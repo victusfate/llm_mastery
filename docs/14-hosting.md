@@ -2,7 +2,7 @@
 
 Primary course domain: https://llmmastery.org/
 
-Cloudflare Pages project: `llm-mastery`. Publish from an authenticated local checkout with `npm run deploy:cloudflare`. The custom domain points to `llm-mastery.pages.dev`; Cloudflare manages HTTPS. GitHub Actions independently builds and publishes the GitHub Pages mirror.
+Cloudflare Pages project: `llm-mastery`. Publish from an authenticated local checkout with `npm run deploy:cloudflare`. The custom domain points to `llm-mastery.pages.dev`; Cloudflare manages HTTPS. GitHub Actions validates pushes to `main`, then runs independent deployment jobs for Cloudflare and the GitHub Pages mirror. Cloudflare automation requires the API token described below; local deployment remains available.
 
 The course is static HTML, CSS, JavaScript, Markdown, and MP3. No application server, database, paid inference service, or API key is required. Progress stays in the browser; export it to move between domains or devices.
 
@@ -23,11 +23,20 @@ See [GitHub's publishing-source documentation](https://docs.github.com/en/pages/
 
 Build command: `npm run build`. Output directory: `dist`. Framework: none. Install dependencies with `npm ci` first. The build copies only public course assets and documents; generated checkpoints and private files are excluded. Start from a fresh checkout for production builds.
 
+### GitHub Actions credentials
+
+In the repository’s Settings → Secrets and variables → Actions, set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Create a dedicated token in Cloudflare with Account → Cloudflare Pages → Edit, scoped to the hosting account. Never commit the token. See [Cloudflare’s CI setup guide](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/).
+
+Setup status: the account ID is configured; the API token is still required. The interactive Cloudflare login can deploy but does not have permission to administer API tokens. Until the token is added, the Cloudflare job reports a missing-credentials error; the independent GitHub Pages job can still succeed. After adding the token, rerun the workflow on `main` or push a new commit.
+
+The workflow uses the locked Wrangler dependency to upload `dist` to `llm-mastery` on its production branch `main`. Pull requests never deploy.
+
+### Local fallback
+
 For a direct upload, authenticate with `npx wrangler login`, then run:
 
 ```bash
-npm run build
-npx wrangler pages deploy dist --project-name=llm-mastery --branch=main
+npm run deploy:cloudflare
 ```
 
 Associate the chosen hostname in the Pages project's Custom domains settings before adding its DNS record. An apex domain requires a Cloudflare zone; a subdomain can use a CNAME from another DNS provider. See [Cloudflare custom domains](https://developers.cloudflare.com/pages/configuration/custom-domains/).
