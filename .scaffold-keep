@@ -3,3 +3,4 @@ AGENTS.md
 CODEOWNERS
 .github/workflows/quality.yml
 .github/workflows/release.yml
+.github/workflows/sync-scaffold.yml
