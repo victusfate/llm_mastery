@@ -29,3 +29,5 @@ playwright-report/
 test-results/
 /training-lab-progress.json
 /training-lab-record.md
+/dist/
+*.partial

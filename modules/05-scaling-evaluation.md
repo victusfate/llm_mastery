@@ -27,3 +27,11 @@ Use the [experiment standard](../docs/07-experiments.md). An upstream evaluation
 Defend a budget allocation, identify an unfair comparison, quantify uncertainty, and state one conclusion the evidence does not support. Produce a revised Project A report and an evaluation checklist another learner can use.
 
 Stretch: calibration, robustness across source distributions, long-context evaluation, or inference-cost-aware scaling. Do not add benchmarks merely to make a table larger.
+
+## Dedicated lab pages
+
+- [Lab 05-01: Small scaling grid and iso-compute pairs](../site/lab.html?lab=05-01) · [Markdown guide](../docs/labs/05-01.md)
+- [Lab 05-02: Fit and challenge a scaling prediction](../site/lab.html?lab=05-02) · [Markdown guide](../docs/labs/05-02.md)
+- [Lab 05-03: A reproducible evaluation entry point](../site/lab.html?lab=05-03) · [Markdown guide](../docs/labs/05-03.md)
+- [Lab 05-04: Paired uncertainty and seed variation](../site/lab.html?lab=05-04) · [Markdown guide](../docs/labs/05-04.md)
+- [Lab 05-05: Contamination and metric-integrity audit](../site/lab.html?lab=05-05) · [Markdown guide](../docs/labs/05-05.md)

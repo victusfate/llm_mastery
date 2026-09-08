@@ -19,3 +19,9 @@ No learner training labs, GPU compatibility checks, multi-node runs, upstream is
 The official source pages linked from the course were inspected for curriculum and contribution planning, but the repository checker validates local Markdown links only. External issue state can change. The résumé was retrieved successfully with a direct HTTP client; Void Horizon returned HTTP 403 and was not inspected. The scaffold README was reviewed as background; its files were not imported.
 
 These initial checks were performed before remote publication. No upstream maintainers were contacted during course creation.
+
+## Interactive course expansion — September 8, 2026
+
+Validated 128 Markdown documents for local links and closed code fences. Ten Node test groups and two Python tests passed. Browser checks covered all ten module guides, four original numerical widgets, grading and assistance, progress import/export, mobile overflow, formatted Markdown redirect and tables, concept dialog, referenced video iframe creation, actual narrated audio playback, dedicated lab rendering, and HTTP availability of all 52 lab and 35 submodule documents. External video playback remains provider-dependent.
+
+The foundations NumPy walkthrough ran successfully: loss 0.490415, finite-difference gradient checks passed, and one update reduced loss to 0.474975. This validates the small worked example, not learner mastery or frontier-scale training.

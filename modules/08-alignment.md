@@ -28,3 +28,12 @@ In PPO-based RLHF, distinguish the **current trainable policy**, the **old rollo
 Implement the DPO toy objective without a trainer, identify policy roles in PPO, and demonstrate a reward-hacking failure with independent evaluation. Explain why DPO is preference optimization and does not involve online rollouts in its standard offline form.
 
 Small CPU/text pilots pass the algorithmic checks. Meaningful model comparisons use a measured local-GPU configuration. Stretch: process rewards, preference uncertainty, or alternative preference objectives; one well-understood method beats a shallow survey.
+
+## Dedicated lab pages
+
+- [Lab 08-01: Preference data and reward-model bias](../site/lab.html?lab=08-01) · [Markdown guide](../docs/labs/08-01.md)
+- [Lab 08-02: DPO from response log probabilities](../site/lab.html?lab=08-02) · [Markdown guide](../docs/labs/08-02.md)
+- [Lab 08-03: A minimal text PPO update](../site/lab.html?lab=08-03) · [Markdown guide](../docs/labs/08-03.md)
+- [Lab 08-04: Compare SFT, DPO, and PPO](../site/lab.html?lab=08-04) · [Markdown guide](../docs/labs/08-04.md)
+- [Lab 08-05: Construct and mitigate reward exploitation](../site/lab.html?lab=08-05) · [Markdown guide](../docs/labs/08-05.md)
+- [Lab 08-06: Behavioral alignment evaluation](../site/lab.html?lab=08-06) · [Markdown guide](../docs/labs/08-06.md)

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Course reader · Training Lab</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to reading</a>
+    <header>
+      <a class="brand" href="./"
+        ><span class="logo">∇</span> TRAINING LAB
+        <span class="tag">READING & MEDIA</span></a
+      >
+      <div class="header-actions">
+        <button id="concept-open">Explain a term</button
+        ><a href="./">← Course</a>
+      </div>
+    </header>
+    <div class="layout">
+      <aside>
+        <p class="eyebrow">REFERENCE LIBRARY</p>
+        <nav id="reader-links" aria-label="Course references">
+          <a href="read.html?doc=docs/06-resources.md">Readings & lectures</a
+          ><a href="read.html?doc=docs/00-personalized-bootcamp.md"
+            >24-week curriculum</a
+          ><a href="read.html?doc=docs/09-home-lab.md">Home hardware</a
+          ><a href="read.html?doc=docs/08-open-source.md"
+            >Open-source contributions</a
+          ><a href="read.html?doc=assessments/01-mastery.md"
+            >Assessment rubric</a
+          >
+        </nav>
+        <p class="eyebrow">ON THIS PAGE</p>
+        <nav id="reader-toc" aria-label="Document sections"></nav>
+      </aside>
+      <main id="main">
+        <div class="row between">
+          <p class="eyebrow">FORMATTED COURSE DOCUMENT</p>
+          <a
+            id="raw-source"
+            data-no-reader
+            href="../README.md?raw=1"
+            target="_blank"
+            >Raw Markdown ↗</a
+          >
+        </div>
+        <article id="guide-body" class="card full-module">
+          Loading document…
+        </article>
+        <section id="reader-media" class="card" hidden>
+          <h2>Watch a referenced lecture</h2>
+          <div id="reader-video-choices" class="row"></div>
+          <div id="reader-video"></div>
+        </section>
+      </main>
+    </div>
+    <button id="selection-explain" class="selection-explain" hidden>
+      Explain selection ↗
+    </button>
+    <dialog id="concept-dialog" aria-labelledby="concept-title">
+      <div class="concept-toolbar">
+        <button id="concept-back" disabled>← Back</button
+        ><span class="eyebrow">CONCEPT EXPLORER</span
+        ><button id="concept-close" aria-label="Close concept explorer">
+          Close ×
+        </button>
+      </div>
+      <form id="concept-search-form" class="row">
+        <label class="sr-only" for="concept-search"
+          >Word or phrase to explain</label
+        ><input
+          id="concept-search"
+          type="search"
+          maxlength="120"
+          placeholder="Search a word or phrase…"
+        /><button type="submit">Explore</button>
+      </form>
+      <div id="concept-scroll">
+        <h2 id="concept-title">Explore a concept</h2>
+        <p id="concept-context" class="small"></p>
+        <article id="concept-body"></article>
+        <div id="concept-media" class="row"></div>
+        <div id="concept-video"></div>
+        <h3>Drill further</h3>
+        <div id="concept-related" class="row"></div>
+      </div>
+      <div class="concept-footer">
+        <button id="concept-copy">Copy contextual tutor prompt</button>
+        <p id="concept-status" class="small" role="status"></p>
+      </div>
+    </dialog>
+    <script type="module" src="read-page.mjs"></script>
+  </body>
+</html>

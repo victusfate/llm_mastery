@@ -28,3 +28,12 @@ Produce [Project A](../projects/README.md). The [TinyStories dataset card](https
 Audit an unfamiliar shard, detect planted leakage, explain the curation comparison’s confounds, and reproduce a resumed run within a stated numerical tolerance. A filter that worsens generalization is a valid result if measured correctly.
 
 Stretch: learned quality ranking, mixture reweighting, temporal splits, or continued pretraining with a forgetting evaluation. Directly useful upstream work can replace a local pipeline component when it meets the same gate.
+
+## Dedicated lab pages
+
+- [Lab 03-01: Aggregate sources with a provenance manifest](../site/lab.html?lab=03-01) · [Markdown guide](../docs/labs/03-01.md)
+- [Lab 03-02: Streaming normalization and restart safety](../site/lab.html?lab=03-02) · [Markdown guide](../docs/labs/03-02.md)
+- [Lab 03-03: Exact and near-duplicate auditing](../site/lab.html?lab=03-03) · [Markdown guide](../docs/labs/03-03.md)
+- [Lab 03-04: Inspectable quality filters](../site/lab.html?lab=03-04) · [Markdown guide](../docs/labs/03-04.md)
+- [Lab 03-05: Matched-budget pretraining comparison](../site/lab.html?lab=03-05) · [Markdown guide](../docs/labs/03-05.md)
+- [Lab 03-06: Checkpoint recovery and training observability](../site/lab.html?lab=03-06) · [Markdown guide](../docs/labs/03-06.md)

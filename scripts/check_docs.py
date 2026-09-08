@@ -5,7 +5,7 @@ from pathlib import Path
 from urllib.parse import unquote
 ROOT = Path(__file__).resolve().parents[1]
 errors = []
-files = [p for p in ROOT.rglob('*.md') if not any(x.startswith('.') or x in {'node_modules', 'private'} for x in p.relative_to(ROOT).parts)]
+files = [p for p in ROOT.rglob('*.md') if not any(x.startswith('.') or x in {'node_modules', 'private', 'dist'} for x in p.relative_to(ROOT).parts)]
 for path in files:
     content = path.read_text()
     if sum(line.startswith('```') for line in content.splitlines()) % 2:
@@ -13,7 +13,7 @@ for path in files:
     for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', content):
         if re.match(r'^[a-zA-Z][a-zA-Z0-9+.-]*:', target) or target.startswith('#'):
             continue
-        local = unquote(target.split('#')[0]).strip('<>')
+        local = unquote(target.split('#')[0].split('?')[0]).strip('<>')
         if local and not (path.parent / local).exists():
             errors.append(f'{path.relative_to(ROOT)}: missing {target}')
 if errors:

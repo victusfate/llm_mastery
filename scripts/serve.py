@@ -3,12 +3,12 @@
 import argparse
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, quote, parse_qs
 
 ROOT = Path(__file__).resolve().parents[1]
-DIRECTORIES = {'site', 'docs', 'modules', 'assessments', 'projects', 'templates', 'progress'}
+DIRECTORIES = {'site', 'docs', 'modules', 'assessments', 'projects', 'templates', 'progress', 'examples'}
 ROOT_FILES = {'README.md', 'START_HERE.md', 'CONTRIBUTING.md', 'LICENSE.md'}
-EXTENSIONS = {'.md', '.html', '.css', '.mjs', '.js', '.svg'}
+EXTENSIONS = {'.md', '.html', '.css', '.mjs', '.js', '.svg', '.mp3', '.py'}
 
 
 def public_file(request_path):
@@ -31,6 +31,12 @@ def public_file(request_path):
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        parsed = urlsplit(self.path)
+        if parsed.path.endswith('.md') and 'raw' not in parse_qs(parsed.query) and 'text/html' in self.headers.get('Accept', '') and public_file(self.path):
+            self.send_response(302)
+            self.send_header('Location', '/site/read.html?doc=' + quote(parsed.path.lstrip('/'), safe='/'))
+            self.end_headers()
+            return
         if self.path == '/':
             self.send_response(302)
             self.send_header('Location', '/site/')
@@ -47,7 +53,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(404)
             return
         data = path.read_bytes()
-        types = {'.mjs': 'text/javascript', '.md': 'text/plain; charset=utf-8'}
+        types = {'.mjs': 'text/javascript', '.md': 'text/plain; charset=utf-8', '.py': 'text/plain; charset=utf-8', '.mp3': 'audio/mpeg'}
         self.send_response(200)
         self.send_header('Content-Type', types.get(path.suffix, self.guess_type(str(path))))
         self.send_header('Content-Length', str(len(data)))

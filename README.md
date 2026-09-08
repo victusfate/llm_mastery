@@ -8,7 +8,7 @@ An intensive, project-based course for learning to build, train, evaluate, and i
 
 ## Open the interactive workbench
 
-Clone the public repository, then start the local workbench:
+Open the [hosted course](https://victusfate.github.io/llm_mastery/), or clone the public repository and start the local workbench:
 
 ```bash
 git clone https://github.com/victusfate/llm_mastery.git
@@ -16,7 +16,7 @@ cd llm_mastery
 python3 scripts/serve.py
 ```
 
-Visit **http://127.0.0.1:8765/site/** for short lessons, interactive numerical experiments, randomized theory checks, scheduled review, and hands-on tutor handoffs. No API key or cloud spend required. [Workbench guide](docs/10-interactive.md).
+Visit **http://127.0.0.1:8765/site/** for 35 narrated submodules, 52 dedicated lab guides, formatted readings, concept popups, interactive numerical experiments, randomized theory checks, scheduled review, and hands-on tutor handoffs. No API key or cloud spend required. [Workbench guide](docs/10-interactive.md).
 
 ## Start here
 

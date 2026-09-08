@@ -28,3 +28,12 @@ Produce [Project B](../projects/README.md), including an 8/64/512-GPU design exe
 ## Gate
 
 Show actual accelerator profiling, kernel correctness, distributed gradient parity, and a recovery trace. Explain why the local two-GPU configuration may be slower than the 5090 alone. A measured slowdown can pass when diagnosed rigorously. If GPUs or network access are unavailable, keep hardware gates pending and complete CPU reference tests first.
+
+## Dedicated lab pages
+
+- [Lab 04-01: Memory accounting and profiler baseline](../site/lab.html?lab=04-01) · [Markdown guide](../docs/labs/04-01.md)
+- [Lab 04-02: Optimize one measured training bottleneck](../site/lab.html?lab=04-02) · [Markdown guide](../docs/labs/04-02.md)
+- [Lab 04-03: A verified GPU kernel](../site/lab.html?lab=04-03) · [Markdown guide](../docs/labs/04-03.md)
+- [Lab 04-04: Distributed gradient equivalence](../site/lab.html?lab=04-04) · [Markdown guide](../docs/labs/04-04.md)
+- [Lab 04-05: DDP versus FSDP across two nodes](../site/lab.html?lab=04-05) · [Markdown guide](../docs/labs/04-05.md)
+- [Lab 04-06: Straggler and worker-failure investigation](../site/lab.html?lab=04-06) · [Markdown guide](../docs/labs/04-06.md)

@@ -103,69 +103,7 @@ export function escapeHTML(value) {
       ],
   );
 }
-// Small, escaped Markdown subset: no raw HTML or executable URLs.
-export function markdown(text, baseURL) {
-  const inline = (value) =>
-    escapeHTML(value)
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, target) => {
-        try {
-          const url = new URL(target, baseURL);
-          return /^https?:$/.test(url.protocol)
-            ? `<a href="${escapeHTML(url.href)}" target="_blank" rel="noopener">${label}</a>`
-            : label;
-        } catch {
-          return label;
-        }
-      })
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
-      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  const lines = text.split("\n");
-  let result = "",
-    code = false,
-    table = false;
-  for (const line of lines) {
-    if (line.startsWith("```")) {
-      if (table) {
-        result += "</tbody></table></div>";
-        table = false;
-      }
-      code = !code;
-      result += code ? "<pre><code>" : "</code></pre>";
-      continue;
-    }
-    if (code) {
-      result += escapeHTML(line) + "\n";
-      continue;
-    }
-    if (line.startsWith("|")) {
-      if (/^\|[\s:|\-]+$/.test(line)) continue;
-      if (!table) {
-        result += '<div class="table-scroll"><table><tbody>';
-        table = true;
-      }
-      result +=
-        "<tr>" +
-        line
-          .split("|")
-          .slice(1, -1)
-          .map((cell) => `<td>${inline(cell.trim())}</td>`)
-          .join("") +
-        "</tr>";
-      continue;
-    }
-    if (table) {
-      result += "</tbody></table></div>";
-      table = false;
-    }
-    const heading = line.match(/^(#{1,6}) (.*)/);
-    if (heading)
-      result += `<h${heading[1].length}>${inline(heading[2])}</h${heading[1].length}>`;
-    else if (line.trim()) result += `<p>${inline(line)}</p>`;
-  }
-  if (code) result += "</code></pre>";
-  if (table) result += "</tbody></table></div>";
-  return result;
-}
+export { markdown } from "./markdown.mjs";
 export function makeQuestion(module, variant = 0, rng = Math.random) {
   const pick = (values) => values[Math.floor(rng() * values.length)];
   const n = pick([2, 4, 8]);

@@ -14,7 +14,8 @@
         <span class="tag">LLM MASTERY</span></a
       >
       <div class="header-actions">
-        <button id="export">Export progress</button
+        <button id="concept-open">Explain a term</button
+        ><button id="export">Export progress</button
         ><label class="button"
           >Import backup<input
             type="file"
@@ -58,7 +59,7 @@
             aria-controls="learn"
             aria-selected="true"
           >
-            01 · Learn & explore</button
+            01 · Full module & lecture</button
           ><button
             role="tab"
             id="tab-test"
@@ -74,49 +75,73 @@
             aria-controls="build"
             aria-selected="false"
           >
-            03 · Build & defend
+            03 · Labs & evidence
           </button>
         </div>
         <section id="learn" role="tabpanel" aria-labelledby="tab-learn">
-          <div class="intro card">
-            <p class="eyebrow">THE MECHANISM</p>
+          <div class="module-tools card">
             <p id="summary"></p>
-            <div class="prediction">
-              <strong>Predict first</strong>
-              <p id="prediction"></p>
-            </div>
+            <p id="prediction" hidden></p>
+            <p class="small">
+              Start with the module overview below, choose a focused submodule,
+              then open a dedicated lab. Click an underlined term to explore it;
+              select any phrase for more context.
+            </p>
             <div class="row">
-              <button id="speak">Read summary aloud</button
+              <button id="speak" class="primary">Listen</button
               ><button id="stop-speech">Stop audio</button
               ><span id="media"></span>
             </div>
+            <details id="lecture-player">
+              <summary>Optional full-module audio reference</summary>
+              <p id="lecture-status" class="small" role="status">
+                New Zealand neural narration · Mitchell
+              </p>
+              <audio id="lecture-audio" controls preload="none"></audio>
+              <nav id="lecture-chapters" aria-label="Lecture chapters"></nav>
+              <details id="lecture-transcript">
+                <summary>Read the spoken transcript</summary>
+                <article id="transcript-body"></article>
+              </details>
+            </details>
             <div id="video"></div>
           </div>
-          <div class="card">
-            <div class="row between">
-              <div>
-                <p class="eyebrow">INTERACTIVE SANDBOX</p>
-                <h2>Change one variable.</h2>
-              </div>
-              <label
-                >Experiment
-                <select id="visual-choice">
-                  <option value="softmax">Softmax temperature</option>
-                  <option value="attention">Causal attention mask</option>
-                  <option value="descent">Gradient descent stability</option>
-                  <option value="bandit">Exact bandit gradient</option>
-                </select></label
-              >
-            </div>
-            <div id="controls"></div>
-            <div id="visual" aria-live="polite"></div>
-            <p id="visual-explanation" class="muted"></p>
-          </div>
-          <details class="card" id="guide">
+          <article
+            id="guide-body"
+            class="card full-module"
+            aria-label="Full module walkthrough"
+          >
+            Loading the full module…
+          </article>
+          <section
+            id="lab-index"
+            class="card"
+            aria-label="Dedicated module labs"
+          ></section>
+          <details class="card sandbox-details">
             <summary>
-              Read the full module · concepts, labs, and pass criteria
+              Explore the visual experiments after the explanation
             </summary>
-            <article id="guide-body">Open to load the Markdown guide.</article>
+            <div class="card">
+              <div class="row between">
+                <div>
+                  <p class="eyebrow">INTERACTIVE SANDBOX</p>
+                  <h2>Change one variable.</h2>
+                </div>
+                <label
+                  >Experiment
+                  <select id="visual-choice">
+                    <option value="softmax">Softmax temperature</option>
+                    <option value="attention">Causal attention mask</option>
+                    <option value="descent">Gradient descent stability</option>
+                    <option value="bandit">Exact bandit gradient</option>
+                  </select></label
+                >
+              </div>
+              <div id="controls"></div>
+              <div id="visual" aria-live="polite"></div>
+              <p id="visual-explanation" class="muted"></p>
+            </div>
           </details>
         </section>
         <section id="test" role="tabpanel" aria-labelledby="tab-test" hidden>
@@ -210,6 +235,42 @@
         </footer>
       </main>
     </div>
+
+    <button id="selection-explain" class="selection-explain" hidden>
+      Explain selection ↗
+    </button>
+    <dialog id="concept-dialog" aria-labelledby="concept-title">
+      <div class="concept-toolbar">
+        <button id="concept-back" disabled>← Back</button
+        ><span class="eyebrow">CONCEPT EXPLORER</span
+        ><button id="concept-close" aria-label="Close concept explorer">
+          Close ×
+        </button>
+      </div>
+      <form id="concept-search-form" class="row">
+        <label class="sr-only" for="concept-search"
+          >Word or phrase to explain</label
+        ><input
+          id="concept-search"
+          type="search"
+          maxlength="120"
+          placeholder="Search a word or phrase…"
+        /><button type="submit">Explore</button>
+      </form>
+      <div id="concept-scroll">
+        <h2 id="concept-title">Explore a concept</h2>
+        <p id="concept-context" class="small"></p>
+        <article id="concept-body"></article>
+        <div id="concept-media" class="row"></div>
+        <div id="concept-video"></div>
+        <h3>Drill further</h3>
+        <div id="concept-related" class="row"></div>
+      </div>
+      <div class="concept-footer">
+        <button id="concept-copy">Copy contextual tutor prompt</button>
+        <p id="concept-status" class="small" role="status"></p>
+      </div>
+    </dialog>
     <script type="module" src="app.mjs"></script>
   </body>
 </html>

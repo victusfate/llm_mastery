@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lab walkthrough · LLM Training Lab</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to lab guidance</a>
+    <header>
+      <a class="brand" href="./"
+        ><span class="logo">∇</span> TRAINING LAB
+        <span class="tag">DEDICATED LAB</span></a
+      >
+      <div class="header-actions">
+        <button id="concept-open">Explain a term</button
+        ><a id="back-module" href="./">← Full module</a>
+      </div>
+    </header>
+    <div class="layout">
+      <aside>
+        <p class="eyebrow">HANDS-ON WALKTHROUGH</p>
+        <h2>One lab.<br />A clear path.</h2>
+        <p class="muted">
+          Read the guidance, predict the result, implement, and bring evidence
+          to review.
+        </p>
+        <nav id="lab-navigation" aria-label="Labs in this module"></nav>
+        <a href="../assessments/01-mastery.md" target="_blank"
+          >Practical mastery rubric ↗</a
+        >
+      </aside>
+      <main id="main">
+        <p id="lab-label" class="eyebrow"></p>
+        <h1 id="lab-title">Loading lab…</h1>
+        <div class="row">
+          <a href="#lab-evidence">Jump to your evidence ↓</a
+          ><a id="lab-source" href="../projects/README.md" target="_blank"
+            >Markdown source ↗</a
+          >
+        </div>
+        <article id="guide-body" class="card full-module">
+          Loading the dedicated guidance…
+        </article>
+        <section class="card" id="lab-evidence">
+          <p class="eyebrow">YOUR WORK · NOT AN AUTOMATIC PASS</p>
+          <h2>Prediction, evidence, explanation</h2>
+          <label for="lab-notes">Your lab record, saved in this browser</label
+          ><textarea
+            id="lab-notes"
+            rows="12"
+            maxlength="50000"
+            placeholder="Prediction before running:
+Code/config/command:
+Actual observation:
+Why this happened:
+Assistance used:
+Fresh independent transfer attempt:
+Reviewer and remaining gaps:"
+          ></textarea>
+          <div class="row">
+            <button id="lab-save" class="primary">Save evidence</button
+            ><button id="lab-export">Export lab record</button
+            ><button id="lab-tutor">Copy tutor handoff</button>
+          </div>
+          <p id="lab-status" role="status" class="small"></p>
+        </section>
+        <footer>
+          Concept explanations and lab guidance are available locally. Run
+          training code in your development environment and record actual
+          results.
+        </footer>
+      </main>
+    </div>
+    <button id="selection-explain" class="selection-explain" hidden>
+      Explain selection ↗
+    </button>
+    <dialog id="concept-dialog" aria-labelledby="concept-title">
+      <div class="concept-toolbar">
+        <button id="concept-back" disabled>← Back</button
+        ><span class="eyebrow">CONCEPT EXPLORER</span
+        ><button id="concept-close" aria-label="Close concept explorer">
+          Close ×
+        </button>
+      </div>
+      <form id="concept-search-form" class="row">
+        <label class="sr-only" for="concept-search"
+          >Word or phrase to explain</label
+        ><input
+          id="concept-search"
+          type="search"
+          maxlength="120"
+          placeholder="Search a word or phrase…"
+        /><button type="submit">Explore</button>
+      </form>
+      <div id="concept-scroll">
+        <h2 id="concept-title">Explore a concept</h2>
+        <p id="concept-context" class="small"></p>
+        <article id="concept-body"></article>
+        <div id="concept-media" class="row"></div>
+        <div id="concept-video"></div>
+        <h3>Drill further</h3>
+        <div id="concept-related" class="row"></div>
+      </div>
+      <div class="concept-footer">
+        <button id="concept-copy">Copy contextual tutor prompt</button>
+        <p id="concept-status" class="small" role="status"></p>
+      </div>
+    </dialog>
+    <script type="module" src="lab-page.mjs"></script>
+  </body>
+</html>

@@ -23,3 +23,11 @@ SFT minimizes negative log probability on selected target tokens. In chat data, 
 Given an unfamiliar chat example, explain every supervised token and repair an incorrect mask. Show a controlled adaptation result and diagnose at least one capability regression or failure mode. A favorable sample is not a substitute for the fixed evaluation.
 
 Stretch: continued pretraining before SFT, synthetic-data filtering, or preference-data construction. Do not use a tutorial’s final checkpoint as evidence that you trained it.
+
+## Dedicated lab pages
+
+- [Lab 06-01: Generate instruction data with protected splits](../site/lab.html?lab=06-01) · [Markdown guide](../docs/labs/06-01.md)
+- [Lab 06-02: Inspect chat templates and supervised labels](../site/lab.html?lab=06-02) · [Markdown guide](../docs/labs/06-02.md)
+- [Lab 06-03: Full versus adapter fine-tuning](../site/lab.html?lab=06-03) · [Markdown guide](../docs/labs/06-03.md)
+- [Lab 06-04: Demonstration quality and behavioral regressions](../site/lab.html?lab=06-04) · [Markdown guide](../docs/labs/06-04.md)
+- [Lab 06-05: Freeze a reproducible reference policy](../site/lab.html?lab=06-05) · [Markdown guide](../docs/labs/06-05.md)

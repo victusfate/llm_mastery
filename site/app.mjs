@@ -1,3 +1,7 @@
+import { submodules } from "./submodules.mjs";
+import { startExplorer } from "./explorer.mjs";
+import { setupLecture } from "./lecture.mjs";
+import { labs } from "./labs.mjs";
 import { modules } from "./content.mjs";
 import {
   softmax,
@@ -11,6 +15,7 @@ import {
 } from "./engine.mjs";
 const $ = (id) => document.getElementById(id);
 const KEY = "llm-training-lab-v1";
+const lecture = setupLecture();
 let state = freshState(),
   question,
   checked = false,
@@ -76,9 +81,13 @@ function selectModule(index) {
     a.textContent = "Readings & media ↗";
     $("media").append(a);
   }
-  $("guide").open = false;
-  $("guide-body").textContent = "Open to load the Markdown guide.";
-  guideRequest++;
+  loadGuide(index);
+  lecture.select(index, m);
+  renderLabs(index);
+  const url = new URL(location.href);
+  url.searchParams.set("module", String(index + 1));
+  history.replaceState(null, "", url);
+
   $("visual-choice").value = m.visual;
   visualControls();
   newQuestion();
@@ -111,23 +120,53 @@ for (const b of document.querySelectorAll("[data-tab]")) {
     }
   };
 }
-$("guide").addEventListener("toggle", async () => {
-  if (!$("guide").open) return;
+async function loadGuide(index) {
   const id = ++guideRequest;
-  const path = `../modules/${modules[state.selected].file}.md`;
-  $("guide-body").textContent = "Loading module…";
+  const path = `../modules/${modules[index].file}.md`;
+  $("guide-body").textContent = "Loading the full module…";
   try {
     const response = await fetch(path);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const text = await response.text();
-    if (id === guideRequest)
-      $("guide-body").innerHTML = markdown(text, new URL(path, location.href));
+    if (id === guideRequest) {
+      const overview =
+        index === 0
+          ? text.split("## 1.")[0]
+          : text
+              .split("## Concepts to explain")[0]
+              .split("## Select one question")[0];
+      const units = submodules.filter((u) => u.module === index);
+      $("guide-body").innerHTML =
+        markdown(overview, new URL(path, location.href)) +
+        "<h2>Follow the submodules</h2><p>Each page contains detailed text, a short lecture clip, an interactive example, and links to its dedicated labs.</p>" +
+        units
+          .map(
+            (u) =>
+              `<a class="lab-link" href="submodule.html?unit=${u.id}"><span>PART ${u.id.split("-")[1]}</span><strong>${esc(u.title)}</strong><span>Read, listen, try →</span></a>`,
+          )
+          .join("") +
+        '<details class="complete-reference"><summary>Read the complete module reference on this page</summary>' +
+        markdown(text, new URL(path, location.href)) +
+        "</details>";
+    }
   } catch (e) {
     if (id === guideRequest)
       $("guide-body").textContent =
-        `Could not load the module: ${e.message}. Start the local server from the course directory.`;
+        `Could not load the module: ${e.message}. Check the local server.`;
   }
-});
+}
+function renderLabs(index) {
+  $("lab-index").innerHTML =
+    "<h2>Open a dedicated lab</h2><p>Each lab has its own guidance, troubleshooting, and evidence record.</p>" +
+    labs
+      .filter((l) => l.module === index)
+      .map(
+        (l) =>
+          `<a class="lab-link" href="lab.html?lab=${l.id}"><span>LAB ${l.id}</span><strong>${esc(l.title)}</strong><span>Open walkthrough →</span></a>`,
+      )
+      .join("");
+}
+
 function newQuestion(forceVariant) {
   variant = forceVariant ?? 1 - variant;
   question = makeQuestion(state.selected, variant);
@@ -300,23 +339,14 @@ $("import").onchange = async (e) => {
     e.target.value = "";
   }
 };
-$("speak").onclick = () => {
-  if (!("speechSynthesis" in window)) {
-    $("storage-status").textContent =
-      "Speech is unavailable in this browser; all lesson content is available as text.";
-    return;
+$("speak").onclick = () => lecture.play();
+$("stop-speech").onclick = () => lecture.stop();
+document.addEventListener("conceptlookup", () => {
+  if (!$("test").hidden && !checked) {
+    revealed = true;
+    $("assisted").checked = true;
   }
-  speechSynthesis.cancel();
-  const m = modules[state.selected];
-  speechSynthesis.speak(
-    new SpeechSynthesisUtterance(
-      `${m.concept} ${m.summary} Predict first: ${m.prediction}`,
-    ),
-  );
-};
-$("stop-speech").onclick = () => {
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
-};
+});
 function visualControls() {
   const kind = $("visual-choice").value;
   const options = {
@@ -389,4 +419,17 @@ function drawVisual() {
 }
 $("visual-choice").onchange = visualControls;
 tab("learn");
-selectModule(state.selected);
+const requestedModule = Number(
+  new URL(location.href).searchParams.get("module"),
+);
+selectModule(
+  Number.isInteger(requestedModule) &&
+    requestedModule >= 1 &&
+    requestedModule <= 10
+    ? requestedModule - 1
+    : state.selected,
+);
+startExplorer();
+
+const mode = new URL(location.href).searchParams.get("mode");
+if (["learn", "test", "build"].includes(mode)) tab(mode);

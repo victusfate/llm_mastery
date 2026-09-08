@@ -14,13 +14,13 @@ try {
   assert.equal(await page.locator("#modules button").count(), 10);
   for (let i = 0; i < 10; i++) {
     await page.locator("#modules button").nth(i).click();
-    await page.locator("#guide summary").click();
     await page.waitForFunction(() => document.querySelector("#guide-body h1"));
     assert.ok(
       (await page.locator("#guide-body").textContent()).includes("Gate"),
     );
   }
   await page.locator("#modules button").nth(0).click();
+  await page.locator(".sandbox-details summary").click();
   for (const kind of ["softmax", "attention", "descent", "bandit"]) {
     await page.selectOption("#visual-choice", kind);
     await page

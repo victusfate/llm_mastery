@@ -35,3 +35,12 @@ A fresh environment reproduces a representative result within a justified tolera
 ## Optional 8–16 week extension
 
 Deepen one specialization, seek a maintained component to own, reproduce at a second scale or setting, and collaborate on a study that needs resources beyond the home lab. Use reviewer feedback to choose the work. Apply to suitable roles when evidence is strong enough; see the [career guide](../docs/05-career.md). Do not automatically turn every learner into a publication-seeking researcher.
+
+## Dedicated lab pages
+
+- [Lab 10-01: Register a falsifiable capstone question](../site/lab.html?lab=10-01) · [Markdown guide](../docs/labs/10-01.md)
+- [Lab 10-02: Reproduce the capstone baseline](../site/lab.html?lab=10-02) · [Markdown guide](../docs/labs/10-02.md)
+- [Lab 10-03: Run an intervention and ablations](../site/lab.html?lab=10-03) · [Markdown guide](../docs/labs/10-03.md)
+- [Lab 10-04: Prepare an external review package](../site/lab.html?lab=10-04) · [Markdown guide](../docs/labs/10-04.md)
+- [Lab 10-05: Publish a reproducible report](../site/lab.html?lab=10-05) · [Markdown guide](../docs/labs/10-05.md)
+- [Lab 10-06: Independent technical defense](../site/lab.html?lab=10-06) · [Markdown guide](../docs/labs/10-06.md)

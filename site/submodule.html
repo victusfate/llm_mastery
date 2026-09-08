@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Submodule · Training Lab</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to lesson</a>
+    <header>
+      <a class="brand" href="./"
+        ><span class="logo">∇</span> TRAINING LAB
+        <span class="tag">FOCUSED LESSON</span></a
+      >
+      <div class="header-actions">
+        <button id="concept-open">Explain a term</button
+        ><a id="back-module" href="./">← Module overview</a>
+      </div>
+    </header>
+    <div class="layout">
+      <aside>
+        <p class="eyebrow">ONE CONCEPT AT A TIME</p>
+        <h2>Read. Listen.<br />Try it.</h2>
+        <nav id="unit-navigation" aria-label="Submodules in this module"></nav>
+      </aside>
+      <main id="main">
+        <p id="unit-label" class="eyebrow"></p>
+        <h1 id="unit-title">Loading submodule…</h1>
+        <section class="card">
+          <p class="eyebrow">SHORT LECTURE · NEW ZEALAND NEURAL VOICE</p>
+          <p>
+            Listen alongside the text, then pause and explore. Narration uses a
+            general New Zealand voice, not an imitation of a particular person.
+          </p>
+          <audio id="unit-audio" controls preload="metadata"></audio>
+          <p id="audio-status" class="small" role="status"></p>
+          <details>
+            <summary>Spoken transcript</summary>
+            <article id="transcript-body"></article>
+          </details>
+        </section>
+        <article id="guide-body" class="card full-module">
+          Loading the explanation…
+        </article>
+        <section class="card">
+          <p class="eyebrow">INTERACTIVE EXAMPLE</p>
+          <h2>Change one thing and explain why.</h2>
+          <div id="unit-sandbox"></div>
+        </section>
+        <section id="unit-labs" class="card"></section>
+        <section class="card">
+          <h2>Your explanation</h2>
+          <label for="unit-notes"
+            >Predict, observe, explain, and name the next question</label
+          ><textarea id="unit-notes" rows="6" maxlength="30000"></textarea>
+          <div class="row">
+            <button id="unit-save">Save note</button
+            ><button id="unit-export">Export note</button
+            ><a id="unit-practice" href="./">Practice module theory →</a>
+          </div>
+          <p id="unit-status" class="small" role="status"></p>
+        </section>
+        <nav class="row between" aria-label="Lesson sequence">
+          <a id="unit-previous" href="./">← Previous</a
+          ><a id="unit-next" href="./">Next →</a>
+        </nav>
+        <footer>
+          Short clips introduce the explanation. Dedicated labs and independent
+          transfer checks establish practical understanding.
+        </footer>
+      </main>
+    </div>
+    <button id="selection-explain" class="selection-explain" hidden>
+      Explain selection ↗
+    </button>
+    <dialog id="concept-dialog" aria-labelledby="concept-title">
+      <div class="concept-toolbar">
+        <button id="concept-back" disabled>← Back</button
+        ><span class="eyebrow">CONCEPT EXPLORER</span
+        ><button id="concept-close" aria-label="Close concept explorer">
+          Close ×
+        </button>
+      </div>
+      <form id="concept-search-form" class="row">
+        <label class="sr-only" for="concept-search"
+          >Word or phrase to explain</label
+        ><input
+          id="concept-search"
+          type="search"
+          maxlength="120"
+          placeholder="Search a word or phrase…"
+        /><button type="submit">Explore</button>
+      </form>
+      <div id="concept-scroll">
+        <h2 id="concept-title">Explore a concept</h2>
+        <p id="concept-context" class="small"></p>
+        <article id="concept-body"></article>
+        <div id="concept-media" class="row"></div>
+        <div id="concept-video"></div>
+        <h3>Drill further</h3>
+        <div id="concept-related" class="row"></div>
+      </div>
+      <div class="concept-footer">
+        <button id="concept-copy">Copy contextual tutor prompt</button>
+        <p id="concept-status" class="small" role="status"></p>
+      </div>
+    </dialog>
+    <script type="module" src="submodule-page.mjs"></script>
+  </body>
+</html>

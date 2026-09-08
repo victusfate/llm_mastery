@@ -28,3 +28,12 @@ Learn rollout batching, generation throughput, KV-cache pressure, policy weight 
 Catch a verifier exploit, explain zero-variance group behavior, and defend an RL improvement or null result under a fixed evaluation budget. Produce [Project C](../projects/README.md).
 
 Local arithmetic training is enough. Code-execution RL and large asynchronous infrastructure are extension topics; do not require them to complete the low-budget bootcamp.
+
+## Dedicated lab pages
+
+- [Lab 09-01: Arithmetic generator and verifier contract](../site/lab.html?lab=09-01) · [Markdown guide](../docs/labs/09-01.md)
+- [Lab 09-02: Base, SFT, and sampling baselines](../site/lab.html?lab=09-02) · [Markdown guide](../docs/labs/09-02.md)
+- [Lab 09-03: Group-relative policy updates](../site/lab.html?lab=09-03) · [Markdown guide](../docs/labs/09-03.md)
+- [Lab 09-04: Controlled reasoning-RL comparison](../site/lab.html?lab=09-04) · [Markdown guide](../docs/labs/09-04.md)
+- [Lab 09-05: Versioned rollout queue and staleness](../site/lab.html?lab=09-05) · [Markdown guide](../docs/labs/09-05.md)
+- [Lab 09-06: Optional trajectory distillation](../site/lab.html?lab=09-06) · [Markdown guide](../docs/labs/09-06.md)

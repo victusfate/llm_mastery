@@ -26,3 +26,10 @@ For the one-week bootcamp version, use a small vocabulary and model; preserve co
 Rebuild a tiny causal block on a fresh specification, explain target alignment and each tensor shape, demonstrate stable loss and resumability, and debug a mask or optimizer-state error. Generating plausible text alone does not pass.
 
 Stretch: implement both RMSNorm/RoPE and grouped-query attention; compare memory and arithmetic accounting. Do not train a large model before the pilot is correct.
+
+## Dedicated lab pages
+
+- [Lab 02-01: A reversible tokenizer and small BPE vocabulary](../site/lab.html?lab=02-01) · [Markdown guide](../docs/labs/02-01.md)
+- [Lab 02-02: Causal decoder and attention parity](../site/lab.html?lab=02-02) · [Markdown guide](../docs/labs/02-02.md)
+- [Lab 02-03: Optimizer and resumable training loop](../site/lab.html?lab=02-03) · [Markdown guide](../docs/labs/02-03.md)
+- [Lab 02-04: Tiny language model and cached generation](../site/lab.html?lab=02-04) · [Markdown guide](../docs/labs/02-04.md)

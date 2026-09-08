@@ -70,6 +70,6 @@ test("Markdown escapes raw HTML, rejects executable links and resolves relative 
   );
   assert.ok(!out.includes("<script>"));
   assert.ok(!out.includes('href="javascript:'));
-  assert.ok(out.includes("http://localhost/modules/a.md"));
+  assert.ok(out.includes("http://localhost/site/read.html?doc=modules%2Fa.md"));
   assert.ok(out.includes("&lt;img&gt;"));
 });

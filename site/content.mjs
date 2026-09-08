@@ -12,7 +12,6 @@ export const modules = [
     lab: "Implement stable NumPy cross-entropy and compare finite differences with autograd. Then diagnose a missing gradient reset in a tiny MLP.",
     defense:
       "Why can random labels be fitted without useful generalization? What would falsify your diagnosis?",
-    video: "SQ3fZ1sAqXI",
   },
   {
     title: "Build a transformer",

@@ -68,3 +68,13 @@ node tests/browser-smoke.mjs
 ```
 
 The test uses a temporary browser profile and writes inspection screenshots under `/tmp`. `LAB_URL` can select another local server origin; `PLAYWRIGHT_MODULE` can point to an already-installed Playwright module. Node 20+ is a suitable test environment. Keep tooling versions recorded when reproducing the browser validation.
+
+## Full lessons, submodules, and reference reader
+
+Start with the full module overview and choose one of 35 dedicated submodule pages. Each combines explanatory text, a short narrated clip with transcript, an interactive example, and relevant lab links. All 52 labs have dedicated guidance pages and local evidence notes. Foundations includes eight detailed walkthrough sections and a runnable NumPy example.
+
+Click dotted terms to open one of 67 concept explanations, explore related ideas, or open a referenced lecture. Select any phrase and choose Explain selection for a contextual lookup. Unknown phrases provide an honest tutor handoff rather than inventing a definition. Using explanations during a theory check marks assistance.
+
+Readings open in a formatted HTML reader with headings, tables, lists, code blocks, section navigation, concept exploration, and referenced video controls. Raw Markdown remains available. Narration uses Mitchell, a stock New Zealand English neural voice; the main button is labeled Listen. The site requires no live model service.
+
+See the [hosting guide](14-hosting.md) for GitHub Pages and Cloudflare Pages deployment. Browser-local learning records do not automatically sync across domains.
