@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM Training Lab</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to lesson</a>
+    <header>
+      <a class="brand" href="./"
+        ><span class="logo">∇</span> TRAINING LAB
+        <span class="tag">LLM MASTERY</span></a
+      >
+      <div class="header-actions">
+        <button id="export">Export progress</button
+        ><label class="button"
+          >Import backup<input
+            type="file"
+            id="import"
+            accept="application/json"
+            hidden /></label
+        ><a href="../README.md" target="_blank">Course source ↗</a>
+      </div>
+    </header>
+    <div class="layout">
+      <aside>
+        <p class="eyebrow">24-WEEK BOOTCAMP</p>
+        <h2>Build understanding.<br />Then prove it.</h2>
+        <p class="muted">
+          A local learning workbench for experienced engineers.
+        </p>
+        <div id="stats" class="stats"></div>
+        <button id="review" class="primary wide">
+          Practice next due concept
+        </button>
+        <nav id="modules" aria-label="Course modules"></nav>
+        <p class="small">
+          Quiz practice ≠ practical mastery.<br />Code gates need evidence and
+          review.
+        </p>
+        <a href="../docs/08-open-source.md" target="_blank"
+          >Your first open-source contribution ↗</a
+        >
+      </aside>
+      <main id="main">
+        <div class="lesson-heading">
+          <p id="week" class="eyebrow"></p>
+          <h1 id="title"></h1>
+          <p id="concept" class="lead"></p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Learning modes">
+          <button
+            role="tab"
+            id="tab-learn"
+            data-tab="learn"
+            aria-controls="learn"
+            aria-selected="true"
+          >
+            01 · Learn & explore</button
+          ><button
+            role="tab"
+            id="tab-test"
+            data-tab="test"
+            aria-controls="test"
+            aria-selected="false"
+          >
+            02 · Retrieve & test</button
+          ><button
+            role="tab"
+            id="tab-build"
+            data-tab="build"
+            aria-controls="build"
+            aria-selected="false"
+          >
+            03 · Build & defend
+          </button>
+        </div>
+        <section id="learn" role="tabpanel" aria-labelledby="tab-learn">
+          <div class="intro card">
+            <p class="eyebrow">THE MECHANISM</p>
+            <p id="summary"></p>
+            <div class="prediction">
+              <strong>Predict first</strong>
+              <p id="prediction"></p>
+            </div>
+            <div class="row">
+              <button id="speak">Read summary aloud</button
+              ><button id="stop-speech">Stop audio</button
+              ><span id="media"></span>
+            </div>
+            <div id="video"></div>
+          </div>
+          <div class="card">
+            <div class="row between">
+              <div>
+                <p class="eyebrow">INTERACTIVE SANDBOX</p>
+                <h2>Change one variable.</h2>
+              </div>
+              <label
+                >Experiment
+                <select id="visual-choice">
+                  <option value="softmax">Softmax temperature</option>
+                  <option value="attention">Causal attention mask</option>
+                  <option value="descent">Gradient descent stability</option>
+                  <option value="bandit">Exact bandit gradient</option>
+                </select></label
+              >
+            </div>
+            <div id="controls"></div>
+            <div id="visual" aria-live="polite"></div>
+            <p id="visual-explanation" class="muted"></p>
+          </div>
+          <details class="card" id="guide">
+            <summary>
+              Read the full module · concepts, labs, and pass criteria
+            </summary>
+            <article id="guide-body">Open to load the Markdown guide.</article>
+          </details>
+        </section>
+        <section id="test" role="tabpanel" aria-labelledby="tab-test" hidden>
+          <div class="card">
+            <p class="eyebrow">ACTIVE RECALL · RANDOMIZED NUMBERS</p>
+            <h2>Calculate before revealing.</h2>
+            <p>
+              Answer within ±0.01. Fractions must be entered as decimals. This
+              checks a narrow concept; it does not award a module pass.
+            </p>
+            <p id="question" class="question"></p>
+            <form id="answer-form">
+              <label for="answer">Your numerical answer</label>
+              <div class="row">
+                <input
+                  id="answer"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  required
+                  maxlength="1000"
+                /><button class="primary" id="check" type="submit">
+                  Check answer
+                </button>
+              </div>
+              <label class="check"
+                ><input type="checkbox" id="assisted" /> I used a hint, notes,
+                or an agent</label
+              >
+            </form>
+            <div id="feedback" role="status"></div>
+            <div class="row">
+              <button id="reveal">Reveal explanation</button
+              ><button id="next-question">New question</button>
+            </div>
+            <p class="small">
+              Unaided correct answers schedule review in 1, 3, 7, then 14 days.
+              Errors or assistance bring the concept back in 10 minutes. These
+              intervals are a practical heuristic, not a validated retention
+              guarantee.
+            </p>
+          </div>
+        </section>
+        <section id="build" role="tabpanel" aria-labelledby="tab-build" hidden>
+          <div class="card">
+            <p class="eyebrow">HANDS-ON TRANSFER</p>
+            <h2>Build it. Break it. Explain it.</h2>
+            <p id="lab"></p>
+            <div class="prediction">
+              <strong>Oral defense</strong>
+              <p id="defense"></p>
+            </div>
+            <p>
+              Use agents to scaffold experiments and tooling. Own the
+              specification, predict the outcome, inspect gradients and data,
+              then pass a fresh small task independently.
+            </p>
+            <label for="notes"
+              >Evidence and explanation · saved on this browser</label
+            ><textarea
+              id="notes"
+              rows="9"
+              placeholder="Prediction:\nCommands / code paths / run IDs:\nObserved result:\nMy explanation:\nAssistance used:\nIndependent transfer attempt:\nReviewer and remaining gaps:"
+              maxlength="30000"
+            ></textarea>
+            <div class="row">
+              <button id="save-note" class="primary">
+                Save learning record</button
+              ><button id="tutor-prompt">Copy tutor handoff</button>
+            </div>
+            <p id="note-status" role="status"></p>
+            <p class="small">
+              Saved notes are unreviewed evidence. The app does not execute
+              training code, grade free-text reasoning, or certify practical
+              skills.
+            </p>
+            <a href="../assessments/01-mastery.md" target="_blank"
+              >Open the practical mastery rubric ↗</a
+            >
+          </div>
+        </section>
+        <footer>
+          <span id="storage-status" role="status"
+            >Progress stays in this browser. Export JSON to move between
+            machines; Markdown for tutor review.</span
+          >
+          <p>
+            No account, API key, or cloud compute required. Source lessons live
+            in Markdown.
+          </p>
+        </footer>
+      </main>
+    </div>
+    <script type="module" src="app.mjs"></script>
+  </body>
+</html>

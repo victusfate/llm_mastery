@@ -1,0 +1,31 @@
+# Local environments and private records
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+.env.*
+!.env.example
+private/
+private-environment.txt
+# Data and generated training artifacts
+/data/
+/checkpoints/
+/runs/
+/wandb/
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+*.bin
+*.arrow
+*.parquet
+.DS_Store
+
+# Optional browser-test tools and personal progress exports
+node_modules/
+playwright-report/
+test-results/
+/training-lab-progress.json
+/training-lab-record.md
