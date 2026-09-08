@@ -93,6 +93,7 @@ if (!unit) {
   }
   $("unit-save").onclick = save;
   $("unit-notes").oninput = save;
+  $("unit-notes").disabled = false;
   $("unit-export").onclick = () => {
     const text = `# Submodule ${unit.id}: ${unit.title}\n\nStatus: unreviewed\n\n${$("unit-notes").value}`;
     const url = URL.createObjectURL(

@@ -11,7 +11,7 @@ try {
  await page.goto(base+'/site/');const downloading=page.waitForEvent('download');await page.locator('#export').click();const download=await downloading;const file=await download.path();
  await other.goto(base+'/site/');other.once('dialog',d=>d.accept());await other.locator('#import').setInputFiles(file);await other.waitForFunction(()=>document.querySelector('#storage-status').textContent.includes('Backup imported'));
  await other.goto(guide);assert.equal(await other.locator('[data-hardware]').inputValue(),'gpu');
- await other.goto(base+'/site/lab.html?lab=01-01');assert.ok((await other.locator('#lab-notes').inputValue()).includes('Evidence retained'));
+ await other.goto(base+'/site/lab.html?lab=01-01');await other.waitForSelector('#lab-notes:not([disabled])');assert.ok((await other.locator('#lab-notes').inputValue()).includes('Evidence retained'));
  await other.goto(guide);await other.locator('[data-reset]').click();await other.reload();assert.equal(await other.locator('[data-hardware]').inputValue(),'browser');
  console.log('Persistence browser checks passed: hardware changes, reload, profile isolation, full backup/restore and reset.');
 }finally{await browser.close()}

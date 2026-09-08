@@ -51,6 +51,7 @@ if (!lab) {
     }
   }
   $("lab-notes").oninput = save;
+  $("lab-notes").disabled = false;
   $("lab-save").onclick = save;
   $("lab-export").onclick = () => {
     const text = `# Lab ${lab.id}: ${lab.title}\n\nExported: ${new Date().toISOString()}\nStatus: unreviewed evidence\n\n${$("lab-notes").value}`;
