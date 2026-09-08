@@ -31,3 +31,8 @@ test-results/
 /training-lab-record.md
 /dist/
 *.partial
+
+.wrangler/
+
+# Browser output is compiled from src/site TypeScript
+/site/*.mjs

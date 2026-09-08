@@ -1,0 +1,25 @@
+{
+  "name": "llm-mastery",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "dev": "node scripts/dev.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/engine.test.ts tests/content.test.ts",
+    "test:browser": "node tests/browser-smoke.ts && node tests/reader-browser.ts && node tests/learning-loop.browser.ts",
+    "check:docs": "node scripts/check-docs.ts",
+    "check": "npm run typecheck && npm test && npm run check:docs && npm run build",
+    "deploy:cloudflare": "npm run check && wrangler pages deploy dist --project-name llm-mastery --branch main"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0",
+    "wrangler": "4.130.0"
+  }
+}

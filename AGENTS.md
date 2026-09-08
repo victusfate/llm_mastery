@@ -10,3 +10,11 @@ This repository is an independent LLM training course. Read README.md, the curre
 - Small experiments can establish a mechanism; they cannot establish frontier-scale operating experience.
 - Read docs/07-experiments.md before evaluating a research claim and assessments/01-mastery.md before awarding a pass.
 - User instructions take precedence over this repository’s tutoring defaults.
+
+## Scaffold and course development
+
+This repository uses the upstream victusfate/scaffold harness, synced by `bin/sync-from-scaffold.sh`. Shared skills live in `skills/` and have wrappers for Codex, Claude, Cursor, and Gemini. Keep course-specific instructions here; `.scaffold-keep` protects them. Record feature decisions, requirements, implementation slices, and actual validation in `docs/<feature-slug>/`.
+
+Read `.agent/default-language.md` before writing code. TypeScript is the default for interactive pages and site tooling; Python is welcome for learning and training examples. Keep the course usable without an agent, paid API, or particular GPU. Start every concept with a plain definition and a visual or concrete example; provide relevant primary readings and media for deeper study before assessment.
+
+Existing session authorization to implement and publish changes applies across the workflow. Do not invent user interview answers, test runs, or perfect quality scores. Use meaningful correctness and accessibility checks. Imported skill commands are optional tools; do not run autonomous queues or agent fan-out unless explicitly requested.

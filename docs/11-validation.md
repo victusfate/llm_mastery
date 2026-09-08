@@ -25,3 +25,9 @@ These initial checks were performed before remote publication. No upstream maint
 Validated 128 Markdown documents for local links and closed code fences. Ten Node test groups and two Python tests passed. Browser checks covered all ten module guides, four original numerical widgets, grading and assistance, progress import/export, mobile overflow, formatted Markdown redirect and tables, concept dialog, referenced video iframe creation, actual narrated audio playback, dedicated lab rendering, and HTTP availability of all 52 lab and 35 submodule documents. External video playback remains provider-dependent.
 
 The foundations NumPy walkthrough ran successfully: loss 0.490415, finite-difference gradient checks passed, and one update reduced loss to 0.474975. This validates the small worked example, not learner mastery or frontier-scale training.
+
+## TypeScript and adaptive learning update
+
+Interactive source now lives in `src/site`, with a TypeScript build and localhost preview. Thirteen Node test groups, TypeScript checks, public Markdown link checks, and all three browser suites pass. New browser coverage includes definition-first navigation, specific visual examples, deeper references, preferred-tutor handoff, confidence feedback and storage, next-step recommendations, actual playback of all three Kokoro samples, and mobile submodule layout.
+
+The old Python preview/link-check scripts and their preview-specific tests have been replaced by TypeScript tooling and browser checks. Python remains available for numerical learning examples. Tutor-model answer quality has not been evaluated: the shipped integration copies context to the learner's selected interface and does not perform inference or award model-generated grades.

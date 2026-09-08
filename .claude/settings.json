@@ -1,0 +1,38 @@
+{
+  "model": "claude-opus-4-8[1m]",
+  "fallbackModel": ["claude-opus-4-8[1m]"],
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/session-start/hook.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"$CLAUDE_PROJECT_DIR/.claude/read-once/hook.sh\"; [ -f \"$f\" ] && bash \"$f\" || exit 0"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/read-once/compact.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

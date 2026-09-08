@@ -5,7 +5,7 @@
 From the repository root:
 
 ```bash
-python3 scripts/serve.py
+npm run dev
 ```
 
 Open **http://127.0.0.1:8765/site/** in a browser. Stop the server with Ctrl+C. Use `--port 8766` if the default port is occupied. The server binds only to localhost and serves the public course documents/assets; it excludes private records and Git internals. For another computer, run a separate local copy and transfer progress with export/import.
@@ -52,9 +52,9 @@ Export downloads a JSON backup and a Markdown tutor record. Some browsers restri
 ## Development checks
 
 ```bash
-node --test tests/engine.test.mjs
-python3 -m unittest discover -s tests -p 'test_*.py'
-python3 scripts/check_docs.py
+npm test
+npm run typecheck
+npm run check:docs
 ```
 
 Node is only needed for the JavaScript tests, not normal use. Engine tests cover numerical grading, question generation, storage validation, review scheduling, and safe Markdown rendering. Server tests cover allowed assets and private/traversal paths. Browser smoke validation should additionally exercise navigation, each visual, answer feedback, persistence, export/import, and a mobile viewport. Live video/audio availability is provider/browser dependent.
@@ -64,7 +64,7 @@ For the optional browser smoke test, install the testing tool locally (the appli
 ```bash
 npm install --no-save --package-lock=false playwright
 npx playwright install chromium
-node tests/browser-smoke.mjs
+npm run test:browser
 ```
 
 The test uses a temporary browser profile and writes inspection screenshots under `/tmp`. `LAB_URL` can select another local server origin; `PLAYWRIGHT_MODULE` can point to an already-installed Playwright module. Node 20+ is a suitable test environment. Keep tooling versions recorded when reproducing the browser validation.

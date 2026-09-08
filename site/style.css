@@ -753,3 +753,14 @@ html {
 #guide-body h2 {
   scroll-margin-top: 20px;
 }
+
+.concept-flow {display:flex;gap:1.5rem;list-style:none;padding:0;align-items:stretch;flex-wrap:wrap;}
+.concept-flow li {position:relative;flex:1;min-width:130px;border:1px solid var(--line,#bbc7ca);border-radius:8px;padding:1rem;background:rgba(40,130,110,.08);}
+.concept-flow li:not(:last-child)::after {content:'→';position:absolute;right:-1.3rem;top:40%;}
+.concept-figure {margin:1.25rem 0;}
+.concept-figure figcaption {font-weight:600;}
+.definition-card {padding:.8rem 0;border-bottom:1px solid var(--line,#bbc7ca);}
+.definition-card summary {cursor:pointer;font-weight:650;}
+.tutor-panel textarea {width:100%;box-sizing:border-box;}
+.tutor-panel label {display:block;margin:.7rem 0;}
+@media(max-width:600px){.concept-flow {flex-direction:column;gap:1.5rem}.concept-flow li:not(:last-child)::after{content:'↓';top:auto;right:50%;bottom:-1.4rem}}

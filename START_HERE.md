@@ -1,14 +1,14 @@
 # Start here
 
-Experienced engineers should use the [24-week bootcamp](docs/00-personalized-bootcamp.md); its schedule takes precedence over the longer module allocations.
+Start with [Choose your learning route](docs/15-learning-paths.md). The course supports developers new to ML, practitioners filling specific gaps, and experienced engineers pursuing an intensive route.
 
-Your first task is to establish your starting point, not to watch a long playlist. Today fits in the first day of Week 1; placement is not an extra week.
+Begin with the definitions and visual examples in the first lesson. Explore at your pace, then use the placement diagnostic to identify which implementation skills need practice.
 
 ## Open the learning interface
 
-Run `python3 scripts/serve.py` from this directory and open http://127.0.0.1:8765/site/. Use Learn & explore for explanations, Retrieve & test for theory, and Build & defend for evidence to review with the tutor. The app’s quiz scores do not replace the placement implementation tasks.
+Install Node 24+, run `npm install`, then `npm run dev` from this directory and open http://127.0.0.1:8765/site/. Use Learn & explore for explanations, Retrieve & test for theory, and Build & defend for evidence to review with the tutor. The app’s quiz scores do not replace the placement implementation tasks.
 
-## First day: nine coursework hours
+## Optional intensive first day: nine coursework hours
 
 | Time budget | Task | Save |
 | --- | --- | --- |

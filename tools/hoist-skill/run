@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+// hoist-skill — emit scaffold capabilities into a consumer repo.
+// Usage: node run [--names <n1,n2|all>] [--harness <claude|cursor|antigravity|codex|all>]
+//                [--into <path>] [--force] [--list]
+//                [--ref <ref>] [--no-record] [--from-manifest [path]] [--plan] [--fetch]
+//
+// CLI shim — the engine lives in hoist.mjs (importable on Node 18+).
+
+import { join, resolve } from 'node:path';
+import { hoist } from './hoist.ts';
+
+const args = process.argv.slice(2);
+const get  = (flag) => { const i = args.indexOf(flag); return i !== -1 ? args[i + 1] : null; };
+const has  = (flag) => args.includes(flag);
+
+const fromManifestFlag = has('--from-manifest');
+const fromManifestRaw  = (() => {
+  const i = args.indexOf('--from-manifest');
+  if (i === -1) return null;
+  const next = args[i + 1];
+  return (next && !next.startsWith('--')) ? next : null;
+})();
+
+const ref         = get('--ref') ?? 'main';
+const intoRaw     = get('--into') ?? '.';
+const INTO        = resolve(intoRaw);
+
+const opts = {
+  names:       get('--names')   ?? 'all',
+  harness:     get('--harness') ?? 'claude',
+  into:        intoRaw,
+  force:       has('--force'),
+  list:        has('--list'),
+  ref,
+  refExplicit: args.includes('--ref'),
+  noRecord:    has('--no-record'),
+  plan:        has('--plan'),
+  fetch:       has('--fetch'),
+  fromManifest: fromManifestFlag
+    ? (fromManifestRaw ?? join(INTO, '.sync', 'hoisted'))
+    : null,
+};
+
+if (has('--names') && fromManifestFlag) {
+  console.error('--names and --from-manifest are mutually exclusive');
+  process.exit(1);
+}
+
+hoist(opts).then(result => {
+  console.log(JSON.stringify(result, null, 2));
+}).catch(e => {
+  console.error(e.message);
+  process.exit(1);
+});

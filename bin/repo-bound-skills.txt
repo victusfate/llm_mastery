@@ -1,0 +1,9 @@
+# Skills that must NOT be installed into a global, non-project skills dir.
+# Single source of truth — read by bin/install-skills.sh (bulk skip) and
+# bin/globalize-skill.sh (per-skill guard). One line per skill name.
+#
+#   sync-scaffold, skillify — orchestrate in-repo git work; need a project repo
+#   simplify                — collides with a Claude Code built-in of the same name
+sync-scaffold
+skillify
+simplify

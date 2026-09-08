@@ -51,7 +51,7 @@
           <h1 id="title"></h1>
           <p id="concept" class="lead"></p>
         </div>
-        <div class="tabs" role="tablist" aria-label="Learning modes">
+        <section id="study-coach" class="card"></section><div class="tabs" role="tablist" aria-label="Learning modes">
           <button
             role="tab"
             id="tab-learn"
@@ -80,7 +80,7 @@
         </div>
         <section id="learn" role="tabpanel" aria-labelledby="tab-learn">
           <div class="module-tools card">
-            <p id="summary"></p>
+            <section id="concept-primer" class="card full-module"></section><p id="summary"></p>
             <p id="prediction" hidden></p>
             <p class="small">
               Start with the module overview below, choose a focused submodule,
@@ -153,7 +153,7 @@
               checks a narrow concept; it does not award a module pass.
             </p>
             <p id="question" class="question"></p>
-            <form id="answer-form">
+            <form id="answer-form"><label for="confidence">Before checking: how confident are you?</label><select id="confidence"><option value="low">Unsure</option><option value="medium" selected>Somewhat confident</option><option value="high">Very confident</option></select><p id="confidence-feedback" role="status"></p>
               <label for="answer">Your numerical answer</label>
               <div class="row">
                 <input

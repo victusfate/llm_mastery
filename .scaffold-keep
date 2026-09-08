@@ -1,0 +1,5 @@
+# Consumer-owned course instructions and publishing configuration
+AGENTS.md
+CODEOWNERS
+.github/workflows/quality.yml
+.github/workflows/release.yml

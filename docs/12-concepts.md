@@ -1505,3 +1505,83 @@ Record temperature, stopping criteria, number of samples, and token budgets. Do 
 How would you isolate training improvement from increased inference compute?
 
 [Full module and primary references](../modules/09-reasoning-rl.md)
+
+## Model
+Aliases: neural model; neural network
+Module: 01-foundations
+Related: Parameter; Prediction; Training loop
+
+### What it means
+A model is a computation that maps inputs to outputs. A trainable model contains adjustable numerical values called parameters.
+
+### Why it matters
+Separate the computation you designed from the values learned from data.
+
+### Concrete example
+A linear model predicts y = w × x + b. With w = 2, b = 1, and x = 3, its prediction is 7.
+
+### Common mistake
+A model's plausible output is not proof that it learned the intended rule.
+
+### Check your understanding
+Which parts of y = w × x + b are inputs, parameters, and outputs?
+
+## Prediction
+Aliases: predictions
+Module: 01-foundations
+Related: Model; Logit; Next-token prediction
+
+### What it means
+A prediction is a model output for a particular input. For language modeling, the output usually describes probabilities over possible next tokens.
+
+### Why it matters
+Training compares predictions with the chosen learning target; generation uses them to choose outputs.
+
+### Concrete example
+After “the cat”, a model may assign probability 0.4 to “sat” and smaller probabilities to many other tokens.
+
+### Common mistake
+The most likely token is not necessarily correct, and sampling need not choose it.
+
+### Check your understanding
+Can the same model generate different text from the same prompt?
+
+## Training loop
+Aliases: training step; training steps
+Module: 01-foundations
+Related: Model; Loss; Gradient; Optimizer
+
+### What it means
+A training loop repeatedly predicts outputs, computes a loss, calculates gradients, and updates parameters using training examples.
+
+### Why it matters
+Every major training pipeline still depends on getting these steps and their state transitions right.
+
+### Concrete example
+Predict a class, measure negative log probability of the target, backpropagate, update the weights, and repeat on another batch.
+
+### Common mistake
+A loss that decreases does not by itself establish generalization or an uncontaminated evaluation.
+
+### Check your understanding
+Which quantities change during training but should remain fixed during a standard evaluation run?
+
+## Dataset
+Aliases: datasets; training data
+Module: 03-pretraining
+Related: Data curation; Provenance; Data leakage
+
+### What it means
+A dataset is a collection of examples with an intended purpose, format, and documented origin. Separate subsets may be used for training, validation, and final evaluation.
+
+### Why it matters
+The examples and selection rules shape what the model can learn and what your evaluation means.
+
+### Concrete example
+Collect 1,000 documents, group duplicates together, and assign groups to training and held-out sets before fitting a model.
+
+### Common mistake
+Randomly splitting rows does not prevent leakage when related documents or users appear across splits.
+
+### Check your understanding
+What unit should be kept together when splitting examples from the same document?

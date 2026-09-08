@@ -1,0 +1,391 @@
+#!/usr/bin/env node
+// Isolated acceptance check for hoist-skill.
+// Runs in a temp dir. Exits non-zero on any failure.
+
+import { mkdtempSync, writeFileSync, mkdirSync, readFileSync, existsSync, rmSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
+const RUN  = join(dirname(fileURLToPath(import.meta.url)), 'run');
+
+// Temp dirs registered here are deleted on exit (L7 cleanup)
+const _tmpDirs = [];
+const makeTmp = () => { const d = mkdtempSync(join(tmpdir(), 'hoist-test-')); _tmpDirs.push(d); return d; };
+process.on('exit', () => { for (const d of _tmpDirs) { try { rmSync(d, { recursive: true }); } catch {} } });
+
+let passed = 0, failed = 0;
+
+function assert(label, cond, detail = '') {
+  if (cond) { console.log(`  ✓ ${label}`); passed++; }
+  else       { console.error(`  ✗ ${label}${detail ? ': ' + detail : ''}`); failed++; }
+}
+
+function run(args) {
+  return spawnSync('node', [RUN, ...args], { encoding: 'utf8' });
+}
+
+// ---------------------------------------------------------------- case 1: claude emit
+
+console.log('\nCase 1: emit feature-chain --harness claude');
+{
+  const dest = makeTmp();
+  const r = run(['--names', 'feature-chain', '--harness', 'claude', '--into', dest]);
+  assert('exits 0', r.status === 0, r.stderr);
+  assert('canonical body written', existsSync(join(dest, 'skills/feature-chain.md')));
+  assert('claude wrapper written', existsSync(join(dest, '.claude/skills/feature-chain/SKILL.md')));
+
+  const wrapper = readFileSync(join(dest, '.claude/skills/feature-chain/SKILL.md'), 'utf8');
+  assert('wrapper @-includes canonical at correct depth',
+    wrapper.includes('@../../../skills/feature-chain.md'));
+  assert('wrapper has description frontmatter',
+    /^---[\s\S]*?description:.*[\s\S]*?---/m.test(wrapper));
+
+  const out = JSON.parse(r.stdout);
+  assert('JSON output has results array', Array.isArray(out.results));
+}
+
+// ---------------------------------------------------------------- case 2: .scaffold-keep is honored
+
+console.log('\nCase 2: .scaffold-keep blocks a path');
+{
+  const dest = makeTmp();
+  writeFileSync(join(dest, '.scaffold-keep'), 'skills/feature-chain.md\n');
+  const r = run(['--names', 'feature-chain', '--harness', 'claude', '--into', dest]);
+  assert('exits 0', r.status === 0, r.stderr);
+  assert('canonical body NOT written (kept)', !existsSync(join(dest, 'skills/feature-chain.md')));
+
+  const out = JSON.parse(r.stdout);
+  const kept = out.results.find(x => x.path === 'skills/feature-chain.md');
+  assert('result status is kept', kept?.status === 'kept');
+}
+
+// ---------------------------------------------------------------- case 3: differing file -> *.scaffold-new
+
+console.log('\nCase 3: differing existing file becomes *.scaffold-new');
+{
+  const dest = makeTmp();
+  mkdirSync(join(dest, 'skills'), { recursive: true });
+  writeFileSync(join(dest, 'skills/feature-chain.md'), 'consumer-owned content\n');
+  const r = run(['--names', 'feature-chain', '--harness', 'claude', '--into', dest]);
+  assert('exits 0', r.status === 0, r.stderr);
+  assert('original file untouched',
+    readFileSync(join(dest, 'skills/feature-chain.md'), 'utf8') === 'consumer-owned content\n');
+  assert('sidecar written',
+    existsSync(join(dest, 'skills/feature-chain.md.scaffold-new')));
+}
+
+// ---------------------------------------------------------------- case 4: unknown capability exits non-zero
+
+console.log('\nCase 4: unknown capability exits non-zero');
+{
+  const dest = makeTmp();
+  const r = run(['--names', 'no-such-skill', '--harness', 'claude', '--into', dest]);
+  assert('exits non-zero', r.status !== 0);
+}
+
+// ---------------------------------------------------------------- case 5: --list prints JSON
+
+console.log('\nCase 5: --list prints valid JSON');
+{
+  const r = run(['--list']);
+  assert('exits 0', r.status === 0, r.stderr);
+  let parsed;
+  try { parsed = JSON.parse(r.stdout); } catch { parsed = null; }
+  assert('stdout is valid JSON', parsed !== null);
+  assert('JSON has capabilities array', Array.isArray(parsed?.capabilities));
+  assert('JSON has harnesses array', Array.isArray(parsed?.harnesses));
+}
+
+// ---------------------------------------------------------------- case 6: antigravity writes both files
+
+console.log('\nCase 6: emit feature-chain --harness antigravity');
+{
+  const dest = makeTmp();
+  const r = run(['--names', 'feature-chain', '--harness', 'antigravity', '--into', dest]);
+  assert('exits 0', r.status === 0, r.stderr);
+  assert('.agents skill written', existsSync(join(dest, '.agents/skills/feature-chain/SKILL.md')));
+  assert('.agent workflow written', existsSync(join(dest, '.agent/workflows/feature-chain.md')));
+}
+
+// ---------------------------------------------------------------- case 7: claude wrapper always has description frontmatter (fallback)
+// Verify that even when no canonical .claude/skills/<name>/SKILL.md exists in the scaffold
+// root, the generated wrapper still contains a description: field so Claude Code can
+// surface the skill in its skill list.
+
+console.log('\nCase 7: claude wrapper fallback has description frontmatter');
+{
+  const dest = makeTmp();
+  // Use a skill whose canonical wrapper exists in the scaffold root so we also prove
+  // the "use existing source" path produces valid frontmatter.
+  const r = run(['--names', 'hoist-skill', '--harness', 'claude', '--into', dest]);
+  assert('exits 0', r.status === 0, r.stderr);
+  const wrapperPath = join(dest, '.claude/skills/hoist-skill/SKILL.md');
+  assert('claude wrapper written', existsSync(wrapperPath));
+  const wrapper = readFileSync(wrapperPath, 'utf8');
+  assert('wrapper has description frontmatter',
+    /^---[\s\S]*?description:.*[\s\S]*?---/m.test(wrapper));
+  assert('wrapper @-includes canonical',
+    wrapper.includes('@../../../skills/hoist-skill.md'));
+}
+
+// ---------------------------------------------------------------- case 8: emit writes .sync/hoisted; re-emit does not duplicate
+
+console.log('\nCase 8: emit writes manifest; re-emit does not duplicate');
+{
+  const dest = makeTmp();
+  const r1 = run(['--names', 'feature-chain', '--harness', 'claude', '--into', dest]);
+  assert('exits 0', r1.status === 0, r1.stderr);
+
+  const manifestPath = join(dest, '.sync', 'hoisted');
+  assert('manifest written', existsSync(manifestPath));
+
+  const lines1 = readFileSync(manifestPath, 'utf8')
+    .split('\n').filter(l => l.trim() && !l.startsWith('#'));
+  assert('one entry', lines1.length === 1, `got: ${JSON.stringify(lines1)}`);
+  assert('correct entry', lines1[0] === 'feature-chain\tclaude\tmain', `got: ${lines1[0]}`);
+
+  // Re-emit — must not duplicate
+  const r2 = run(['--names', 'feature-chain', '--harness', 'claude', '--into', dest]);
+  assert('re-emit exits 0', r2.status === 0, r2.stderr);
+  const lines2 = readFileSync(manifestPath, 'utf8')
+    .split('\n').filter(l => l.trim() && !l.startsWith('#'));
+  assert('still one entry (no duplicate)', lines2.length === 1, `got: ${JSON.stringify(lines2)}`);
+}
+
+// ---------------------------------------------------------------- case 9: --no-record leaves no manifest
+
+console.log('\nCase 9: --no-record leaves no manifest');
+{
+  const dest = makeTmp();
+  const r = run(['--names', 'feature-chain', '--harness', 'claude', '--into', dest, '--no-record']);
+  assert('exits 0', r.status === 0, r.stderr);
+  assert('no manifest written', !existsSync(join(dest, '.sync', 'hoisted')));
+}
+
+// ---------------------------------------------------------------- case 10: --from-manifest emits recorded set
+
+console.log('\nCase 10: --from-manifest emits the recorded set');
+{
+  const dest = makeTmp();
+  mkdirSync(join(dest, '.sync'), { recursive: true });
+  writeFileSync(join(dest, '.sync', 'hoisted'),
+    '# .sync/hoisted\nfeature-chain\tclaude\tv9.9.9\n');
+
+  const r = run(['--from-manifest', '--into', dest]);
+  assert('exits 0', r.status === 0, r.stderr);
+  assert('canonical body written', existsSync(join(dest, 'skills/feature-chain.md')));
+  assert('claude wrapper written', existsSync(join(dest, '.claude/skills/feature-chain/SKILL.md')));
+
+  const out = JSON.parse(r.stdout);
+  assert('results array present', Array.isArray(out.results));
+}
+
+// ---------------------------------------------------------------- case 11: --plan outputs sources
+
+console.log('\nCase 11: --plan outputs annotated source list');
+{
+  const r = run(['--names', 'tdd', '--harness', 'claude', '--plan']);
+  assert('exits 0', r.status === 0, r.stderr);
+  let plan;
+  try { plan = JSON.parse(r.stdout); } catch { plan = null; }
+  assert('stdout is valid JSON', plan !== null, r.stdout.slice(0, 200));
+  assert('has ref', plan?.ref === 'main');
+  assert('has harness', plan?.harness === 'claude');
+  assert('sources is array', Array.isArray(plan?.sources));
+  const paths = plan?.sources.map(s => s.path);
+  assert('includes tool path', paths?.includes('tools/hoist-skill/run'));
+  assert('includes RESOLVER',  paths?.includes('.claude/skills/RESOLVER.md'));
+  assert('includes skill body', paths?.includes('skills/tdd.md'));
+  assert('includes claude wrapper', paths?.includes('.claude/skills/tdd/SKILL.md'));
+  const byPath = Object.fromEntries((plan?.sources ?? []).map(s => [s.path, s]));
+  assert('tool path required:true',    byPath['tools/hoist-skill/run']?.required === true);
+  assert('RESOLVER required:true',     byPath['.claude/skills/RESOLVER.md']?.required === true);
+  assert('skill body required:true',   byPath['skills/tdd.md']?.required === true);
+  assert('claude wrapper required:false', byPath['.claude/skills/tdd/SKILL.md']?.required === false);
+}
+
+// ---------------------------------------------------------------- case 12: --names and --from-manifest are mutually exclusive
+
+console.log('\nCase 12: --names and --from-manifest are mutually exclusive');
+{
+  const r = run(['--names', 'tdd', '--from-manifest']);
+  assert('exits non-zero', r.status !== 0);
+}
+
+// ---------------------------------------------------------------- case 13: --ref is recorded in manifest
+
+console.log('\nCase 13: --ref is recorded in manifest');
+{
+  const dest = makeTmp();
+  const r = run(['--names', 'feature-chain', '--harness', 'claude', '--into', dest, '--ref', 'v1.2.3']);
+  assert('exits 0', r.status === 0, r.stderr);
+  const lines = readFileSync(join(dest, '.sync', 'hoisted'), 'utf8')
+    .split('\n').filter(l => l.trim() && !l.startsWith('#'));
+  assert('ref recorded', lines[0] === 'feature-chain\tclaude\tv1.2.3', `got: ${lines[0]}`);
+}
+
+// ---------------------------------------------------------------- case 14: --plan echoes --ref
+
+console.log('\nCase 14: --plan echoes --ref');
+{
+  const r = run(['--names', 'tdd', '--harness', 'claude', '--plan', '--ref', 'v2.0.0']);
+  assert('exits 0', r.status === 0, r.stderr);
+  let plan;
+  try { plan = JSON.parse(r.stdout); } catch { plan = null; }
+  assert('ref in plan output', plan?.ref === 'v2.0.0');
+}
+
+// ---------------------------------------------------------------- case 15: replay preserves pinned ref when --ref not passed
+
+console.log('\nCase 15: replay preserves pinned ref (no --ref passed)');
+{
+  const dest = makeTmp();
+  mkdirSync(join(dest, '.sync'), { recursive: true });
+  writeFileSync(join(dest, '.sync', 'hoisted'),
+    '# header\nfeature-chain\tclaude\tv1.2.3\n');
+
+  run(['--from-manifest', '--into', dest]);
+
+  const line = readFileSync(join(dest, '.sync', 'hoisted'), 'utf8')
+    .split('\n').find(l => l.trim() && !l.startsWith('#'));
+  assert('pinned ref preserved', line === 'feature-chain\tclaude\tv1.2.3', `got: ${line}`);
+}
+
+// ---------------------------------------------------------------- case 16: --from-manifest --ref re-records with new ref to same path
+
+console.log('\nCase 16: --from-manifest --ref re-records with new ref in place');
+{
+  const dest = makeTmp();
+  mkdirSync(join(dest, '.sync'), { recursive: true });
+  writeFileSync(join(dest, '.sync', 'hoisted'),
+    'feature-chain\tclaude\tv1.2.3\n');
+
+  run(['--from-manifest', '--into', dest, '--ref', 'v2.0.0']);
+
+  const line = readFileSync(join(dest, '.sync', 'hoisted'), 'utf8')
+    .split('\n').find(l => l.trim() && !l.startsWith('#'));
+  assert('ref updated to new pin', line === 'feature-chain\tclaude\tv2.0.0', `got: ${line}`);
+  // No second manifest at manifestWritePath if custom path was used
+}
+
+// ---------------------------------------------------------------- case 17: missing skill body gives actionable error
+
+console.log('\nCase 17: missing skill body gives actionable error (P3)');
+{
+  // Build a partial mirror: has RESOLVER.md but lacks skills/tdd.md
+  const fakeRoot = makeTmp();
+  mkdirSync(join(fakeRoot, '.claude', 'skills'), { recursive: true });
+  // Copy real RESOLVER.md so registry parsing works
+  const realResolver = readFileSync(join(ROOT, '.claude', 'skills', 'RESOLVER.md'), 'utf8');
+  writeFileSync(join(fakeRoot, '.claude', 'skills', 'RESOLVER.md'), realResolver, 'utf8');
+  // Deliberately omit skills/tdd.md
+
+  const dest = makeTmp();
+  const r = spawnSync('node', [RUN, '--names', 'tdd', '--harness', 'claude', '--into', dest], {
+    encoding: 'utf8',
+    env: { ...process.env, HOIST_SCAFFOLD_ROOT: fakeRoot },
+  });
+  assert('exits non-zero', r.status !== 0, `status: ${r.status}`);
+  assert('error mentions missing source', r.stderr.includes('missing source'), r.stderr);
+  assert('error includes --fetch hint', r.stderr.includes('--fetch'), r.stderr);
+  assert('error includes raw URL', r.stderr.includes('raw.githubusercontent.com'), r.stderr);
+}
+
+// ---------------------------------------------------------------- case 18: --fetch emits from a local HTTP server (P1)
+
+console.log('\nCase 18: --fetch emits skills from a local HTTP file server');
+{
+  // The sandbox blocks fetch() in spawnSync children when the server lives in the
+  // parent process. Workaround: start the server as a peer process via IPC so the
+  // spawned tool can connect to it.
+  const { spawn } = await import('node:child_process');
+
+  const serverScript = `
+    import { createServer } from 'node:http';
+    import { readFile } from 'node:fs/promises';
+    import { join } from 'node:path';
+    const ROOT = ${JSON.stringify(ROOT)};
+    createServer(async (req, res) => {
+      const relPath = req.url.replace(/^\\/[^\\/]+\\//, '');
+      try { const d = await readFile(join(ROOT, relPath)); res.writeHead(200); res.end(d); }
+      catch { res.writeHead(404); res.end('not found'); }
+    }).listen(0, '127.0.0.1', function() {
+      process.send('ready:' + this.address().port);
+    });
+  `;
+
+  const srv = spawn('node', ['--input-type=module'], {
+    stdio: ['pipe', 'ignore', 'ignore', 'ipc'],
+  });
+  srv.stdin.end(serverScript);
+
+  const serverPort = await new Promise(resolve => {
+    srv.on('message', m => {
+      if (String(m).startsWith('ready:')) resolve(Number(String(m).split(':')[1]));
+    });
+  });
+
+  const dest = makeTmp();
+  const r = spawnSync('node', [RUN, '--fetch', '--names', 'tdd', '--harness', 'claude', '--into', dest], {
+    encoding: 'utf8',
+    timeout: 15000,
+    env: { ...process.env, HOIST_RAW_BASE: `http://127.0.0.1:${serverPort}` },
+  });
+
+  srv.kill();
+
+  assert('--fetch exits 0', r.status === 0, r.stderr?.slice(0, 300));
+  assert('--fetch: skill body written', existsSync(join(dest, 'skills/tdd.md')));
+  assert('--fetch: claude wrapper written', existsSync(join(dest, '.claude/skills/tdd/SKILL.md')));
+
+  let fetchOut;
+  try { fetchOut = JSON.parse(r.stdout); } catch { fetchOut = null; }
+  assert('--fetch: results array present', Array.isArray(fetchOut?.results));
+
+  const manifestPath = join(dest, '.sync', 'hoisted');
+  assert('--fetch: manifest recorded', existsSync(manifestPath));
+}
+
+// ---------------------------------------------------------------- case 19: --plan --from-manifest preserves pinned refs in sources
+
+console.log('\nCase 19: --plan --from-manifest preserves pinned refs in sources');
+{
+  const dest = makeTmp();
+  mkdirSync(join(dest, '.sync'), { recursive: true });
+  writeFileSync(join(dest, '.sync', 'hoisted'),
+    'feature-chain\tclaude\tv1.2.3\n');
+
+  const r = spawnSync('node', [RUN, '--plan', '--from-manifest', '--into', dest], {
+    encoding: 'utf8',
+  });
+  assert('exits 0', r.status === 0, r.stderr?.slice(0, 300));
+
+  let out;
+  try { out = JSON.parse(r.stdout); } catch { out = null; }
+  assert('stdout is valid JSON', out !== null);
+
+  const capSource = out?.sources?.find(s => s.path && !s.path.startsWith('.') && s.path !== 'tools/hoist-skill/run');
+  assert('capability source has ref field', capSource?.ref !== undefined, JSON.stringify(capSource));
+  assert('capability source ref matches manifest pin', capSource?.ref === 'v1.2.3', `got: ${capSource?.ref}`);
+}
+
+// ---------------------------------------------------------------- case 20: back-compat export surface
+// Guards the regression where splitting hoist.mjs dropped the readManifest export.
+// Consumer-vendored tools/sync/run.mjs copies (not in scaffold-files.txt) import
+// readManifest from '../hoist-skill/hoist.ts'; dropping it breaks them on sync.
+
+console.log('\nCase 20: hoist.mjs preserves back-compat export surface');
+{
+  const mod = await import('./hoist.ts');
+  assert('exports hoist', typeof mod.hoist === 'function');
+  assert('re-exports readManifest (back-compat for vendored run.mjs)',
+    typeof mod.readManifest === 'function');
+}
+
+// ---------------------------------------------------------------- summary
+
+console.log(`\n${passed} passed, ${failed} failed.`);
+process.exit(failed > 0 ? 1 : 0);
