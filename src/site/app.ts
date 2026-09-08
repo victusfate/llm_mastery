@@ -1,3 +1,4 @@
+import { createProgressBackup, validateProgressBackup, restoreProgressBackup } from "./progress-backup.ts";
 import { renderCoach, confidenceFeedback } from "./study-coach.ts";
 import { mountPrimer } from "./concept-primer.ts";
 import { submodules } from "./submodules.ts";
@@ -286,11 +287,17 @@ function download(name, type, text) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+function backupText() {
+  try { return JSON.stringify(createProgressBackup(state, localStorage), null, 2); }
+  catch { $("storage-status").textContent = "Full backup could not read browser storage. Check site storage permissions before retrying."; return null; }
+}
 $("export").onclick = () => {
+  const snapshot = backupText();
+  if (!snapshot) return;
   download(
     "training-lab-progress.json",
     "application/json",
-    JSON.stringify(state, null, 2),
+    snapshot,
   );
   const lines = [
     "# LLM Training Lab — learning record",
@@ -311,17 +318,20 @@ $("export").onclick = () => {
     );
   download("training-lab-record.md", "text/markdown", lines.join("\n"));
   $("storage-status").textContent =
-    "Export requested: JSON backup and Markdown tutor record. If the browser blocks multiple downloads, use the backup button below.";
+    "Export requested: Full JSON backup (including lab/submodule notes and hardware) and Markdown tutor record. If the browser blocks multiple downloads, use the backup button below.";
   if (!$("backup-only")) {
     const b = document.createElement("button");
     b.id = "backup-only";
     b.textContent = "Download JSON backup";
-    b.onclick = () =>
+    b.onclick = () => {
+      const snapshot = backupText();
+      if (!snapshot) return;
       download(
         "training-lab-progress.json",
         "application/json",
-        JSON.stringify(state, null, 2),
+        JSON.stringify(createProgressBackup(state, localStorage), null, 2),
       );
+    };
     $("storage-status").after(b);
   }
 };
@@ -330,15 +340,16 @@ $("import").onchange = async (e) => {
   if (!file) return;
   try {
     if (file.size > 5000000) throw new Error("Backup exceeds 5 MB");
-    const next = validateState(JSON.parse(await file.text()));
+    const backup = validateProgressBackup(JSON.parse(await file.text()));
+    const next = backup.state;
     if (
       !confirm(
         "Replace this browser’s progress with the selected backup? Export first if you need to keep both.",
       )
     )
       return;
+    restoreProgressBackup(backup, localStorage);
     state = next;
-    save();
     selectModule(state.selected);
     $("storage-status").textContent =
       "Backup imported. Evidence notes remain unreviewed.";

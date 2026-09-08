@@ -1,44 +1,47 @@
-# Home lab: RTX 5090, RTX 5080, and MacBook Pro
+# Your home lab
 
-## Use the hardware you own
+Start with the hardware you already have. The course does not require a particular GPU, two PCs, or cloud spending. In the interactive reader, use **Your setup** to choose your resources and get a starting plan. Your choices stay in this browser and can be changed or cleared at any time.
 
-The desktop RTX 5090 specification lists **32 GB VRAM** and the RTX 5080 lists **16 GB**. Both list no NVLink support. Verify the actual installed cards, driver, and usable memory locally. [NVIDIA 5090 specifications](https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/), [NVIDIA 5080 specifications](https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5080/).
+## Choose a starting path
 
-| Machine | Primary role |
-| --- | --- |
-| 5090 PC | Main pretraining/adaptation runs, larger memory experiments, kernel work |
-| 5080 PC | Independent seeds/ablations, smaller training jobs, evaluation or rollout generation |
-| Recent MacBook Pro | Interactive lessons, coding, data inspection, CPU tests, SSH orchestration; optional Apple-accelerated experiments after identifying the chip |
+| Available hardware | Begin with | Scale up when |
+| --- | --- | --- |
+| Browser only | Definitions, visual experiments, theory checks, readings and tutor discussions | You have access to a Python environment for implementation labs |
+| Laptop or desktop CPU | NumPy examples, gradients, tiny models, data checks and evaluation fixtures | A measured experiment requires more compute |
+| Apple Silicon Mac | CPU correctness checks, then supported accelerated operations | Your selected framework and operations pass a forward/backward test |
+| One GPU | Tiny training loops, memory measurements, then progressively larger experiments | A smaller run has answered the correctness questions |
+| Multiple GPUs | Independent seeds and ablations first; distributed correctness experiments later | You have measured interconnect and communication costs |
 
-Default to independent jobs on the two PCs. That avoids synchronizing every step across a home network. The 16+32 GB capacities are **not a single 48 GB device**. For DDP, both workers hold a replica; the smaller card and slower worker constrain a symmetric setup. FSDP introduces other memory/communication tradeoffs and should be measured separately.
+Model size alone cannot predict whether training fits. Activations, sequence length, optimizer state, batch size, numerical precision, and additional policy/reference/value models all matter. Start with a small run and measure peak memory before increasing any dimension.
 
-## First hardware inventory
+## Record your own inventory
 
-On each PC, record OS, `nvidia-smi` output, supported Python/PyTorch/CUDA combination, CPU RAM, free disk, wired network interface speed, and a timed file transfer. Keep IP addresses and machine names private. Neither the network nor installed software has been inspected from this repository session.
+Record operating system, CPU, system memory, free disk, accelerator model, usable accelerator memory, and the framework version. For multiple machines, also measure a file transfer and record network throughput. Keep hostnames, IP addresses, and account details out of public learning logs.
 
-Both GPUs are Blackwell-generation devices. Select a driver and PyTorch CUDA build that supports the actual device using the [official installer](https://pytorch.org/get-started/locally/); test a forward/backward operation before installing optional kernels. Then independently test Triton/attention-library support. A working PyTorch matmul does not establish every extension’s compatibility.
+Use the [official PyTorch installer](https://pytorch.org/get-started/locally/) for the current supported combination. Check the relevant backend documentation before installing optional kernels: [CUDA](https://docs.pytorch.org/docs/stable/notes/cuda.html) or [Apple MPS](https://docs.pytorch.org/docs/stable/notes/mps.html). Successful inference does not establish that backward passes or all optional extensions work.
 
-Use a reproducible Linux environment on the PCs for CUDA/distributed labs. If using Windows/WSL, check support for the particular distributed backend and networking configuration; do not assume a Linux distributed recipe transfers unchanged. Exact OS/RAM/network details remain to be inventoried.
+## Start with a correctness experiment
 
-## Suggested starting sizes
+1. Run a small tensor computation and its backward pass.
+2. Compare a gradient with a finite-difference estimate.
+3. Overfit a tiny batch and explain why that is a debugging check, not generalization.
+4. Record wall time and peak memory for the actual training configuration.
+5. Increase one dimension at a time, retaining a configuration that fits comfortably.
 
-- Scratch pretraining: 10–50M parameters, context 256–512, microbatch selected by measurement; then pilot 100M if useful.
-- Post-training: first tiny scratch policies for objective correctness, then an open 0.5–1.5B candidate for short-response experiments if the actual optimizer/reference/rollout configuration fits.
-- Multiple concurrent policy/reference/value/reward copies can exceed memory well before one model’s weights do. Begin with sequential or shared/frozen components only where the algorithm and implementation support them; adapters change memory, not the need to account for every component.
-- Run independent ablations on both PCs, labeling hardware differences. For training comparisons, control token/step budgets; for performance comparisons, use the same hardware or clearly separate the hardware effect.
+Use the [foundations walkthrough](../modules/01-foundations.md) and the [general compute guide](04-compute.md). The course's larger runs are extensions; basic algorithmic understanding can be developed with deliberately small examples.
 
-These are starting proposals, not performance or fit claims. Benchmark with real sequence lengths and checkpoint/evaluation overhead.
+## Multiple devices are separate resources
 
-## Two-node distributed lab
+Memory on separate GPUs does not automatically become one larger device. With data-parallel replicas, each worker needs space for its own model state. Sharding changes memory and communication requirements; it does not remove the need to measure them.
 
-Use one GPU on each PC, connected on a trusted local network. The PCs form two nodes, so this is real small multi-node experience. Start with a tiny model and deterministic batch. Check rendezvous/backend connectivity, gradient equivalence, timeouts, and rank-specific logs before throughput runs. Use a private interface and do not expose the training rendezvous port publicly.
+Independent jobs are often useful before synchronized training. Compare one device with multiple devices at controlled effective batch size, and separate algorithmic effects from hardware effects. A slow distributed run can still teach you how to profile communication.
 
-For communication intuition: 100M parameters with a hypothetical 2-byte gradient tensor require 200 MB of gradient payload. Merely moving 200 MB across an ideal 1 Gbit/s link takes 1.6 seconds before protocol/collective overhead; at 10 Gbit/s the payload bound is 0.16 seconds. Actual collectives, dtype, overlap, and topology change total cost. Measure link throughput and collective time; do not assume either network speed is installed.
+## Set your own spending ceiling
 
-Compare the 5090 alone, the 5080 alone, and both nodes at controlled effective batch. A slower two-node run is an excellent profiling lesson. For homogeneous high-bandwidth scaling, a short hosted run is optional—not required to pretend the home topology is equivalent.
+A zero-cloud-budget path is supported. Optional cloud access is not a requirement or an instruction to spend. Before renting hardware, write the experiment question, estimated run duration, hourly quote, storage charges, stopping condition, and total spending ceiling. Record actual costs afterward.
 
-## Low-budget policy
+Local electricity and storage also cost money. Estimate electricity from measured average system power, runtime, and your local rate. A declared budget is a planning limit, not an expected bill.
 
-The primary bootcamp uses existing machines and targets **$0 required cloud spend**. Local electricity/storage are still costs. Estimate electricity as measured average system kW × hours × your local electricity rate. Do not use marketing peak power as a measured bill.
+## Worked example: a multi-machine setup
 
-Treat the GPU-hour worksheet in the [general compute guide](04-compute.md) as a work cap; its hypothetical rental cost is not your expected local spend. A proposed optional external envelope is **$0–$100/month, with no spend assumed until you choose a ceiling**. No paid resources are provisioned by the course. Schedule useful work on the other machine while a run is active; unattended run time is not extra study credit.
+The [RTX 5090 + RTX 5080 + MacBook Pro example](09-home-lab-example.md) illustrates one contributor's configuration. It is an optional case study, not the assumed hardware of the reader.

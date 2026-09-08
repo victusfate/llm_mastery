@@ -1,3 +1,4 @@
+import { mountHardwareProfile } from "./hardware-profile.ts";
 import { markdown } from "./markdown.ts";
 import { startExplorer } from "./explorer.ts";
 import { element as $ } from "./dom.ts";
@@ -20,6 +21,7 @@ if (!safe) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const source = await response.text();
     $("guide-body").innerHTML = markdown(source, url);
+    if(path === "docs/09-home-lab.md") mountHardwareProfile($("guide-body"));
     document.title = `${document.querySelector("#guide-body h1")?.textContent || path} · Training Lab`;
     for (const heading of document.querySelectorAll("#guide-body h2")) {
       const a = document.createElement("a");

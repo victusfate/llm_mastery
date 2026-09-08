@@ -50,3 +50,20 @@ test('tutor handoffs preserve context and reject executable destinations',()=>{
  assert.equal(safeTutorURL('http://localhost:3000/'),'http://localhost:3000/');
  const prompt=tutorPrompt('Gradient','Example slope is −4.');assert.ok(prompt.includes('Example slope is −4.'));assert.ok(prompt.includes('wait for my answer'));
 });
+
+import { hardwarePlan, parseHardwareProfile } from '../src/site/hardware-profile.ts';
+import { createProgressBackup, validateProgressBackup, restoreProgressBackup } from '../src/site/progress-backup.ts';
+test('hardware guidance follows the learner and defaults to no cloud spending',()=>{
+ assert.equal(parseHardwareProfile(null).cloud,'0');
+ assert.ok(hardwarePlan({hardware:'cpu',memory:'unknown',cloud:'0'}).join(' ').includes('CPU'));
+ assert.ok(hardwarePlan({hardware:'multi',memory:'8to16',cloud:'25'}).join(' ').includes('$25'));
+ assert.equal(parseHardwareProfile({hardware:'inherited',cloud:'999'}).hardware,'browser');
+});
+test('full backup restores separate notes, rejects unrelated keys, and keeps old backups compatible',()=>{
+ const map=new Map<string,string>();const storage={get length(){return map.size},key:(i:number)=>[...map.keys()][i],getItem:(k:string)=>map.get(k)??null,setItem:(k:string,v:string)=>{map.set(k,v)},removeItem:(k:string)=>{map.delete(k)}} as Storage;
+ storage.setItem('llm-training-lab-evidence-01-01','my evidence');storage.setItem('unrelated','keep');
+ const full=validateProgressBackup(createProgressBackup(freshState(),storage));storage.setItem('llm-training-lab-evidence-01-02','old');restoreProgressBackup(full,storage);
+ assert.equal(storage.getItem('llm-training-lab-evidence-01-01'),'my evidence');assert.equal(storage.getItem('llm-training-lab-evidence-01-02'),null);assert.equal(storage.getItem('unrelated'),'keep');
+ restoreProgressBackup(validateProgressBackup(freshState()),storage);assert.equal(storage.getItem('llm-training-lab-evidence-01-01'),'my evidence');
+ assert.throws(()=>validateProgressBackup({...freshState(),browserData:{unrelated:'override'}}));
+});

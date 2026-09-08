@@ -11,7 +11,7 @@
     "dev": "node scripts/dev.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/engine.test.ts tests/content.test.ts",
-    "test:browser": "node tests/browser-smoke.ts && node tests/reader-browser.ts && node tests/learning-loop.browser.ts",
+    "test:browser": "node tests/browser-smoke.ts && node tests/reader-browser.ts && node tests/learning-loop.browser.ts && node tests/persistence.browser.ts",
     "check:docs": "node scripts/check-docs.ts",
     "check": "npm run typecheck && npm test && npm run check:docs && npm run build",
     "deploy:cloudflare": "npm run check && wrangler pages deploy dist --project-name llm-mastery --branch main"

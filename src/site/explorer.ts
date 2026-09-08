@@ -1,3 +1,4 @@
+import { mountBookmark } from "./bookmark.ts";
 import { mountTutor } from "./tutor.ts";
 import { conceptVisual } from "./concept-visuals.ts";
 import { resourcesHTML } from "./concept-primer.ts";
@@ -11,6 +12,7 @@ import {
 import { markdown, escapeHTML as esc } from "./engine.ts";
 import { element as $ } from "./dom.ts";
 export function startExplorer() {
+  mountBookmark();
   const dialog = $("concept-dialog"),
     history = [];
   let concepts = [],
