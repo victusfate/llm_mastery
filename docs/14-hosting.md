@@ -27,7 +27,7 @@ Build command: `npm run build`. Output directory: `dist`. Framework: none. Insta
 
 In the repository’s Settings → Secrets and variables → Actions, set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Create a dedicated token in Cloudflare with Account → Cloudflare Pages → Edit, scoped to the hosting account. Never commit the token. See [Cloudflare’s CI setup guide](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/).
 
-Setup status: the account ID is configured; the API token is still required. The interactive Cloudflare login can deploy but does not have permission to administer API tokens. Until the token is added, the Cloudflare job reports a missing-credentials error; the independent GitHub Pages job can still succeed. After adding the token, rerun the workflow on `main` or push a new commit.
+Both repository secrets are configured. Successful pushes to `main` automatically publish to Cloudflare Pages and the GitHub Pages mirror. Forks need their own credentials and hosting project. Pages Edit is an account-level permission covering Pages projects in that account; it cannot be restricted to the `llmmastery.org` zone. The workflow explicitly targets the `llm-mastery` project.
 
 The workflow uses the locked Wrangler dependency to upload `dist` to `llm-mastery` on its production branch `main`. Pull requests never deploy.
 

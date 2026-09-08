@@ -76,7 +76,7 @@ The repository uses [Scaffold](https://github.com/victusfate/scaffold)'s shared 
 
 ## Deployments
 
-Pushes to `main` run the [GitHub Actions workflow](.github/workflows/pages.yml): validation and a static build, followed by deployment jobs for the GitHub Pages mirror and Cloudflare Pages (`llmmastery.org`). Pull requests run validation only. Cloudflare deployment requires the repository secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit, limited to the hosting account) and `CLOUDFLARE_ACCOUNT_ID`. Until the API token is configured, its job fails with a setup message; the GitHub Pages mirror still publishes independently.
+Pushes to `main` run the [GitHub Actions workflow](.github/workflows/pages.yml): validation and a static build, followed by deployment jobs for the GitHub Pages mirror and Cloudflare Pages (`llmmastery.org`). Pull requests run validation only. Cloudflare deployment requires the repository secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit, limited to the hosting account) and `CLOUDFLARE_ACCOUNT_ID`. Both secrets are configured for this repository. Forks must configure their own hosting credentials; missing credentials produce an explicit setup error.
 
 For an authenticated local production deployment, run `npm run deploy:cloudflare`. See [hosting and credential setup](docs/14-hosting.md).
 
