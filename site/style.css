@@ -290,7 +290,8 @@ textarea {
 }
 .heatmap {
   display: grid;
-  grid-template-columns: repeat(8, minmax(25px, 1fr));
+  grid-template-columns: repeat(8, minmax(38px, 1fr));
+  min-width: 340px;
   gap: 5px;
   max-width: 550px;
 }
@@ -299,13 +300,14 @@ textarea {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   border-radius: 4px;
   background: #0c150f;
-  color: #778679;
+  color: #d6e2d7;
+  border: 1px solid #8ba99c;
 }
 .cell.on {
-  background: #476d42;
+  background: #365630;
   color: white;
 }
 .cell.selected {
@@ -765,24 +767,62 @@ html {
 .tutor-panel label {display:block;margin:.7rem 0;}
 @media(max-width:600px){.concept-flow {flex-direction:column;gap:1.5rem}.concept-flow li:not(:last-child)::after{content:'↓';top:auto;right:50%;bottom:-1.4rem}}
 
-/* Mechanism plates: connected neurons, tensors, and measured quantities. */
+/* Diagram colors are checked against their actual SVG backgrounds. */
+:root {
+  --diagram-bg: #0d1915;
+  --diagram-text: #f3f7ee;
+  --diagram-edge: #a5c9bd;
+  --diagram-accent: #c4ed9a;
+  --diagram-secondary: #ffe0a0;
+}
+.diagram-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 16px 0 8px;
+  border: 1px solid #829d90;
+  border-radius: 8px;
+  background: var(--diagram-bg);
+  scrollbar-color: var(--diagram-edge) var(--diagram-bg);
+}
+.diagram-scroll:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+.diagram-scroll::after {
+  content: "Scroll horizontally when the diagram is wider than this panel.";
+  display: block;
+  position: sticky;
+  left: 0;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--diagram-text);
+  border-top: 1px solid #829d90;
+}
 .mechanism-graphic {
+  min-width: 600px;
   max-height: none;
   height: auto;
-  margin: 16px 0;
-  border: 1px solid #3e5745;
-  background: #0d1915;
+  margin: 0;
+  background: var(--diagram-bg);
 }
 .mechanism-graphic text {
-  fill: #e0eade;
+  fill: var(--diagram-text);
   text-anchor: middle;
-  font: 14px Georgia, serif;
+  font: 16px/1.4 ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
-.mechanism-graphic .wire { fill: none; stroke: #729d96; stroke-width: 1.6; }
-.mechanism-graphic .neuron { fill: #214e45; stroke: #c4ed9a; stroke-width: 2; }
-.mechanism-graphic .block { fill: #203c33; stroke: #81b6a1; }
-.mechanism-graphic .signal { fill: #c4ed9a; }
-.mechanism-graphic .blocked { fill: #25332c; stroke: #6f8173; }
-.mechanism-graphic .curve { fill: none; stroke: #c4ed9a; stroke-width: 3; }
-.mechanism-graphic .comparison { fill: none; stroke: #edc579; stroke-width: 2.5; stroke-dasharray: 6 4; }
+.mechanism-graphic .wire { fill: none; stroke: var(--diagram-edge); stroke-width: 2; }
+.mechanism-graphic .neuron { fill: #214e45; stroke: var(--diagram-accent); stroke-width: 2; }
+.mechanism-graphic .block { fill: #203c33; stroke: var(--diagram-edge); stroke-width: 1.5; }
+.mechanism-graphic .signal { fill: var(--diagram-accent); }
+.mechanism-graphic .blocked { fill: var(--diagram-bg); stroke: var(--diagram-edge); stroke-width: 1.5; }
+.mechanism-graphic .curve { fill: none; stroke: var(--diagram-accent); stroke-width: 3; }
+.mechanism-graphic .comparison { fill: none; stroke: var(--diagram-secondary); stroke-width: 3; stroke-dasharray: 6 4; }
+.diagram-description { font-size: 16px; color: var(--text); line-height: 1.6; }
 .concept-figure { margin-inline: 0; }
+.heatmap-scroll { max-width: 100%; overflow-x: auto; padding: 3px; }
+.heatmap-scroll:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+@media (forced-colors: active) {
+  .mechanism-graphic { forced-color-adjust: none; }
+  .diagram-scroll:focus-visible, .heatmap-scroll:focus-visible { outline-color: Highlight; }
+}

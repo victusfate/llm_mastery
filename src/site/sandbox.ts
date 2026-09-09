@@ -96,6 +96,14 @@ export function mountSandbox(root, kind) {
             `<div class="cell ${i % n <= Math.floor(i / n) ? "on" : ""}">${Math.floor(i / n)},${i % n}</div>`,
         ).join("") +
         "</div>";
+    const heatmap = view.querySelector('.heatmap');
+    const scroll = document.createElement('div');
+    scroll.className = 'heatmap-scroll';
+    scroll.tabIndex = 0;
+    scroll.setAttribute('role', 'region');
+    scroll.setAttribute('aria-label', 'Attention mask; scroll horizontally for all columns');
+    heatmap.replaceWith(scroll);
+    scroll.append(heatmap);
       explanation.textContent = `There are ${(n * (n + 1)) / 2} allowed query–key pairs including the diagonal, out of ${n * n} score positions. Rows are queries. This shows a mask, not learned attention weights.`;
     } else if (kind === "shapes") {
       view.innerHTML =

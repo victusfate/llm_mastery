@@ -10,7 +10,7 @@ Replace text-only visual examples with local SVG illustrations throughout all 71
 - Every concept has an explicit graphic assignment. Unknown assignments fail visibly during content validation.
 - Interactive graphics derive from the same slider values as the numeric readouts.
 - SVG titles, descriptions, labels, shapes, and supporting prose provide alternatives to color. Graphics resize without external assets, animation, or network access.
-- Large hidden layers show up to eight neurons with an explicit truncation label.
+- Large hidden layers show up to six neurons with an explicit truncation label.
 
 ## Validation
 
@@ -19,3 +19,5 @@ Replace text-only visual examples with local SVG illustrations throughout all 71
 - `tests/visuals.browser.ts`: all 11 sandbox types rendered SVG with accessible names, remained finite at slider extremes, and fit a 390px viewport. Added to the browser suite.
 - Inspected a rendered desktop network/computation graph screenshot; mobile screenshots were also captured outside Git.
 - Concept coverage checks require SVG shapes and descriptions for all 71 entries.
+
+The [visual design review](visual-review.md) records contrast, legibility, cached-style resilience, and browser validation improvements.

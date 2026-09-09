@@ -413,6 +413,14 @@ function drawVisual() {
         return `<div class="cell ${on ? "on" : ""} ${row === v ? "selected" : ""}">${row},${col}</div>`;
       }).join("") +
       "</div>";
+    const heatmap = $("visual").querySelector('.heatmap');
+    const scroll = document.createElement('div');
+    scroll.className = 'heatmap-scroll';
+    scroll.tabIndex = 0;
+    scroll.setAttribute('role', 'region');
+    scroll.setAttribute('aria-label', 'Attention mask; scroll horizontally for all columns');
+    heatmap.replaceWith(scroll);
+    scroll.append(heatmap);
     $("visual-explanation").textContent =
       `Rows are queries; columns are keys. Highlighted row ${v} can access ${causal ? v + 1 : 8} keys. These are allowed positions, not learned attention weights. ${causal ? "Future positions are blocked." : "Future information is visible: unsuitable for ordinary next-token training."}`;
   } else if (kind === "descent") {

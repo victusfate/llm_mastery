@@ -1,5 +1,6 @@
 import { build } from 'esbuild';
-import { mkdir, readdir, copyFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, copyFile, rm, writeFile, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 export const publicDirectories = ['site','docs','modules','assessments','projects','templates','progress','examples'];
 export const publicFiles = ['README.md','START_HERE.md','CONTRIBUTING.md','LICENSE.md','index.html','.nojekyll'];
@@ -23,6 +24,18 @@ export async function buildSite() {
  await mkdir(output,{recursive:true});
  for(const directory of publicDirectories)await copyTree(directory,join(output,directory));
  for(const file of publicFiles)await copyFile(file,join(output,file));
+ // Content versions prevent an old stylesheet from being paired with new SVG markup.
+ for(const name of await readdir(join(output,'site'))) {
+  if(!name.endsWith('.html'))continue;
+  const file=join(output,'site',name);
+  let html=await readFile(file,'utf8');
+  const assets=[...html.matchAll(/(?:href|src)="([^"/?]+\.(?:css|mjs))"/g)];
+  for(const [,asset] of assets){
+   const hash=createHash('sha256').update(await readFile(join(output,'site',asset))).digest('hex').slice(0,12);
+   html=html.replaceAll(`"${asset}"`,`"${asset}?v=${hash}"`);
+  }
+  await writeFile(file,html);
+ }
  console.log('Built static course in dist/');
 }
 if(process.argv[1]?.endsWith('/build.ts'))await buildSite();

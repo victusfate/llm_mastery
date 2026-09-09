@@ -20,6 +20,32 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Install visual review browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/visual-browser" playwright@1.63.0 --no-audit --no-fund
+          node "$RUNNER_TEMP/visual-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Run browser regression suite
+        run: |
+          node scripts/dev.ts > "$RUNNER_TEMP/course-dev.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid"' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8765/site/ > /dev/null; then break; fi
+            sleep 1
+          done
+          PLAYWRIGHT_MODULE="$RUNNER_TEMP/visual-browser/node_modules/playwright/index.mjs" npm run test:browser
+      - name: Check rendered production build before publishing
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory dist > "$RUNNER_TEMP/course-preview.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid"' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8765/site/ > /dev/null; then break; fi
+            sleep 1
+          done
+          export PLAYWRIGHT_MODULE="$RUNNER_TEMP/visual-browser/node_modules/playwright/index.mjs"
+          node tests/browser-smoke.ts
+          node tests/visuals.browser.ts
       - uses: actions/upload-pages-artifact@v5
         if: github.ref == 'refs/heads/main'
         with:
