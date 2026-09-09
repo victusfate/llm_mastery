@@ -764,3 +764,25 @@ html {
 .tutor-panel textarea {width:100%;box-sizing:border-box;}
 .tutor-panel label {display:block;margin:.7rem 0;}
 @media(max-width:600px){.concept-flow {flex-direction:column;gap:1.5rem}.concept-flow li:not(:last-child)::after{content:'↓';top:auto;right:50%;bottom:-1.4rem}}
+
+/* Mechanism plates: connected neurons, tensors, and measured quantities. */
+.mechanism-graphic {
+  max-height: none;
+  height: auto;
+  margin: 16px 0;
+  border: 1px solid #3e5745;
+  background: #0d1915;
+}
+.mechanism-graphic text {
+  fill: #e0eade;
+  text-anchor: middle;
+  font: 14px Georgia, serif;
+}
+.mechanism-graphic .wire { fill: none; stroke: #729d96; stroke-width: 1.6; }
+.mechanism-graphic .neuron { fill: #214e45; stroke: #c4ed9a; stroke-width: 2; }
+.mechanism-graphic .block { fill: #203c33; stroke: #81b6a1; }
+.mechanism-graphic .signal { fill: #c4ed9a; }
+.mechanism-graphic .blocked { fill: #25332c; stroke: #6f8173; }
+.mechanism-graphic .curve { fill: none; stroke: #c4ed9a; stroke-width: 3; }
+.mechanism-graphic .comparison { fill: none; stroke: #edc579; stroke-width: 2.5; stroke-dasharray: 6 4; }
+.concept-figure { margin-inline: 0; }

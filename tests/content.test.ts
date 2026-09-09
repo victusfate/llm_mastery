@@ -27,13 +27,13 @@ test('reader renders lists, code, table headers and safe links',()=>{
  assert.ok(rendered.includes('<ol>'));assert.ok(rendered.includes('<th scope="col">'));assert.ok(rendered.includes('&lt;x&gt;'));assert.ok(!rendered.includes('<script>'));assert.ok(!rendered.includes('href="javascript:'));
 });
 
-import { visualSteps } from '../src/site/concept-visuals.ts';
+import { visualSteps, conceptVisual } from '../src/site/concept-visuals.ts';
 import { deeperResources } from '../src/site/deeper-resources.ts';
 import { nextStudyStep, confidenceFeedback } from '../src/site/study-coach.ts';
 import { freshState } from '../src/site/engine.ts';
 import { safeTutorURL, tutorPrompt } from '../src/site/tutor.ts';
 test('every concept has a definition, specific visual, and deeper references',()=>{
- for(const concept of concepts){assert.ok(concept.body.includes('### What it means'));assert.ok(visualSteps[concept.title]?.length>=3,concept.title);assert.ok(deeperResources(concept.module).every(r=>r.url.startsWith('https://')&&r.purpose.length>20));}
+ for(const concept of concepts){assert.ok(concept.body.includes('### What it means'));assert.ok(visualSteps[concept.title]?.length>=3,concept.title);const graphic=conceptVisual(concept.title);assert.match(graphic,/<svg[^>]+role="img"/,concept.title);assert.match(graphic,/<desc>[^<]+<\/desc>/,concept.title);assert.match(graphic,/<(?:path|rect|circle) /,concept.title);assert.ok(!graphic.includes('NaN'),concept.title);assert.ok(deeperResources(concept.module).every(r=>r.url.startsWith('https://')&&r.purpose.length>20));}
 });
 test('study recommendations distinguish errors, assisted practice, and independent application',()=>{
  const state=freshState();assert.equal(nextStudyStep(state).kind,'learn');

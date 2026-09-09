@@ -1,3 +1,4 @@
+import { scalingGraphic, timelineGraphic, intervalGraphic, tokenGraphic, evaluationGraphic, stateGraphic, loraGraphic, networkGraphic, barsGraphic, attentionGraphic, gridGraphic, curveGraphic, corpusGraphic, workersGraphic, maskGraphic, policyGraphic, computationGraphic, transformerGraphic } from './graphics.ts';
 import { escapeHTML } from './engine.ts';
 // Each sequence shows a specific mechanism or numerical example, not a mastery score.
 export const visualSteps:Record<string,string[]> = {
@@ -73,8 +74,56 @@ export const visualSteps:Record<string,string[]> = {
  'Training loop':['Predict → measure loss','Differentiate → update parameters','Repeat and evaluate separately'],
  'Dataset':['Collect examples','Document origins and transformations','Split training, validation and test data'],
 };
+// Every concept is assigned deliberately; missing artwork is a content error.
+export const graphicGroups:Record<string,string[]> = {
+ network: ['Model','Parameter','Activation'],
+ computation: ['Autograd','Training loop'],
+ curve: ['Gradient','Finite differences','Gradient descent','Learning rate','Optimizer','Weight decay'],
+ distribution: ['Loss','Logit','Softmax','Cross-entropy','Temperature','Entropy','Perplexity','Prediction','Sampling','Policy'],
+ matrix: ['Tensor','Embedding','Normalization','Precision','Kernel','LoRA'],
+ attention: ['Attention','Causal mask','KV cache'],
+ transformer: ['Transformer','Residual connection','Next-token prediction','Pretraining'],
+ corpus: ['Token','Data curation','Provenance','Deduplication','Data leakage','Dataset'],
+ workers: ['Shard','Batch size','Gradient accumulation','DDP','FSDP','Straggler','Checkpoint','Profiling','Throughput'],
+ evaluation: ['Generalization','Overfitting','Scaling laws','Evaluation','Confidence interval','Ablation'],
+ mask: ['SFT','Padding'],
+ policy: ['Reward','Policy gradient','Advantage','Termination','PPO','Reference policy','KL divergence','DPO','Reward model','Reward hacking','RLVR','GRPO','Verifier','Rollout'],
+};
+export function conceptGraphic(title:string):string {
+ if(title==='Scaling laws')return scalingGraphic();
+ if(['Profiling','Throughput','Straggler','Kernel'].includes(title))return timelineGraphic();
+ if(title==='Confidence interval')return intervalGraphic();
+ if(['Token','Embedding','Next-token prediction'].includes(title))return tokenGraphic();
+ if(['Evaluation','Confidence interval','Ablation','Generalization','Verifier'].includes(title))return evaluationGraphic();
+ if(['Shard','FSDP'].includes(title))return stateGraphic(true);
+ if(title==='DDP')return stateGraphic();
+ if(title==='LoRA')return loraGraphic();
+ if(title==='Loss')return barsGraphic([.25,1.386],['P(target)','−ln P'],'Target probability and loss (nats)');
+ if(title==='Cross-entropy')return barsGraphic([.8,.223],['P(target)','−ln P'],'Target probability and loss (nats)');
+ if(title==='Logit')return barsGraphic([2,1,0],['A','B','C'],'Raw vocabulary scores');
+ if(title==='Softmax'||title==='Entropy')return barsGraphic([.5,.5],['A','B'],'Uniform binary probabilities');
+ if(title==='Temperature')return barsGraphic([.881,.731],['T = 1','T = 2'],'P(A) for logits [2, 0]');
+ if(title==='Advantage')return barsGraphic([5,3,2],['Return','Baseline','Advantage'],'Return minus baseline');
+ if(title==='KL divergence')return barsGraphic([.7,.3,.5,.5],['P(A)','P(B)','Q(A)','Q(B)'],'Compare two action distributions');
+ const group=Object.entries(graphicGroups).find(([,titles])=>titles.includes(title))?.[0];
+ switch(group){
+ case 'network': return networkGraphic();
+ case 'computation': return computationGraphic();
+ case 'curve': return curveGraphic();
+ case 'distribution': return barsGraphic([.665,.245,.09],['A','B','C'],'Example next-token probability distribution');
+ case 'matrix': return gridGraphic(4,3,'Example tensor: 4 examples × 3 features');
+ case 'attention': return attentionGraphic()+gridGraphic(5,5,'Causal attention mask',true);
+ case 'transformer': return transformerGraphic();
+ case 'corpus': return corpusGraphic();
+ case 'workers': return workersGraphic();
+ case 'evaluation': return curveGraphic(true);
+ case 'mask': return maskGraphic();
+ case 'policy': return policyGraphic();
+ default: throw new Error(`Missing graphic for ${title}`);
+ }
+}
 export function conceptVisual(title:string):string {
  const steps=visualSteps[title];
  if(!steps)return '';
- return `<figure class="concept-figure"><figcaption>Visual example · ${escapeHTML(title)}</figcaption><ol class="concept-flow">${steps.map(s=>`<li>${escapeHTML(s)}</li>`).join('')}</ol></figure>`;
+ return `<figure class="concept-figure"><figcaption>Visual example · ${escapeHTML(title)}</figcaption>${conceptGraphic(title)}<ol class="concept-flow">${steps.map(s=>`<li>${escapeHTML(s)}</li>`).join('')}</ol></figure>`;
 }

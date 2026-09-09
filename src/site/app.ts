@@ -1,3 +1,4 @@
+import { descentGraphic, barsGraphic, attentionGraphic, policyGraphic } from './graphics.ts';
 import { createProgressBackup, validateProgressBackup, restoreProgressBackup } from "./progress-backup.ts";
 import { renderCoach, confidenceFeedback } from "./study-coach.ts";
 import { mountPrimer } from "./concept-primer.ts";
@@ -421,12 +422,7 @@ function drawVisual() {
       x = (1 - v) * x;
       xs.push(x);
     }
-    const scale = Math.max(2, ...xs.map(Math.abs));
-    const pts = xs
-      .map((y, i) => `${20 + i * 30},${110 - (y / scale) * 90}`)
-      .join(" ");
-    $("visual").innerHTML =
-      `<svg viewBox="0 0 580 220" role="img" aria-label="Parameter trajectory for gradient descent on x squared over two"><line x1="15" y1="110" x2="565" y2="110" stroke="#526e58"/><polyline fill="none" stroke="#c4ed9a" stroke-width="3" points="${pts}"/><text x="20" y="210" fill="#aebcae" font-size="12">step 0 → 18 · vertical range ±${scale.toFixed(2)}</text></svg>`;
+    $("visual").innerHTML = descentGraphic(v);
     $("visual-explanation").textContent =
       `For L(x)=x²/2, x_next=(1−learning_rate)x. Final x=${x.toFixed(4)}. Converges for 0<rate<2, oscillates without decay at 2, diverges above 2. This toy curvature does not specify an LLM learning rate.`;
   } else {
@@ -437,6 +433,9 @@ function drawVisual() {
     $("visual-explanation").textContent =
       "A earns 3; B earns 1. J=3p+1(1−p). With p=sigmoid(z), dJ/dz=2p(1−p). Higher expected reward does not always mean a larger gradient. Compare this exact value with a sampled estimator in the lab.";
   }
+  if(kind === 'softmax')$("visual").insertAdjacentHTML('afterbegin', barsGraphic(softmax([2,1,0],v),['A','B','C'],'Next-token probabilities'));
+  if(kind === 'attention')$("visual").insertAdjacentHTML('afterbegin', attentionGraphic(8,v,$("causal").checked));
+  if(kind === 'bandit')$("visual").insertAdjacentHTML('afterbegin', policyGraphic(v));
 }
 $("visual-choice").onchange = visualControls;
 tab("learn");

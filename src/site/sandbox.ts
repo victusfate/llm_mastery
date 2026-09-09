@@ -1,3 +1,4 @@
+import { descentGraphic, networkGraphic, barsGraphic, attentionGraphic, corpusGraphic, workersGraphic, maskGraphic, computationGraphic, policyGraphic } from './graphics.ts';
 import { softmax } from "./engine.ts";
 export function mountSandbox(root, kind) {
   const controls = document.createElement("div"),
@@ -128,8 +129,8 @@ export function mountSandbox(root, kind) {
         x *= 1 - a();
         xs.push(x);
       }
-      const limit = Math.max(2, ...xs.map(Math.abs));
-      view.innerHTML = `<svg viewBox="0 0 580 220" role="img" aria-label="Gradient descent trajectory"><line x1="15" y1="110" x2="565" y2="110" stroke="#526e58"/><polyline fill="none" stroke="#c4ed9a" stroke-width="3" points="${xs.map((v, i) => `${20 + i * 30},${110 - (v / limit) * 90}`).join(" ")}"/><text x="20" y="210" fill="#aebcae">18 steps · vertical range ±${limit.toFixed(2)}</text></svg>`;
+
+      view.innerHTML = descentGraphic(a());
       explanation.textContent = `L(x)=x²/2 gives x_next=(1−rate)x. Final x=${x.toFixed(4)}. This quadratic converges for 0<rate<2; its threshold is not a general neural-network recipe.`;
     } else if (kind === "bandit") {
       view.innerHTML =
@@ -185,6 +186,19 @@ export function mountSandbox(root, kind) {
       explanation.textContent =
         "There are 100 evaluation prompts; correct plus invalid never exceeds 100 in these controls. Dropping invalid responses changes the denominator and can inflate a headline score without improving any answer.";
     }
+    const graphics:Record<string,()=>string> = {
+      graph: () => networkGraphic() + computationGraphic(),
+      shapes: () => networkGraphic(b()),
+      softmax: () => barsGraphic(softmax([2,1,0],a()),['A','B','C'],'Next-token probabilities'),
+      attention: () => attentionGraphic(a()),
+      gradient: () => computationGraphic() + barsGraphic([(a()-1)/b(),(1-a())/b()],['Correct','Other'],'Signed logit gradient contributions'),
+      bandit: () => policyGraphic(a()),
+      curation: () => corpusGraphic([1000,1000*(1-a()/100),1000*(1-a()/100)*(1-b()/100)]),
+      batch: () => workersGraphic(a(),b()),
+      mask: () => maskGraphic(a(),b()),
+      evaluation: () => barsGraphic([a(),100-a()-b(),b()],['Correct','Incorrect','Invalid'],'100 evaluation responses'),
+    };
+    if(graphics[kind])view.insertAdjacentHTML('afterbegin',graphics[kind]());
   }
   draw();
 }
