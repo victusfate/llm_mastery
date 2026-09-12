@@ -29,6 +29,62 @@ test('reverse-mode autograd matches finite differences, including reused variabl
  assert.throws(()=>z.backpropagate(z.parseExpression('a+q'),{a:1}),/No value supplied/);
 });
 
+test('the composed Value graph matches the expression engine and the exercise it mirrors',()=>{
+ // The same formula built two ways must agree in value and in every gradient.
+ const a=z.value(1.5,'a'),b=z.value(-2,'b'),c=z.value(0.5,'c');
+ const composed=a.mul(b).add(c).mul(a.tanh());
+ composed.backward();
+ const parsed=z.backpropagate(z.parseExpression('(a*b + c) * tanh(a)'),{a:1.5,b:-2,c:0.5});
+ assert.ok(Math.abs(composed.data-parsed.value)<1e-12);
+ for(const [name,node] of [['a',a],['b',b],['c',c]] as const)
+  assert.ok(Math.abs(node.grad-parsed.grads[name])<1e-12,`${name}: ${node.grad} vs ${parsed.grads[name]}`);
+
+ // Gradient accumulates at a fan-out, and backward twice doubles it until the
+ // graph is cleared — the behaviour a training loop has to handle.
+ const x=z.value(3,'x');
+ x.mul(x).backward();
+ assert.equal(x.grad,6);
+ const y=z.value(3,'y'),loss=y.mul(y);
+ loss.backward();
+ loss.backward();
+ assert.equal(y.grad,12);
+ loss.zeroGrad().backward();
+ assert.equal(y.grad,6);
+
+ // Every operation checks against central differences through the helper the
+ // guide asks learners to write.
+ for(const build of [
+  ([p,q]:z.Value[])=>p.mul(q).add(p.tanh()).relu().add(q.exp()),
+  ([p,q]:z.Value[])=>p.sub(q).div(p.pow(2).add(3)).sigmoid(),
+  ([p,q]:z.Value[])=>p.neg().mul(q).add(z.sumValues([p,q,1])).log(),
+ ]){
+  const check=z.checkValueGradients(build,[0.7,1.3]);
+  assert.ok(check.maxError<1e-6,`${check.maxError}: ${check.analytic} vs ${check.numeric}`);
+ }
+
+ // Composed graphs draw with the same figure the typed-expression panel uses.
+ const trace=z.valueTrace(composed);
+ assert.equal(trace.value,composed.data);
+ assert.deepEqual(Object.keys(trace.grads).sort(),['a','b','c']);
+ assert.ok(trace.nodes.every(node=>node.inputs.every(input=>input<node.id)),'children come before their consumers');
+});
+
+test('a composed network trains, and skipping zeroGrad visibly breaks it',()=>{
+ const examples=[{inputs:[2,3],target:1},{inputs:[3,-1],target:-1},{inputs:[0.5,1],target:-1},{inputs:[1,1],target:1}];
+ const network=new z.Network([2,4,4,1],3);
+ assert.equal(network.parameters().length,37);
+ const fit=z.fitNetwork(network,examples,{steps:150,learningRate:0.06});
+ assert.ok(fit.finalLoss<0.01,`did not overfit four examples: ${fit.finalLoss}`);
+ fit.predictions.forEach((prediction,i)=>assert.ok(Math.sign(prediction)===Math.sign(examples[i].target)));
+ // Leaving gradients from previous steps in place is the classic bug; it must
+ // be reproducible here so the lesson can point at a number.
+ const stale=z.fitNetwork(new z.Network([2,4,4,1],3),examples,{steps:150,learningRate:0.06,clearGradients:false});
+ assert.ok(stale.finalLoss>fit.finalLoss*10,`${stale.finalLoss} vs ${fit.finalLoss}`);
+ // Determinism: the seed fixes the run, so a lesson can quote the loss.
+ assert.equal(z.fitNetwork(new z.Network([2,4,4,1],3),examples,{steps:20}).finalLoss,
+              z.fitNetwork(new z.Network([2,4,4,1],3),examples,{steps:20}).finalLoss);
+});
+
 test('the bigram model is a distribution, beats uniform, and smoothing costs training loss',()=>{
  const model=z.trainBigram(NAMES);
  for(const row of model.probabilities){

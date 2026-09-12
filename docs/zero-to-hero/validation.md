@@ -7,7 +7,7 @@ Recorded September 12, 2026, on Node v22.22.2 in a Linux container. The reposito
 | Command | Result |
 | --- | --- |
 | `npx tsc --noEmit` | Passed with no output. One real defect was caught and fixed: the track page reused the element id `lecture-status`, which already belonged to the module lecture player |
-| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 30 tests passed, 0 failed (15 pre-existing, 15 new) |
+| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 32 tests passed, 0 failed (15 pre-existing, 17 new) |
 | `node scripts/check-docs.ts` | Checked every public Markdown document; all local links resolve |
 | `npm run build` | Static course built into `dist/`, including `site/zero-to-hero.html` and the bundled `z2h-*.mjs` modules and worker |
 | `node tests/zero-to-hero.browser.ts` | Passed: 9 lecture pages, slider extremes, worker samples, timeout recovery, notes, mobile layout |
@@ -20,7 +20,8 @@ Browser tests were run with a locally installed Playwright pointed at the contai
 
 These are the checks that would fail if a lesson's claims stopped being true:
 
-- **Autograd**: six expressions differentiated and compared against central differences; `d(a·a)/da = 6` and `d(a·a·a)/da = 27` at `a = 3`, confirming gradient accumulation at a fan-out; one node per variable; parser errors raised for malformed input.
+- **Autograd, typed expressions**: six expressions differentiated and compared against central differences; `d(a·a)/da = 6` and `d(a·a·a)/da = 27` at `a = 3`, confirming gradient accumulation at a fan-out; one node per variable; parser errors raised for malformed input.
+- **Autograd, composed graphs**: the `Value` form agrees with the expression form to `1e-12` in value and in every gradient on the same formula; backward twice doubles the gradient and `zeroGrad` restores it; three composed functions check against central differences to better than `1e-6`; a `[2, 4, 4, 1]` network with 37 parameters overfits four examples to a loss below `0.01`, and the same run with gradient clearing disabled ends more than ten times worse.
 - **Bigram model**: every row sums to 1; the model's loss (about 1.95 nats per bigram on our 125-word list) is below the uniform baseline `log 27 ≈ 3.30`; smoothing raises training loss; sampling is seeded and reproducible.
 - **Character MLP**: the smoothed minibatch loss falls by more than 0.3 nats over 300 steps; the parameter count matches a hand-derived formula; two runs with one seed produce identical losses.
 - **Initialisation diagnostics**: gain 3 saturates more than 25% of activations in layer 5; gain 0.3 collapses the activation standard deviation to below a fifth of layer 1's; batch normalisation cuts saturation by more than a factor of four; every histogram sums to 1.

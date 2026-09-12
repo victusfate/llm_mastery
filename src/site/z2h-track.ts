@@ -64,19 +64,29 @@ export const lectures: Lecture[] = [
     ],
     sample: {
       description:
-        "Differentiate an expression by hand, then let the workbench's reverse pass and a central difference disagree with you or confirm you.",
-      code: `const expression = z2h.parseExpression("(a*b + c) * tanh(a)");
-const variables = { a: 1.5, b: -2, c: 0.5 };
-const trace = z2h.backpropagate(expression, variables);
-print("value", trace.value);
-for (const name of Object.keys(variables)) {
-  const numeric = z2h.numericGradient(expression, variables, name);
-  print(name, "backward", trace.grads[name], "numeric", numeric,
-        "gap", Math.abs(trace.grads[name] - numeric));
-}
-// A variable used twice accumulates from both paths. Predict the gradient of a
-// in "a*a + a" before running it.
-return trace.grads;`,
+        "Compose a graph the way the exercise does, call backward, and check every gradient against a central difference. JavaScript has no operator overloading, so a * b + c is written a.mul(b).add(c) — the mechanism is the one you will write in Python.",
+      code: `const a = z2h.value(1.5, "a"), b = z2h.value(-2, "b"), c = z2h.value(0.5, "c");
+const loss = a.mul(b).add(c).mul(a.tanh());   // (a*b + c) * tanh(a)
+loss.backward();
+print("value", loss.data, "grads", { a: a.grad, b: b.grad, c: c.grad });
+
+// The same formula through the typed-expression engine, as a second opinion.
+print("expression engine", z2h.backpropagate(z2h.parseExpression("(a*b + c) * tanh(a)"),
+                                             { a: 1.5, b: -2, c: 0.5 }).grads);
+
+// Every operation against central differences, the check your version needs.
+const check = z2h.checkValueGradients(([p, q]) => p.mul(q).add(p.tanh()).relu(), [0.7, -1.3]);
+print("largest analytic vs numeric gap", check.maxError);
+
+// Four examples, one small network, trained by plain gradient descent.
+const fit = z2h.fitNetwork(new z2h.Network([2, 4, 4, 1], 3), [
+  { inputs: [2, 3], target: 1 }, { inputs: [3, -1], target: -1 },
+  { inputs: [0.5, 1], target: -1 }, { inputs: [1, 1], target: 1 },
+], { steps: 150, learningRate: 0.06 });
+print("loss", fit.lossHistory[0], "->", fit.finalLoss, "predictions", fit.predictions);
+
+// Now pass clearGradients: false and explain the number you get.
+return z2h.valueTrace(loss).nodes.map(n => [n.label || n.op, n.value, n.grad]);`,
     },
   },
   {

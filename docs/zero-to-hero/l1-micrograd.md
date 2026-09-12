@@ -83,6 +83,17 @@ Open the [interactive panel](../../site/zero-to-hero.html?lecture=l1) and:
 - Type an expression with a division and set the denominator near zero. Note that the backward pass produces enormous numbers rather than an error — nothing in autograd protects you from a badly conditioned forward pass.
 - Read the node table: the `gradient` column is exactly what your `backward()` should produce for the same expression.
 
+### Cross-check your Python against the runnable sample
+
+The sample below the panel exposes the same engine in the composed form you are
+writing: `z2h.value(1.5, "a")` creates a leaf, operations are methods because
+JavaScript has no operator overloading (`a.mul(b).add(c)` for `a * b + c`),
+`loss.backward()` walks the graph in reverse, and `zeroGrad()` clears it.
+`z2h.checkValueGradients(build, inputs)` runs the finite-difference comparison
+for you, and `z2h.fitNetwork` trains a small network on four examples so you can
+see what a working loop reaches. Use it as a second opinion when your Python
+disagrees with your expectation — never as a substitute for writing your own.
+
 ## Common failures and what they look like
 
 | Symptom | Likely cause |
