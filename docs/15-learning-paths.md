@@ -22,6 +22,8 @@ Move forward when you can explain and use the idea. When a check fails, use the 
 | Developer with basic ML | Foundations walkthrough and [placement](../assessments/00-placement.md) | Skip only skills demonstrated independently; spend more time on unfamiliar training topics |
 | Experienced ML engineer | Diagnostic and weak-area review | Optional [24-week intensive plan](00-personalized-bootcamp.md); accelerate only with evidence |
 
+Whichever route you take, the [Zero to Hero companion track](18-zero-to-hero.md) is the recommended way to earn implementation fluency during modules 1 and 2. It needs no GPU for the first eight lectures.
+
 The curriculum describes scope, not a universal completion time. At 5, 10, or 20 hours per week, plan a longer calendar than the intensive route. Reforecast after the first few completed labs; do not multiply reading speed into a mastery estimate.
 
 ## Hardware and cost

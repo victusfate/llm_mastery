@@ -4,6 +4,8 @@
 
 The sequence is foundations → transformer → pretraining → systems → scaling/evaluation → SFT → RL → preferences/RLHF → reasoning RL → research. Evaluation begins during pretraining and is deepened later. Do not wait until the evaluation module to create held-out data.
 
+Weeks 1 to 6 pair well with the [Zero to Hero companion track](18-zero-to-hero.md): lectures 1 to 6 during foundations, lectures 7 and 8 during the transformer module, and lecture 9 as preparation for pretraining and systems. The lectures build fluency; the weekly deliverables below remain the assessed work.
+
 ## Full 40-week route
 
 | Week | Main work | Weekly deliverable |

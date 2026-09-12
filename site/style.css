@@ -826,3 +826,54 @@ html {
   .mechanism-graphic { forced-color-adjust: none; }
   .diagram-scroll:focus-visible, .heatmap-scroll:focus-visible { outline-color: Highlight; }
 }
+
+/* Zero to Hero companion track */
+#lecture-navigation a {
+  padding: 11px 12px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  text-decoration: none;
+}
+#lecture-navigation a[aria-current="page"] {
+  background: #2b3d2c;
+  border-color: #789064;
+}
+#lecture-links {
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.widget-controls {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  align-items: end;
+  margin: 18px 0 24px;
+}
+.widget-controls textarea {
+  margin: 6px 0 0;
+}
+.widget-controls output {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.code-editor {
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #0c170f;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+#sample-output {
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 60px;
+  max-height: 340px;
+  white-space: pre-wrap;
+  border: 1px solid var(--border);
+}
+#sample-output:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}

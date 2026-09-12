@@ -10,8 +10,8 @@
     "build": "node scripts/build.ts",
     "dev": "node scripts/dev.ts",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/engine.test.ts tests/content.test.ts",
-    "test:browser": "node tests/browser-smoke.ts && node tests/reader-browser.ts && node tests/learning-loop.browser.ts && node tests/persistence.browser.ts && node tests/visuals.browser.ts && node tests/visual-design.browser.ts",
+    "test": "node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts",
+    "test:browser": "node tests/browser-smoke.ts && node tests/reader-browser.ts && node tests/learning-loop.browser.ts && node tests/persistence.browser.ts && node tests/visuals.browser.ts && node tests/visual-design.browser.ts && node tests/zero-to-hero.browser.ts",
     "check:docs": "node scripts/check-docs.ts",
     "check": "npm run typecheck && npm test && npm run check:docs && npm run build",
     "deploy:cloudflare": "npm run check && wrangler pages deploy dist --project-name llm-mastery --branch main"

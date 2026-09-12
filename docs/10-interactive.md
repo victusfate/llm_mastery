@@ -31,6 +31,14 @@ The workbench uses browser-native HTML, CSS, and JavaScript with no package inst
 
 This is a chosen instructional workflow, not a claim to have measured an optimal learning rate. Shorten passive material when implementation or recall exposes a gap.
 
+## Zero to Hero companion pages
+
+`site/zero-to-hero.html` holds nine lecture pages for the [companion track](18-zero-to-hero.md). Each page carries a study guide, an opt-in video link, a panel whose numbers are computed in your browser, and an editable code sample.
+
+The panels compute rather than illustrate: a scalar autograd trace with a finite-difference comparison, a bigram count matrix and its loss against the uniform baseline, a character MLP that trains in the tab, activation and gradient statistics across initialisation scales, a gradient check under deliberately broken backward rules, hierarchical versus flat parameter scaling, a real attention head with a causal-invariance readout, byte-pair merges on text you supply, and parameter and compute accounting for a GPT-2 sized run.
+
+The code samples run in a Web Worker with a five-second limit, so an accidental infinite loop terminates a worker instead of freezing the page. Samples have no network or storage access, and edits persist for the browser session only; notes are saved like other course notes and are included in progress exports. Nothing is sent anywhere.
+
 ## Review and retention
 
 Correct unaided answers move a concept through 1-, 3-, 7-, and 14-day review intervals. Early repeated successes do not advance the interval. Wrong or assisted attempts schedule another review after ten minutes. These intervals are a transparent heuristic; revise them based on delayed recall and transfer performance.

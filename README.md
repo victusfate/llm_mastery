@@ -24,8 +24,9 @@ Visit **http://127.0.0.1:8765/site/** for 35 narrated submodules, 52 dedicated l
 1. Read the [starting instructions](START_HERE.md).
 2. Complete the [placement diagnostic](assessments/00-placement.md) before choosing a route.
 3. Follow the [24-week bootcamp](docs/00-personalized-bootcamp.md), or the [fuller curriculum](docs/02-curriculum.md), using the linked module guides.
-4. Use the [tutoring protocol](docs/03-working-together.md) at each session.
-5. Track evidence using the [mastery rubric](assessments/01-mastery.md) and [progress tracker](progress/README.md).
+4. Work the [Zero to Hero companion track](docs/18-zero-to-hero.md) alongside modules 1 and 2 for mechanical fluency: nine linked lectures, our own exercises, and checks that fail loudly.
+5. Use the [tutoring protocol](docs/03-working-together.md) at each session.
+6. Track evidence using the [mastery rubric](assessments/01-mastery.md) and [progress tracker](progress/README.md).
 
 ## What you will build
 
@@ -45,6 +46,7 @@ The initial release includes a working learning interface, course instructions, 
 | --- | --- |
 | [24-week bootcamp](docs/00-personalized-bootcamp.md) | Primary experienced-engineer route |
 | [Interactive workbench](docs/10-interactive.md) | Lessons, visuals, quizzes, learning records |
+| [Zero to Hero companion](docs/18-zero-to-hero.md) | Study track for Andrej Karpathy's free lecture series, with interactive panels and runnable samples |
 | [Home hardware](docs/09-home-lab.md) | Personal hardware settings, CPU/GPU routes, and measured memory limits |
 | [Open-source lane](docs/08-open-source.md) | Current contribution candidates and first-ten-day plan |
 | [Timeline](docs/01-timeline.md) | Prerequisites, minimum plausible routes, hours, reforecasting |
