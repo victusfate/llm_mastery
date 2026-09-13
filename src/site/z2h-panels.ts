@@ -7,8 +7,9 @@
 
 import { escapeHTML as esc } from "./engine.ts";
 import { barsGraphic } from "./graphics.ts";
-import { metrics, table, fixed, compact } from "./z2h-readout.ts";
+import { metrics, table, fixed, compact } from "./readout.ts";
 import * as z from "./z2h-numerics.ts";
+import { SAMPLES_PER_RUN } from "./z2h-char-models.ts";
 import { NAMES, TOKENIZER_SAMPLE, ATTENTION_SENTENCE } from "./z2h-data.ts";
 import { traceGraphic, matrixGraphic, scatterGraphic, histogramGraphic, seriesGraphic, treeGraphic, tokenRibbonGraphic } from "./z2h-visuals.ts";
 
@@ -104,7 +105,7 @@ export const panels: Record<PanelKind, Panel> = {
       const labels = model.characters.slice(0, shown);
       const counts = model.counts.slice(0, shown).map((row) => row.slice(0, shown));
       const random = z.rng(number(values, "seed"));
-      const samples = Array.from({ length: 6 }, () => z.sampleBigram(model, random)).filter(Boolean);
+      const samples = Array.from({ length: SAMPLES_PER_RUN }, () => z.sampleBigram(model, random)).filter(Boolean);
       const uniform = z.uniformLoss(model.characters.length);
       return {
         figures:
@@ -322,13 +323,9 @@ export const panels: Record<PanelKind, Panel> = {
     ],
     render(values) {
       const tokens = ATTENTION_SENTENCE.slice(0, number(values, "length"));
-      const result = z.selfAttention({
-        tokens,
-        causal: Boolean(values.causal),
-        temperature: number(values, "temperature"),
-        headDim: 8,
-      });
-      const drift = result.earlierPositionDrift;
+      const attention = { tokens, causal: Boolean(values.causal), temperature: number(values, "temperature"), headDim: 8 };
+      const result = z.selfAttention(attention);
+      const drift = z.causalDrift(attention);
       return {
         figures:
           matrixGraphic(result.weights, {

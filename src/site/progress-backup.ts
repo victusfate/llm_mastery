@@ -1,7 +1,9 @@
 import { validateState, type Progress } from './engine.ts';
+// Track notes are keyed <prefix><lecture id>; the page builds the same key.
+export const ZERO_TO_HERO_NOTE_PREFIX='llm-training-zero-to-hero-';
 const mainKey='llm-training-lab-v1';
 export function isLearningDataKey(key:string):boolean {
- return key==='llm-mastery-hardware-v1'||/^llm-training-(?:lab-evidence|submodule)-\d{2}-\d{2}$/.test(key)||/^llm-training-zero-to-hero-l\d{1,2}$/.test(key);
+ return key==='llm-mastery-hardware-v1'||/^llm-training-(?:lab-evidence|submodule)-\d{2}-\d{2}$/.test(key)||new RegExp(`^${ZERO_TO_HERO_NOTE_PREFIX}l\\d{1,2}$`).test(key);
 }
 export function createProgressBackup(state:Progress,storage:Storage) {
  const browserData:Record<string,string>={};

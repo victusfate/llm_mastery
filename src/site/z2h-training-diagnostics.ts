@@ -3,7 +3,6 @@
 // can be asserted in a test. Import from ./z2h-numerics.ts, which re-exports the
 // whole set as one API.
 
-import { softmax } from "./engine.ts";
 import { gaussian, rng } from "./z2h-random.ts";
 import { denseForward, denseBackward, denseLoss, meanCrossEntropyRules, type BackwardRules, type DenseWeights } from "./z2h-dense-layer.ts";
 
@@ -163,15 +162,18 @@ export function gradientCheck(rule: GradientRule = "correct", seed = 7, toleranc
     ...meanCrossEntropyRules(weights, batch),
     ...(rule === "no-batch-mean" ? { scale: 1 } : {}),
     ...(rule === "no-onehot" ? { logitGradient: (probability: number) => probability } : {}),
-    // The transposed rule indexes the forward orientation on the backward path,
-    // a mistake that only shows up in the earlier layer.
+    // The "wrong orientation" rule swaps the hidden and class indices reading w2
+    // on the backward path — the classic transpose bug. The modulo only keeps the
+    // swapped indices inside w2's [hidden][classes] shape; the corruption is that
+    // dHidden is now wrong, so W1/b1 fail while W2/b2, which never read a hidden
+    // weight, still pass the check.
     ...(rule === "transposed-hidden"
-      ? { hiddenWeight: (j: number, k: number) => w2[(k * hidden + j) % hidden][j % classes] }
+      ? { hiddenWeight: (j: number, k: number) => w2[k % hidden][j % classes] }
       : {}),
   };
 
   const { gradW1, gradB1, gradW2, gradB2 } =
-    denseBackward(x, forward().pass, labels, weights, rules);
+    denseBackward(forward().pass, labels, weights, rules);
 
   const numeric = (set: (delta: number) => void) => {
     const step = 1e-5;

@@ -26,7 +26,7 @@ for (const causal of [true, false]) {
   const head = z2h.selfAttention({ tokens, causal });
   print(causal ? "causal " : "no mask",
         "| row sums", head.rowSums.map(s => s.toFixed(6)).join(" "),
-        "| drift in earlier outputs", head.earlierPositionDrift);
+        "| drift in earlier outputs", z2h.causalDrift({ tokens, causal }));
 }
 // Zero is the assertion. Any other number is the future leaking backwards.
 ```

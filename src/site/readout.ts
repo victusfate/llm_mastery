@@ -1,4 +1,4 @@
-// Readout markup shared by every panel on the site.
+// Readout helpers shared across the site.
 //
 // The metric tile and the scrollable table are the two shapes a panel uses to
 // put exact numbers beside a figure. They live here so the Zero to Hero panels,
@@ -29,4 +29,11 @@ export function compact(value: number): string {
   for (const [size, suffix] of SCALES)
     if (Math.abs(value) >= size) return `${(value / size).toFixed(size === 1e3 ? 1 : 2)}${suffix}`;
   return value.toFixed(0);
+}
+
+/** A number for a diagram label: exponential at the extremes, else `digits` decimals. */
+export function labelNumber(value: number, digits = 3): string {
+  if (!Number.isFinite(value)) return "∞";
+  if (Math.abs(value) >= 1000 || (Math.abs(value) < 0.001 && value !== 0)) return value.toExponential(1);
+  return Number(value.toFixed(digits)).toString();
 }

@@ -32,7 +32,7 @@ export interface Lecture {
   /** Guide filename inside docs/zero-to-hero/. */
   guide: string;
   /** Course modules this lecture feeds, by index into content.ts modules. */
-  courseModules: { module: number; why: string }[];
+  courseModules: { moduleIndex: number; why: string }[];
   labs: string[];
   links: TrackLink[];
   sample: { description: string; code: string };
@@ -56,7 +56,7 @@ export const lectures: Lecture[] = [
       "Write a scalar autograd engine from nothing, and prove its gradients against finite differences instead of trusting a falling loss.",
     panel: "autograd",
     guide: "l1-micrograd.md",
-    courseModules: [{ module: 0, why: "Autograd, loss, and the verified training loop are module 1's entire subject." }],
+    courseModules: [{ moduleIndex: 0, why: "Autograd, loss, and the verified training loop are module 1's entire subject." }],
     labs: ["01-01", "01-02"],
     links: [
       { label: "micrograd repository", url: "https://github.com/karpathy/micrograd", note: "MIT licensed" },
@@ -102,8 +102,8 @@ return z2h.valueTrace(loss).nodes.map(n => [n.label || n.op, n.value, n.grad]);`
     panel: "bigram",
     guide: "l2-bigram.md",
     courseModules: [
-      { module: 0, why: "Cross-entropy, sampling, and a baseline you can beat are the foundations module's tools." },
-      { module: 1, why: "The same objective scales up to the decoder you build in module 2." },
+      { moduleIndex: 0, why: "Cross-entropy, sampling, and a baseline you can beat are the foundations module's tools." },
+      { moduleIndex: 1, why: "The same objective scales up to the decoder you build in module 2." },
     ],
     labs: ["01-01", "02-04"],
     links: [
@@ -134,8 +134,8 @@ return z2h.trainBigram(data.NAMES, 5).loss - model.loss;`,
     panel: "mlp",
     guide: "l3-mlp.md",
     courseModules: [
-      { module: 0, why: "Learning-rate search, over- and underfitting, and split discipline belong to module 1." },
-      { module: 4, why: "Honest held-out reporting is the habit module 5 formalises." },
+      { moduleIndex: 0, why: "Learning-rate search, over- and underfitting, and split discipline belong to module 1." },
+      { moduleIndex: 4, why: "Honest held-out reporting is the habit module 5 formalises." },
     ],
     labs: ["01-02", "01-04"],
     links: [
@@ -167,8 +167,8 @@ return "compare the two columns, not the loss curve";`,
     panel: "activations",
     guide: "l4-activations.md",
     courseModules: [
-      { module: 0, why: "Diagnosing a failing training run is module 1's failure-diagnosis lab." },
-      { module: 1, why: "Norm placement in a decoder block is a module 2 decision." },
+      { moduleIndex: 0, why: "Diagnosing a failing training run is module 1's failure-diagnosis lab." },
+      { moduleIndex: 1, why: "Norm placement in a decoder block is a module 2 decision." },
     ],
     labs: ["01-04", "02-03"],
     links: [
@@ -203,8 +203,8 @@ return normalised.layers.map(l => l.activationStd);`,
     panel: "gradcheck",
     guide: "l5-backprop.md",
     courseModules: [
-      { module: 0, why: "Gradient verification is the first foundations lab and the habit everything later depends on." },
-      { module: 3, why: "Custom kernels in module 4 need a hand-derived backward pass and a check for it." },
+      { moduleIndex: 0, why: "Gradient verification is the first foundations lab and the habit everything later depends on." },
+      { moduleIndex: 3, why: "Custom kernels in module 4 need a hand-derived backward pass and a check for it." },
     ],
     labs: ["01-01", "04-03"],
     links: [
@@ -236,8 +236,8 @@ return z2h.gradientCheck("transposed-hidden").entries;`,
     panel: "hierarchy",
     guide: "l6-wavenet.md",
     courseModules: [
-      { module: 0, why: "Convolution and shape discipline are covered by the foundations convolution lab." },
-      { module: 1, why: "Module 2 asks you to keep every shape in a decoder explicit." },
+      { moduleIndex: 0, why: "Convolution and shape discipline are covered by the foundations convolution lab." },
+      { moduleIndex: 1, why: "Module 2 asks you to keep every shape in a decoder explicit." },
     ],
     labs: ["01-03", "02-02"],
     links: [
@@ -270,8 +270,8 @@ return crossover;`,
     panel: "attention",
     guide: "l7-gpt.md",
     courseModules: [
-      { module: 1, why: "This is module 2's build: a causal decoder with an attention-parity test." },
-      { module: 2, why: "Module 3 pretrains the architecture you build here." },
+      { moduleIndex: 1, why: "This is module 2's build: a causal decoder with an attention-parity test." },
+      { moduleIndex: 2, why: "Module 3 pretrains the architecture you build here." },
     ],
     labs: ["02-02", "02-03", "02-04"],
     links: [
@@ -287,7 +287,7 @@ for (const causal of [true, false]) {
   const head = z2h.selfAttention({ tokens, causal, headDim: 8 });
   print(causal ? "causal " : "no mask",
         "row sums", head.rowSums.map(s => s.toFixed(6)).join(" "),
-        "drift in earlier outputs", head.earlierPositionDrift.toExponential(2));
+        "drift in earlier outputs", z2h.causalDrift({ tokens, causal }).toExponential(2));
 }
 // The causal drift must be exactly zero. That assertion belongs in your test
 // suite before you train anything.
@@ -306,8 +306,8 @@ return z2h.selfAttention({ tokens, causal: true }).weights;`,
     panel: "tokenizer",
     guide: "l8-tokenizer.md",
     courseModules: [
-      { module: 1, why: "Module 2's first lab is a reversible tokenizer with a small BPE vocabulary." },
-      { module: 2, why: "Tokenisation decisions change the token budget you account for in module 3." },
+      { moduleIndex: 1, why: "Module 2's first lab is a reversible tokenizer with a small BPE vocabulary." },
+      { moduleIndex: 2, why: "Tokenisation decisions change the token budget you account for in module 3." },
     ],
     labs: ["02-01"],
     links: [
@@ -341,9 +341,9 @@ return model.merges.slice(0, 8);`,
     panel: "budget",
     guide: "l9-gpt2.md",
     courseModules: [
-      { module: 2, why: "Module 3 runs a matched-budget pretraining study with checkpointing." },
-      { module: 3, why: "Module 4 measures throughput, memory, and distributed behaviour." },
-      { module: 4, why: "Module 5 turns budgets into scaling and evaluation decisions." },
+      { moduleIndex: 2, why: "Module 3 runs a matched-budget pretraining study with checkpointing." },
+      { moduleIndex: 3, why: "Module 4 measures throughput, memory, and distributed behaviour." },
+      { moduleIndex: 4, why: "Module 5 turns budgets into scaling and evaluation decisions." },
     ],
     labs: ["03-05", "03-06", "04-01", "05-01"],
     links: [

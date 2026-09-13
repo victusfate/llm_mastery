@@ -16,7 +16,7 @@ const TIMEOUT = 5000;
  * One worker per run, terminated on completion or timeout, so a snippet that
  * never returns costs a worker rather than the page.
  */
-function runInWorker(code: string, timeout = TIMEOUT): Promise<SandboxResponse> {
+function runInWorker(code: string): Promise<SandboxResponse> {
   return new Promise((resolve) => {
     let worker: Worker;
     try {
@@ -31,8 +31,8 @@ function runInWorker(code: string, timeout = TIMEOUT): Promise<SandboxResponse> 
       resolve(response);
     };
     const timer = setTimeout(
-      () => finish({ ok: false, lines: [], error: `Stopped after ${timeout / 1000} seconds. Reduce the work, or check for a loop that never ends.` }),
-      timeout,
+      () => finish({ ok: false, lines: [], error: `Stopped after ${TIMEOUT / 1000} seconds. Reduce the work, or check for a loop that never ends.` }),
+      TIMEOUT,
     );
     worker.onmessage = (event: MessageEvent<SandboxResponse>) => finish(event.data);
     worker.onerror = (event) => finish({ ok: false, lines: [], error: event.message || "The sandbox worker failed to load." });

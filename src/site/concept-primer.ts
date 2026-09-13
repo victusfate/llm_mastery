@@ -6,7 +6,7 @@ export function definition(concept:Concept):string {
  return concept.body.split('### What it means\n')[1]?.split('\n### ')[0].trim() || concept.title;
 }
 export function resourcesHTML(module:string):string {
- return `<h3>Go deeper</h3><ul>${deeperResources(module).map(r=>`<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)} ↗</a><p>${esc(r.purpose)}</p></li>`).join('')}</ul>`;
+ return `<h3>Go deeper</h3><ul>${deeperResources(module).map(r=>`<li><a href="${esc(r.url)}"${r.internal?"":' target="_blank" rel="noopener"'}>${esc(r.title)}${r.internal?"":" ↗"}</a><p>${esc(r.purpose)}</p></li>`).join('')}</ul>`;
 }
 let guide:Promise<Concept[]>;
 export async function mountPrimer(root:HTMLElement,module:string) {

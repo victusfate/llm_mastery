@@ -9,7 +9,7 @@ import type { Trace, TraceNode } from "./z2h-autograd-expression.ts";
 // Lecture 1, second form — the same autograd as an object you compose
 
 //
-// The expression engine above parses text, which suits a panel where a learner
+// z2h-autograd-expression.ts parses text, which suits a panel where a learner
 // types a formula. The exercise itself is different: you build a graph by
 // composing objects, call backward on the result, and read each leaf's
 // gradient. This is that form, so a sample here can mirror the Python you are
@@ -18,34 +18,39 @@ import type { Trace, TraceNode } from "./z2h-autograd-expression.ts";
 
 /** One scalar in a graph: its value, its gradient, and how it was produced. */
 export class Value {
-  data: number;
   grad = 0;
-  label: string;
-  readonly children: Value[];
-  readonly op: string;
+  children: Value[] = [];
+  op = "input";
   /** Applies this node's local rules to its children's gradients. */
-  private readonly propagate: (self: Value) => void;
-  constructor(
-    data: number,
-    label = "",
-    children: Value[] = [],
-    op = "input",
-    propagate: (self: Value) => void = () => {},
-  ) {
+  private propagate: (self: Value) => void = () => {};
+
+  /** A leaf: a value the graph starts from. */
+  data: number;
+  label: string;
+  constructor(data: number, label = "") {
     this.data = data;
     this.label = label;
-    this.children = children;
-    this.op = op;
-    this.propagate = propagate;
+  }
+
+  /** A node computed from others, carrying the rule that sends gradient back. */
+  private static derived(data: number, children: Value[], op: string, propagate: (self: Value) => void): Value {
+    const node = new Value(data);
+    node.children = children;
+    node.op = op;
+    node.propagate = propagate;
+    return node;
   }
 
   static of(other: Value | number): Value {
-    return other instanceof Value ? other : new Value(other, String(other), [], "const");
+    if (other instanceof Value) return other;
+    const constant = new Value(other, String(other));
+    constant.op = "const";
+    return constant;
   }
 
   add(other: Value | number): Value {
     const right = Value.of(other);
-    return new Value(this.data + right.data, "", [this, right], "+", (self) => {
+    return Value.derived(this.data + right.data, [this, right], "+", (self) => {
       this.grad += self.grad;
       right.grad += self.grad;
     });
@@ -53,7 +58,7 @@ export class Value {
 
   mul(other: Value | number): Value {
     const right = Value.of(other);
-    return new Value(this.data * right.data, "", [this, right], "*", (self) => {
+    return Value.derived(this.data * right.data, [this, right], "*", (self) => {
       this.grad += self.grad * right.data;
       right.grad += self.grad * this.data;
     });
@@ -61,7 +66,7 @@ export class Value {
 
   /** Constant exponent only: the derivative in the exponent needs data > 0. */
   pow(exponent: number): Value {
-    return new Value(this.data ** exponent, "", [this], `^${exponent}`, (self) => {
+    return Value.derived(this.data ** exponent, [this], `^${exponent}`, (self) => {
       this.grad += self.grad * exponent * this.data ** (exponent - 1);
     });
   }
@@ -80,33 +85,33 @@ export class Value {
 
   tanh(): Value {
     const t = Math.tanh(this.data);
-    return new Value(t, "", [this], "tanh", (self) => {
+    return Value.derived(t, [this], "tanh", (self) => {
       this.grad += self.grad * (1 - t * t);
     });
   }
 
   exp(): Value {
     const e = Math.exp(this.data);
-    return new Value(e, "", [this], "exp", (self) => {
+    return Value.derived(e, [this], "exp", (self) => {
       this.grad += self.grad * e;
     });
   }
 
   log(): Value {
-    return new Value(Math.log(this.data), "", [this], "log", (self) => {
+    return Value.derived(Math.log(this.data), [this], "log", (self) => {
       this.grad += self.grad / this.data;
     });
   }
 
   relu(): Value {
-    return new Value(Math.max(0, this.data), "", [this], "relu", (self) => {
+    return Value.derived(Math.max(0, this.data), [this], "relu", (self) => {
       this.grad += this.data > 0 ? self.grad : 0;
     });
   }
 
   sigmoid(): Value {
     const s = 1 / (1 + Math.exp(-this.data));
-    return new Value(s, "", [this], "sigmoid", (self) => {
+    return Value.derived(s, [this], "sigmoid", (self) => {
       this.grad += self.grad * s * (1 - s);
     });
   }
@@ -147,7 +152,7 @@ export const value = (data: number, label = ""): Value => new Value(data, label)
 
 /** Sum a list without writing a fold at every call site. */
 export function sumValues(values: (Value | number)[]): Value {
-  return values.reduce<Value>((total, item) => total.add(item), new Value(0, "", [], "const"));
+  return values.reduce<Value>((total, item) => total.add(item), Value.of(0));
 }
 
 /** Render a composed graph with the same figure the expression panel uses. */

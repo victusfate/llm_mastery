@@ -7,6 +7,8 @@
   --muted: #aebcae;
   --accent: #c4ed9a;
   --gold: #e3c889;
+  --nav-current-bg: #2b3d2c;
+  --nav-current-border: #789064;
 }
 * {
   box-sizing: border-box;
@@ -172,8 +174,8 @@ nav button {
   padding: 10px;
 }
 nav button.active {
-  background: #2b3d2c;
-  border-color: #789064;
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
 }
 nav button span {
   color: var(--muted);
@@ -527,8 +529,8 @@ footer {
   text-decoration: none;
 }
 #lab-navigation a[aria-current="page"] {
-  background: #2b3d2c;
-  border-color: #789064;
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
 }
 audio {
   width: 100%;
@@ -694,8 +696,8 @@ audio {
   text-decoration: none;
 }
 #unit-navigation a[aria-current="page"] {
-  background: #2b3d2c;
-  border-color: #789064;
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
 }
 .complete-reference {
   margin-top: 30px;
@@ -836,8 +838,8 @@ html {
   text-decoration: none;
 }
 #lecture-navigation a[aria-current="page"] {
-  background: #2b3d2c;
-  border-color: #789064;
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
 }
 #lecture-links {
   padding-left: 20px;
@@ -883,6 +885,7 @@ html {
   line-height: 1.7;
   min-height: 46px;
   max-height: 340px;
+  overflow: auto;
   white-space: pre-wrap;
   border: 1px solid var(--border);
   margin-top: 14px;

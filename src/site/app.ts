@@ -18,7 +18,7 @@ import {
   makeQuestion,
 } from "./engine.ts";
 import { element as $ } from "./dom.ts";
-import { metrics } from "./z2h-readout.ts";
+import { metrics } from "./readout.ts";
 const KEY = "llm-training-lab-v1";
 const lecture = setupLecture();
 let state = freshState(),

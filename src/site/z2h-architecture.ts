@@ -66,7 +66,6 @@ export interface AttentionResult {
   rowSums: number[];
   outputs: number[][];
   causal: boolean;
-  earlierPositionDrift: number;
 }
 
 function tokenEmbedding(token: string, position: number, width: number, random: () => number): number[] {
@@ -76,61 +75,84 @@ function tokenEmbedding(token: string, position: number, width: number, random: 
   return Array.from({ length: width }, () => gaussian(content) * 0.8 + Math.sin(position + 1) * 0.3 + gaussian(random) * 0.05);
 }
 
-export function selfAttention(options: {
+interface HeadConfig {
+  headDim: number;
+  causal: boolean;
+  temperature: number;
+  seed: number;
+}
+
+/** One causal self-attention head over the sequence. */
+function runHead(sequence: string[], config: HeadConfig): { weights: number[][]; outputs: number[][] } {
+  const { headDim, causal, temperature, seed } = config;
+  const random = rng(seed);
+  const embeddings = sequence.map((token, i) => tokenEmbedding(token, i, headDim, random));
+  const projection = () =>
+    Array.from({ length: headDim }, () => Array.from({ length: headDim }, () => gaussian(random) / Math.sqrt(headDim)));
+  const wq = projection();
+  const wk = projection();
+  const wv = projection();
+  const project = (matrix: number[][]) =>
+    embeddings.map((row) =>
+      Array.from({ length: headDim }, (_, j) => row.reduce((sum, value, i) => sum + value * matrix[i][j], 0)),
+    );
+  const q = project(wq);
+  const k = project(wk);
+  const v = project(wv);
+  const weights = q.map((query, i) => {
+    const scores = k.map((key, j) =>
+      causal && j > i
+        ? -Infinity
+        : query.reduce((sum, value, d) => sum + value * key[d], 0) / (Math.sqrt(headDim) * temperature),
+    );
+    return softmax(scores.map((s) => (s === -Infinity ? -1e9 : s)));
+  });
+  const outputs = weights.map((row) =>
+    Array.from({ length: headDim }, (_, d) => row.reduce((sum, weight, j) => sum + weight * v[j][d], 0)),
+  );
+  return { weights, outputs };
+}
+
+export interface AttentionOptions {
   tokens: string[];
   headDim?: number;
   causal?: boolean;
   temperature?: number;
   seed?: number;
-}): AttentionResult {
-  const tokens = options.tokens;
-  const headDim = options.headDim ?? 8;
-  const causal = options.causal ?? true;
-  const temperature = options.temperature ?? 1;
-  const seed = options.seed ?? 11;
-  const run = (sequence: string[]) => {
-    const random = rng(seed);
-    const embeddings = sequence.map((token, i) => tokenEmbedding(token, i, headDim, random));
-    const projection = () =>
-      Array.from({ length: headDim }, () => Array.from({ length: headDim }, () => gaussian(random) / Math.sqrt(headDim)));
-    const wq = projection();
-    const wk = projection();
-    const wv = projection();
-    const project = (matrix: number[][]) =>
-      embeddings.map((row) =>
-        Array.from({ length: headDim }, (_, j) => row.reduce((sum, value, i) => sum + value * matrix[i][j], 0)),
-      );
-    const q = project(wq);
-    const k = project(wk);
-    const v = project(wv);
-    const weights = q.map((query, i) => {
-      const scores = k.map((key, j) =>
-        causal && j > i
-          ? -Infinity
-          : query.reduce((sum, value, d) => sum + value * key[d], 0) / (Math.sqrt(headDim) * temperature),
-      );
-      return softmax(scores.map((s) => (s === -Infinity ? -1e9 : s)));
-    });
-    const outputs = weights.map((row) =>
-      Array.from({ length: headDim }, (_, d) => row.reduce((sum, weight, j) => sum + weight * v[j][d], 0)),
-    );
-    return { weights, outputs };
-  };
-  const { weights, outputs } = run(tokens);
-  // Replace the final token and measure how much earlier outputs moved. Causal
-  // attention must report zero; remove the mask and it will not.
-  const altered = [...tokens.slice(0, -1), tokens[tokens.length - 1] + "?"];
-  const shifted = run(altered);
-  let earlierPositionDrift = 0;
-  for (let i = 0; i < tokens.length - 1; i++)
-    for (let d = 0; d < headDim; d++)
-      earlierPositionDrift = Math.max(earlierPositionDrift, Math.abs(outputs[i][d] - shifted.outputs[i][d]));
+}
+
+const headConfig = (options: AttentionOptions): HeadConfig => ({
+  headDim: options.headDim ?? 8,
+  causal: options.causal ?? true,
+  temperature: options.temperature ?? 1,
+  seed: options.seed ?? 11,
+});
+
+export function selfAttention(options: AttentionOptions): AttentionResult {
+  const config = headConfig(options);
+  const { weights, outputs } = runHead(options.tokens, config);
   return {
-    tokens,
+    tokens: options.tokens,
     weights,
     rowSums: weights.map((row) => row.reduce((a, b) => a + b, 0)),
     outputs,
-    causal,
-    earlierPositionDrift,
+    causal: config.causal,
   };
+}
+
+/**
+ * How much earlier outputs move when the final token is edited. Causal
+ * attention must report zero; without the mask it will not. Runs the head
+ * twice, so it is a separate call from the display pass rather than baked in.
+ */
+export function causalDrift(options: AttentionOptions): number {
+  const config = headConfig(options);
+  const tokens = options.tokens;
+  const base = runHead(tokens, config);
+  const altered = runHead([...tokens.slice(0, -1), tokens[tokens.length - 1] + "?"], config);
+  let drift = 0;
+  for (let i = 0; i < tokens.length - 1; i++)
+    for (let d = 0; d < config.headDim; d++)
+      drift = Math.max(drift, Math.abs(base.outputs[i][d] - altered.outputs[i][d]));
+  return drift;
 }

@@ -72,7 +72,10 @@ try {
  const sample = page.locator('.live-cell').last();
  await sample.locator('textarea').fill('while (true) {}');
  await sample.locator('button.primary').click();
- await page.waitForFunction(() => /Stopped after/.test(document.querySelector('.live-cell:last-of-type .live-output')?.textContent ?? ''), null, { timeout: 20000 });
+ await page.waitForFunction(() => {
+   const cells = document.querySelectorAll('.live-cell');
+   return /Stopped after/.test(cells[cells.length - 1]?.querySelector('.live-output')?.textContent ?? '');
+ }, null, { timeout: 20000 });
  assert.ok(await sample.locator('button.primary').isEnabled(), 'the run button must recover after a timeout');
  await sample.locator('button').nth(1).click();
  assert.equal(await sample.locator('textarea').inputValue(), lectures[0].sample.code);

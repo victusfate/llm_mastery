@@ -1,4 +1,5 @@
 import { escapeHTML as esc } from './engine.ts';
+export type DiagramClass = 'wire'|'neuron'|'block'|'signal'|'blocked'|'curve'|'comparison';
 
 // SVG primitives keep diagrams local, sharp at any zoom, and available offline.
 export const text = (x:number,y:number,label:string) => `<text x="${x}" y="${y}">${esc(label)}</text>`;

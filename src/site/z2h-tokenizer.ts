@@ -20,6 +20,9 @@ export interface BPEModel {
   compression: number;
 }
 
+/** A pair seen once is not a pattern, so merging starts at two. */
+const MIN_PAIR_COUNT = 2;
+
 const bytesOf = (text: string) => [...new TextEncoder().encode(text)];
 
 function mergePass(ids: number[], pair: [number, number], replacement: number): number[] {
@@ -48,7 +51,7 @@ export function trainBPE(text: string, mergeCount = 20): BPEModel {
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
     let best = "";
-    let bestCount = 1;
+    let bestCount = MIN_PAIR_COUNT - 1;
     for (const [key, count] of counts) if (count > bestCount) [best, bestCount] = [key, count];
     if (!best) break;
     const pair = best.split(",").map(Number) as [number, number];

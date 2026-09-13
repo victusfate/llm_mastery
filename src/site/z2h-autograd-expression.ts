@@ -148,29 +148,45 @@ export function backpropagate(expression: Expression, variables: Record<string, 
     const right = visit(node.right);
     const a = nodes[left].value;
     const b = nodes[right].value;
-    const rules: Record<string, [number, (grad: number) => void]> = {
-      "+": [a + b, (grad) => {
-        addGrad(left, grad);
-        addGrad(right, grad);
-      }],
-      "-": [a - b, (grad) => {
-        addGrad(left, grad);
-        addGrad(right, -grad);
-      }],
-      "*": [a * b, (grad) => {
-        addGrad(left, grad * b);
-        addGrad(right, grad * a);
-      }],
-      "/": [a / b, (grad) => {
-        addGrad(left, grad / b);
-        addGrad(right, (-grad * a) / (b * b));
-      }],
-      "^": [a ** b, (grad) => {
-        addGrad(left, grad * b * a ** (b - 1));
-        if (a > 0) addGrad(right, grad * a ** b * Math.log(a));
-      }],
-    };
-    const [value, back] = rules[node.op];
+    // One value and one closure per node: compute only the selected operation.
+    let value: number;
+    let back: (grad: number) => void;
+    switch (node.op) {
+      case "+":
+        value = a + b;
+        back = (grad) => {
+          addGrad(left, grad);
+          addGrad(right, grad);
+        };
+        break;
+      case "-":
+        value = a - b;
+        back = (grad) => {
+          addGrad(left, grad);
+          addGrad(right, -grad);
+        };
+        break;
+      case "*":
+        value = a * b;
+        back = (grad) => {
+          addGrad(left, grad * b);
+          addGrad(right, grad * a);
+        };
+        break;
+      case "/":
+        value = a / b;
+        back = (grad) => {
+          addGrad(left, grad / b);
+          addGrad(right, (-grad * a) / (b * b));
+        };
+        break;
+      default:
+        value = a ** b;
+        back = (grad) => {
+          addGrad(left, grad * b * a ** (b - 1));
+          if (a > 0) addGrad(right, grad * a ** b * Math.log(a));
+        };
+    }
     return push(node.op, node.op, value, [left, right], back);
   }
   const output = visit(expression);

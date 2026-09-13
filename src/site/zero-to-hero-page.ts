@@ -4,7 +4,8 @@
 import { markdown, escapeHTML as esc } from "./engine.ts";
 import { modules } from "./content.ts";
 import { labs } from "./labs.ts";
-import { lectures, type Lecture } from "./z2h-track.ts";
+import { lectures, type Lecture, type TrackLink } from "./z2h-track.ts";
+import { ZERO_TO_HERO_NOTE_PREFIX } from "./progress-backup.ts";
 import { mountPanel } from "./z2h-panel-mount.ts";
 import { mountLiveCell, upgradeLiveBlocks } from "./z2h-live-code.ts";
 import { startExplorer } from "./explorer.ts";
@@ -12,9 +13,8 @@ import { element as $ } from "./dom.ts";
 
 const requested = new URL(location.href).searchParams.get("lecture");
 const lecture = lectures.find((entry) => entry.id === requested) ?? lectures[0];
-startExplorer();
 
-function link(item: { label: string; url: string; note?: string }): string {
+function link(item: TrackLink): string {
   return `<li><a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.label)} ↗</a>${item.note ? ` <span class="small">— ${esc(item.note)}</span>` : ""}</li>`;
 }
 
@@ -62,7 +62,7 @@ function renderMapping(current: Lecture): void {
     current.courseModules
       .map(
         (entry) =>
-          `<li><a href="./?module=${entry.module + 1}">Module ${entry.module + 1}: ${esc(modules[entry.module].title)}</a> — ${esc(entry.why)}</li>`,
+          `<li><a href="./?module=${entry.moduleIndex + 1}">Module ${entry.moduleIndex + 1}: ${esc(modules[entry.moduleIndex].title)}</a> — ${esc(entry.why)}</li>`,
       )
       .join("") +
     "</ul><h3>Labs that assess this material</h3>" +
@@ -99,7 +99,7 @@ function renderSampleCell(current: Lecture): void {
 }
 
 function renderNotes(current: Lecture): void {
-  const key = `llm-training-zero-to-hero-${current.id}`;
+  const key = `${ZERO_TO_HERO_NOTE_PREFIX}${current.id}`;
   const notes = $("lecture-notes");
   try {
     notes.value = localStorage.getItem(key) || "";
@@ -147,6 +147,7 @@ function wireTutorHandoff(current: Lecture, notes: HTMLTextAreaElement): void {
   };
 }
 
+startExplorer();
 renderNavigation(lecture);
 renderHeader(lecture);
 renderMapping(lecture);

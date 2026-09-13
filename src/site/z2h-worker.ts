@@ -79,7 +79,11 @@ export function runSample(code: string): SandboxResponse {
   }
 }
 
-if (typeof self !== "undefined" && "onmessage" in self) {
+// Installed only when this module is loaded as a worker; the tests import
+// runSample directly and must not acquire a message handler. The constructor is
+// looked up rather than named, because the project's lib targets the DOM.
+const workerScope = (globalThis as { WorkerGlobalScope?: new () => unknown }).WorkerGlobalScope;
+if (workerScope && self instanceof workerScope) {
   self.onmessage = (event: MessageEvent<SandboxRequest>) => {
     (self as unknown as Worker).postMessage(runSample(event.data.code));
   };

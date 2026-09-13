@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import * as z from '../src/site/z2h-numerics.ts';
 import { NAMES, TOKENIZER_SAMPLE } from '../src/site/z2h-data.ts';
 import { lectures } from '../src/site/z2h-track.ts';
+import { labs } from '../src/site/labs.ts';
 import { traceGraphic, matrixGraphic, scatterGraphic, histogramGraphic, seriesGraphic, treeGraphic, tokenRibbonGraphic } from '../src/site/z2h-visuals.ts';
 import { runSample } from '../src/site/z2h-worker.ts';
 import { liveBlocksOf } from '../src/site/z2h-live-code.ts';
@@ -181,9 +182,9 @@ test('causal attention distributes weight one per query and leaks nothing backwa
    if(j>i)assert.ok(weight<1e-9,`position ${i} attended to future position ${j}`);
   });
  });
- assert.equal(causal.earlierPositionDrift,0);
+ assert.equal(z.causalDrift({tokens,causal:true}),0);
  // Remove the mask and the same measurement becomes non-zero: the check works.
- assert.ok(z.selfAttention({tokens,causal:false}).earlierPositionDrift>1e-3);
+ assert.ok(z.causalDrift({tokens,causal:false})>1e-3);
  // Lower temperature sharpens the distribution toward selecting one position.
  const sharp=z.selfAttention({tokens,temperature:0.3});
  const flat=z.selfAttention({tokens,temperature:3});
@@ -280,13 +281,13 @@ test('the sandbox runs a sample, reports failures, and truncates large values',(
 
 test('every lecture links to real files, real videos, and real course labs',()=>{
  assert.equal(lectures.length,9);
- const labIds=new Set(readFileSync(new URL('../src/site/labs.ts',import.meta.url),'utf8').match(/id: "\d{2}-\d{2}"/g).map(entry=>entry.slice(5,10)));
+ const labIds=new Set(labs.map(lab=>lab.id));
  const panels=new Set<string>();
  for(const lecture of lectures){
   assert.ok(existsSync(new URL(lecture.guide,new URL('../docs/zero-to-hero/',import.meta.url))),lecture.guide);
   assert.match(lecture.video,/^[\w-]{11}$/,lecture.id);
   assert.ok(lecture.focus.length>60&&lecture.outcome.length>60,lecture.id);
-  assert.ok(lecture.courseModules.length>0&&lecture.courseModules.every(entry=>entry.module>=0&&entry.module<=9));
+  assert.ok(lecture.courseModules.length>0&&lecture.courseModules.every(entry=>entry.moduleIndex>=0&&entry.moduleIndex<=9));
   assert.ok(lecture.labs.length>0);
   for(const lab of lecture.labs)assert.ok(labIds.has(lab),`${lecture.id} references unknown lab ${lab}`);
   assert.ok(lecture.links.every(item=>item.url.startsWith('https://')),lecture.id);

@@ -15,6 +15,7 @@ export interface DenseWeights {
 }
 
 export interface DensePass {
+  inputs: number[][];
   hidden: number[][];
   probabilities: number[][];
 }
@@ -40,7 +41,7 @@ export function denseForward(inputs: number[][], weights: DenseWeights): DensePa
     }
     return softmax(logits);
   });
-  return { hidden, probabilities };
+  return { inputs, hidden, probabilities };
 }
 
 /** Mean negative log likelihood of the target class over the batch. */
@@ -79,12 +80,12 @@ export interface DenseGradients {
 }
 
 export function denseBackward(
-  inputs: number[][],
   pass: DensePass,
   targets: number[],
   weights: DenseWeights,
   rules: BackwardRules,
 ): DenseGradients {
+  const inputs = pass.inputs;
   const width = weights.b1.length;
   const classes = weights.b2.length;
   const inputWidth = weights.w1.length;

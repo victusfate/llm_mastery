@@ -6,16 +6,12 @@
 // title and description for screen readers.
 
 import { frame, line, box, text } from "./graphics.ts";
+import { labelNumber as round } from "./readout.ts";
 import { SATURATION_THRESHOLD, type Trace } from "./z2h-numerics.ts";
 
 /** Placeholder for an empty figure: an outlined plate rather than bare text. */
 const emptyPlate = (message: string) =>
   `<rect x="70" y="70" width="460" height="140" class="blocked"/>` + text(300, 145, message);
-
-const round = (value: number, digits = 3) =>
-  !Number.isFinite(value) ? "∞" : Math.abs(value) >= 1000 || (Math.abs(value) < 0.001 && value !== 0)
-    ? value.toExponential(1)
-    : Number(value.toFixed(digits)).toString();
 
 /** Computation graph of one expression: structure here, exact numbers in the table. */
 export function traceGraphic(trace: Trace, limit = 15): string {
@@ -131,19 +127,26 @@ export function scatterGraphic(points: number[][], labels: string[], caption: st
 }
 
 /** Activation histogram with the saturated tails marked. */
+// The activation axis runs from −1 to +1 across this box.
+const PLOT_LEFT = 70;
+const PLOT_RIGHT = 530;
+const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
+
 export function histogramGraphic(bins: number[], caption: string, saturated: number): string {
   const threshold = SATURATION_THRESHOLD;
   const peak = Math.max(...bins, 1e-12);
-  const width = 460 / bins.length;
+  const barWidth = PLOT_WIDTH / bins.length;
   let body = text(300, 25, caption);
-  const edge = 70 + 460 * ((threshold + 1) / 2);
-  body += `<rect x="${edge}" y="60" width="${540 - edge}" height="160" class="blocked" opacity="0.85"/>`;
-  body += `<rect x="70" y="60" width="${540 - edge}" height="160" class="blocked" opacity="0.85"/>`;
+  // The saturated tails are symmetric: |activation| > threshold at each end.
+  const rightEdge = PLOT_LEFT + PLOT_WIDTH * ((threshold + 1) / 2);
+  const bandWidth = PLOT_RIGHT - rightEdge;
+  body += `<rect x="${rightEdge}" y="60" width="${bandWidth}" height="160" class="blocked" opacity="0.85"/>`;
+  body += `<rect x="${PLOT_LEFT}" y="60" width="${bandWidth}" height="160" class="blocked" opacity="0.85"/>`;
   bins.forEach((share, i) => {
     const height = (share / peak) * 150;
-    body += `<rect x="${(70 + i * width).toFixed(1)}" y="${(220 - height).toFixed(1)}" width="${Math.max(1, width - 2).toFixed(1)}" height="${height.toFixed(1)}" class="signal"/>`;
+    body += `<rect x="${(PLOT_LEFT + i * barWidth).toFixed(1)}" y="${(220 - height).toFixed(1)}" width="${Math.max(1, barWidth - 2).toFixed(1)}" height="${height.toFixed(1)}" class="signal"/>`;
   });
-  body += line(70, 220, 540, 220) + text(75, 245, "−1") + text(305, 245, "0") + text(535, 245, "+1");
+  body += line(PLOT_LEFT, 220, PLOT_RIGHT, 220) + text(75, 245, "−1") + text(300, 245, "0") + text(525, 245, "+1");
   body += text(300, 270, `Dark bands: |activation| > ${threshold} · ${(100 * saturated).toFixed(1)}% saturated`);
   return frame(
     caption,

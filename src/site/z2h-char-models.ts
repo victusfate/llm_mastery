@@ -3,7 +3,6 @@
 // can be asserted in a test. Import from ./z2h-numerics.ts, which re-exports the
 // whole set as one API.
 
-import { softmax } from "./engine.ts";
 import { gaussian, rng } from "./z2h-random.ts";
 import { denseForward, denseBackward, denseLoss, meanCrossEntropyRules, type DenseWeights } from "./z2h-dense-layer.ts";
 
@@ -29,7 +28,10 @@ function sampleIndex(row: number[], random: () => number): number {
   return row.length - 1;
 }
 
-export function vocabularyOf(words: string[]): string[] {
+/** Character to row index, the lookup every model here needs. */
+const indexOf = (characters: string[]) => new Map(characters.map((character, i) => [character, i]));
+
+function vocabularyOf(words: string[]): string[] {
   const letters = new Set<string>();
   for (const word of words) for (const character of word) letters.add(character);
   return [BOUNDARY, ...[...letters].sort()];
@@ -37,7 +39,7 @@ export function vocabularyOf(words: string[]): string[] {
 
 export function trainBigram(words: string[], smoothing = 1): BigramModel {
   const characters = vocabularyOf(words);
-  const index = new Map(characters.map((c, i) => [c, i]));
+  const index = indexOf(characters);
   const counts = characters.map(() => characters.map(() => 0));
   for (const word of words) {
     const padded = BOUNDARY + word + BOUNDARY;
@@ -53,8 +55,8 @@ export function trainBigram(words: string[], smoothing = 1): BigramModel {
 }
 
 /** Mean negative log likelihood per bigram: the number training must beat. */
-export function bigramLoss(model: BigramModel, words: string[]): number {
-  const index = new Map(model.characters.map((c, i) => [c, i]));
+function bigramLoss(model: BigramModel, words: string[]): number {
+  const index = indexOf(model.characters);
   let total = 0;
   let count = 0;
   for (const word of words) {
@@ -87,7 +89,7 @@ export function uniformLoss(vocabularySize: number): number {
   return Math.log(vocabularySize);
 }
 
-const SAMPLES_PER_RUN = 6;
+export const SAMPLES_PER_RUN = 6;
 const MAX_SAMPLE_LENGTH = 12;
 
 export interface MLPOptions {
@@ -119,8 +121,8 @@ interface Dataset {
   targets: number[];
 }
 
-export function contextDataset(words: string[], characters: string[], context: number): Dataset {
-  const index = new Map(characters.map((c, i) => [c, i]));
+function contextDataset(words: string[], characters: string[], context: number): Dataset {
+  const index = indexOf(characters);
   const contexts: number[][] = [];
   const targets: number[] = [];
   for (const word of words) {
@@ -171,7 +173,7 @@ export function trainCharMLP(options: MLPOptions): MLPRun {
   /** Look the context up in the embedding table, then run the shared stack. */
   function forward(rows: number[][]) {
     const inputs = rows.map((row) => row.flatMap((id) => table[id]));
-    return { inputs, ...denseForward(inputs, weights) };
+    return denseForward(inputs, weights);
   }
 
   const meanLoss = (data: Dataset) => denseLoss(forward(data.contexts).probabilities, data.targets);
@@ -185,9 +187,9 @@ export function trainCharMLP(options: MLPOptions): MLPRun {
       rows.push(train.contexts[pick]);
       targets.push(train.targets[pick]);
     }
-    const { inputs, ...pass } = forward(rows);
+    const pass = forward(rows);
     const { gradW1, gradB1, gradW2, gradB2, dInput } =
-      denseBackward(inputs, pass, targets, weights, meanCrossEntropyRules(weights, batch));
+      denseBackward(pass, targets, weights, meanCrossEntropyRules(weights, batch));
     // The embedding table collects each context slot's share of the input
     // gradient, so a character used twice in one batch accumulates twice.
     const gradTable = table.map((row) => row.map(() => 0));

@@ -10,6 +10,7 @@ export interface ParameterBreakdown {
   positional: number;
   attention: number;
   feedForward: number;
+  norms: number;
   total: number;
 }
 
@@ -26,15 +27,18 @@ export function parameterCount(options: {
   const vocabulary = options.vocabulary ?? 50257;
   const context = options.context ?? 1024;
   const expansion = options.expansion ?? 4;
+  const embedding = vocabulary * width;
+  const positional = context * width;
   const attention = layers * (4 * width * width + 4 * width);
   const feedForward = layers * (2 * expansion * width * width + expansion * width + width);
   const norms = layers * 4 * width + 2 * width;
   return {
-    embedding: vocabulary * width,
-    positional: context * width,
+    embedding,
+    positional,
     attention,
     feedForward,
-    total: vocabulary * width + context * width + attention + feedForward + norms,
+    norms,
+    total: embedding + positional + attention + feedForward + norms,
   };
 }
 
