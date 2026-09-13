@@ -92,6 +92,31 @@ Instrument the model from lecture 3 rather than writing a new one.
 **Comparison**
 - a 5-layer `tanh` network at gains `0.5`, `1.0`, `3.0`, with and without normalisation, reporting the diagnostics above and the dev loss after a fixed budget
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# Read the network before training it.
+import torch
+
+gain, depth, width, batch = 1.0, 5, 32, 64
+x = torch.randn(batch, width)
+layers = [torch.randn(width, width) * gain / width ** 0.5 for _ in range(depth)]
+
+for i, W in enumerate(layers):
+    x = torch.tanh(x @ W)
+    saturated = (x.abs() > 0.97).float().mean().item()
+    print(f"layer {i + 1}  std {x.std().item():.3f}  saturated {100 * saturated:.1f}%")
+
+# Try gain = 0.4 and gain = 3.0 and keep both printouts. Then add a
+# normalisation step before each tanh and compare all three.
+```
+
 ## Checks that must pass
 
 1. **Variance arithmetic.** Empirically measure pre-activation variance for a layer with fan-in 100 at `σ = 1/√100` and assert it is within 10% of 1 over a batch of 1,000.

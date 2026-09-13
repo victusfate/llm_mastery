@@ -79,6 +79,32 @@ A full reproduction needs rented hardware. Do the version your machine supports 
 
 Whatever tier you are in, the deliverable is a report with a pre-registered plan, measured numbers, and an explicit gap between estimate and reality.
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# Price the run before you rent anything.
+def parameters(layers=12, width=768, vocab=50257, context=1024):
+    attention = layers * (4 * width * width + 4 * width)
+    feed_forward = layers * (8 * width * width + 5 * width)
+    norms = layers * 4 * width + 2 * width
+    return vocab * width + context * width + attention + feed_forward + norms
+
+n = parameters()
+assert n == 124_439_808, f"{n:,} is not the published 124M configuration"
+
+tokens = 10e9
+achieved = 400e12 * 8 * 0.40              # 8 devices, 40% model FLOPs utilisation
+hours = 6 * n * tokens / achieved / 3600
+print(f"{n:,} parameters · {hours:.2f} hours · ${hours * 16:.0f} at $2 per device-hour")
+# Now measure your own tokens per second for one step and replace the 0.40.
+```
+
 ## Checks that must pass
 
 1. **Parameter count matches the target configuration exactly.** Assert the total; do not print and squint.

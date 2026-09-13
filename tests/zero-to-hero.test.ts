@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import * as z from '../src/site/z2h-numerics.ts';
 import { NAMES, TOKENIZER_SAMPLE } from '../src/site/z2h-data.ts';
 import { lectures, findLecture } from '../src/site/z2h-track.ts';
@@ -325,6 +326,30 @@ test('runnable blocks are recognised only when fenced as run',()=>{
  assert.deepEqual(liveBlocksOf('```run\nprint(1)\n```'),['print(1)']);
  assert.deepEqual(liveBlocksOf('```js\nprint(1)\n```'),[]);
  assert.deepEqual(liveBlocksOf('text\n\n```run\na\n```\n\nmore\n\n```run\nb\n```\n'),['a','b']);
+});
+
+const guideText=(lecture:{doc:string})=>readFileSync(new URL(lecture.doc.replace('../docs/zero-to-hero/',''),new URL('../docs/zero-to-hero/',import.meta.url)),'utf8');
+const pythonBlocks=(text:string)=>[...text.matchAll(/^```python\n([\s\S]*?)^```/gm)].map(match=>match[1]);
+const python3Available=(()=>{try{execFileSync('python3',['-c','pass'],{stdio:'ignore'});return true}catch{return false}})();
+
+test('each guide pairs its JavaScript cells with a PyTorch starting point',()=>{
+ for(const lecture of lectures){
+  const text=guideText(lecture);
+  const blocks=pythonBlocks(text);
+  assert.equal(blocks.length,1,`${lecture.id} should carry exactly one Python starter`);
+  assert.ok(blocks[0].split('\n').length>=10,`${lecture.id}: the starter is too small to start from`);
+  assert.ok(text.includes('colab.research.google.com'),`${lecture.id} must point at Colab`);
+  // The sandbox executes JavaScript, so a Python block must never be marked
+  // runnable: it would fail the moment a learner pressed Run.
+  assert.ok(!/```(?:python run|run python)/.test(text),`${lecture.id} marks Python as runnable`);
+  assert.equal(liveBlocksOf(text).some(code=>code.includes('import torch')),false,lecture.id);
+ }
+});
+
+test('every Python starter compiles',{skip:python3Available?false:'python3 is not available here'},()=>{
+ for(const lecture of lectures)
+  for(const code of pythonBlocks(guideText(lecture)))
+   execFileSync('python3',['-c','import sys; compile(sys.stdin.read(), "<starter>", "exec")'],{input:code});
 });
 
 test('track notes are included in progress backups',()=>{

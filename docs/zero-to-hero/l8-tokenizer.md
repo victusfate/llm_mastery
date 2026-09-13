@@ -77,6 +77,44 @@ Real tokenizers add two refinements worth knowing. A **regex pre-split** prevent
 - special tokens with an id range that `encode` can never emit from ordinary text
 - statistics: vocabulary size, compression on training and held-out text, tokens per character, the longest token learned
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# Byte-level merges. No framework needed for this one.
+def merge(ids, pair, new_id):
+    out, i = [], 0
+    while i < len(ids):
+        if i + 1 < len(ids) and (ids[i], ids[i + 1]) == pair:
+            out.append(new_id)
+            i += 2
+        else:
+            out.append(ids[i])
+            i += 1
+    return out
+
+def train(text, merges):
+    ids, recorded = list(text.encode("utf-8")), []
+    for step in range(merges):
+        counts = {}
+        for pair in zip(ids, ids[1:]):
+            counts[pair] = counts.get(pair, 0) + 1
+        if not counts or max(counts.values()) < 2:
+            break
+        best = max(counts, key=counts.get)
+        ids = merge(ids, best, 256 + step)
+        recorded.append((best, 256 + step))
+    return recorded, ids
+
+# encode replays `recorded` in order; decode expands ids back to bytes and
+# decodes UTF-8. Assert decode(encode(text)) == text before anything else.
+```
+
 ## Checks that must pass
 
 1. **Round trip on the training text.** `decode(encode(text)) == text`, exactly, for the whole training text.

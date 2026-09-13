@@ -79,6 +79,35 @@ Write two models over the same data and compare them.
 **Comparison**
 - report both losses to three decimals and the largest absolute difference between the two probability matrices
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# The counting model, and the one number it is judged by.
+import torch
+
+words = ["ada", "nora", "elias"]            # your own list, one word per line
+chars = ["."] + sorted({c for word in words for c in word})
+index = {c: i for i, c in enumerate(chars)}
+
+pairs = [(p, n) for word in words for p, n in zip("." + word, word + ".")]
+counts = torch.zeros(len(chars), len(chars))
+for previous, following in pairs:
+    counts[index[previous], index[following]] += 1
+
+smoothed = counts + 1
+probs = smoothed / smoothed.sum(dim=1, keepdim=True)
+loss = -torch.stack([probs[index[p], index[n]] for p, n in pairs]).log().mean()
+
+print("loss", loss.item(), "uniform baseline", torch.tensor(float(len(chars))).log().item())
+# Sample with torch.multinomial on one row, and stop at index 0.
+```
+
 ## Checks that must pass
 
 1. **Rows are distributions.** Every row of the probability matrix sums to 1 within `1e-9`, and no entry is negative.

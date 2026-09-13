@@ -82,6 +82,31 @@ Write this from the specification, not by typing along with the screen. Target: 
 
 Do not skip `parameters()` and the explicit zeroing. Half the value of this exercise is discovering what goes wrong when they are absent.
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# Check your own engine against PyTorch on the same expression.
+import torch
+
+a = torch.tensor(1.5, requires_grad=True)
+b = torch.tensor(-2.0, requires_grad=True)
+c = torch.tensor(0.5, requires_grad=True)
+
+loss = (a * b + c) * torch.tanh(a)
+loss.backward()
+
+print("value", loss.item())
+print("grads", a.grad.item(), b.grad.item(), c.grad.item())
+# Your Value class must match these to about 1e-6. The operation that
+# disagrees is the local rule to re-derive.
+```
+
 ## Checks that must pass
 
 These are the deliverables, not the loss curve.

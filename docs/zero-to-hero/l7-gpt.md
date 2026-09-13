@@ -78,6 +78,38 @@ Build it in this order, testing each stage before adding the next. Every stage s
 
 Keep the model small enough to train on the hardware you have — see the [home-lab guide](../09-home-lab.md). A few hundred thousand parameters on a megabyte of text is enough to demonstrate everything here.
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# One causal head, and the test that makes next-token training honest.
+import torch
+import torch.nn.functional as F
+
+T, C, head = 6, 32, 16
+torch.manual_seed(1)
+x = torch.randn(1, T, C)
+key, query, value = (torch.nn.Linear(C, head, bias=False) for _ in range(3))
+mask = torch.tril(torch.ones(T, T)) == 0
+
+def forward(inputs):
+    k, q, v = key(inputs), query(inputs), value(inputs)
+    scores = (q @ k.transpose(-2, -1) / head ** 0.5).masked_fill(mask, float("-inf"))
+    return F.softmax(scores, dim=-1) @ v
+
+out = forward(x)
+changed = x.clone()
+changed[0, -1] += 1.0                              # edit only the last token
+drift = (out[0, :-1] - forward(changed)[0, :-1]).abs().max().item()
+print("drift in earlier outputs", drift)
+assert drift == 0.0, "the mask is not doing its job"
+```
+
 ## Checks that must pass
 
 1. **Rows are distributions.** Every row of the attention weights sums to 1 within `1e-6`, with no negative entries.

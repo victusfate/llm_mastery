@@ -71,6 +71,31 @@ This lecture is an exercise, not a talk. Work the exercise notebook yourself and
 
 **Finally, remove the framework.** Train the model for 200 steps using only your gradients and confirm the loss matches an autograd run to a few decimal places over the same seed and batch order.
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# Write the comparison harness before deriving anything.
+import torch
+
+def compare(name, manual, tensor):
+    assert manual.shape == tensor.grad.shape, f"{name}: {manual.shape} vs {tensor.grad.shape}"
+    difference = (manual - tensor.grad).abs().max().item()
+    print(f"{name:10s} exact {torch.equal(manual, tensor.grad)!s:5s} "
+          f"close {torch.allclose(manual, tensor.grad, atol=1e-8)!s:5s} "
+          f"max diff {difference:.3e}")
+
+# Build the forward pass keeping every intermediate, call loss.backward() to get
+# the reference, then derive each gradient by hand and pass it through compare.
+# Shape mismatch is a failure, not a warning: it is what a changed batch size
+# will expose later.
+```
+
 ## Checks that must pass
 
 1. **Every tensor, elementwise.** Maximum absolute difference below `1e-8` in double precision, or roughly `1e-4` relative in single precision. State which precision you used; the tolerance is meaningless without it.

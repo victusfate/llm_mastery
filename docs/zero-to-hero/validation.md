@@ -7,7 +7,7 @@ Recorded September 12, 2026, on Node v22.22.2 in a Linux container. The reposito
 | Command | Result |
 | --- | --- |
 | `npx tsc --noEmit` | Passed with no output. One real defect was caught and fixed: the track page reused the element id `lecture-status`, which already belonged to the module lecture player |
-| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 34 tests passed, 0 failed (15 pre-existing, 19 new) |
+| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 36 tests passed, 0 failed (15 pre-existing, 21 new) |
 | `node scripts/check-docs.ts` | Checked every public Markdown document; all local links resolve |
 | `npm run build` | Static course built into `dist/`, including `site/zero-to-hero.html` and the bundled `z2h-*.mjs` modules and worker |
 | `node tests/zero-to-hero.browser.ts` | Passed: 9 lecture pages, slider extremes, inline and sample cells, cell isolation, timeout recovery, edit persistence, notes, mobile layout |
@@ -33,6 +33,7 @@ These are the checks that would fail if a lesson's claims stopped being true:
 - **Figures**: every figure carries `role="img"`, a title, and a description; contains no `NaN`, `Infinity`, or `undefined`; and keeps every label inside the 600 × 280 viewBox.
 - **Track data**: each lecture's guide file exists, its video identifier is well formed, its labs exist in `labs.ts`, its links are HTTPS, and its sample runs in the sandbox without error.
 - **Inline examples**: all 19 runnable blocks across the nine guides execute in the sandbox, print output, and contain no `NaN` or `undefined` in what they print. The whole suite still runs in about 1.5 seconds.
+- **Python starters**: each guide carries exactly one PyTorch starting point of at least ten lines, points at Colab, and is never marked runnable (the sandbox executes JavaScript, so a Run button on a Python block would only produce an error). Every starter is compiled by `python3` in the test, which skips itself where `python3` is absent.
 - **Guides**: each guide links its own video, credits the author, carries the six required sections, and has balanced code fences; `licensing.md` names every referenced repository and flags the unlicensed one.
 
 ## Defects found and fixed during validation
@@ -53,4 +54,5 @@ Items 4 to 8 were found only because the new figures were added to `tests/visual
 - **Node 24.** The repository's engine requirement was not exercised; this run used Node 22.
 - **Lecture runtimes and playlist membership.** YouTube is unreachable from this environment. Video identifiers and repository links were read from `karpathy/nn-zero-to-hero` and `karpathy/build-nanogpt`, and no runtimes are stated anywhere in the track.
 - **The video embed.** External media cannot load here; the browser test asserts the iframe is created with the right source and that a direct link is offered, not that playback works.
+- **The PyTorch starters were compiled, not executed.** This container has no `torch`, so the nine Python starting points are checked for syntax only. Their arithmetic was verified where it does not need a framework: the parameter function reproduces 124,439,808 exactly, and the bigram pairing was run by hand. Run them in Colab before relying on the tensor code.
 - **Learning outcomes.** Nothing in this work measures whether the track teaches anyone anything. It is an instructional design plus correctness checks, not an evaluated intervention.

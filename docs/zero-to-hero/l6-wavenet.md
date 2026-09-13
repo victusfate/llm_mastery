@@ -69,6 +69,31 @@ The second half of this lecture is not about architecture at all. It is about th
 **Comparison**
 - flat versus hierarchical at contexts 4, 8, and 16, matched on parameter count as closely as you can, at a fixed step budget; report dev loss for each
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# Prove the grouping does what you think before training on it.
+import torch
+
+batch, positions, features = 2, 8, 4
+x = torch.arange(batch * positions * features).view(batch, positions, features)
+print("input", tuple(x.shape))
+
+paired = x.view(batch, positions // 2, -1)        # combine adjacent positions
+print("after one level", tuple(paired.shape))
+
+assert torch.equal(paired[0, 0], torch.cat([x[0, 0], x[0, 1]]))
+# If that assertion fails, your reshape interleaved positions instead of
+# grouping neighbours, and the model will train on nonsense that still
+# produces a falling loss.
+```
+
 ## Checks that must pass
 
 1. **Shape assertions.** Every layer asserts its input rank and the divisibility it requires. A wrong context length must raise immediately, not train.

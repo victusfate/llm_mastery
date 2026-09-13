@@ -80,6 +80,52 @@ for (const learningRate of [0.05, 0.4, 1.2]) {
 - sample words from the trained model
 - with `d = 2`, plot the embedding and label each point with its symbol
 
+### Starting point for Colab or your own machine
+
+The cells above run in this page, in JavaScript, because a browser can execute
+them with nothing installed. The exercise itself is PyTorch, so here is the same
+idea in the language you will actually write it in. Paste it into
+[Colab](https://colab.research.google.com/) or a local notebook and build
+outwards from it — it is a starting point, not a solution.
+
+```python
+# The context dataset and one complete training step.
+import torch
+import torch.nn.functional as F
+
+context, embed, hidden, V = 3, 10, 200, len(chars)
+
+X, Y = [], []
+for word in words:
+    window = [0] * context
+    for character in word + ".":
+        X.append(window)
+        Y.append(index[character])
+        window = window[1:] + [index[character]]
+X, Y = torch.tensor(X), torch.tensor(Y)
+
+g = torch.Generator().manual_seed(1)
+C = torch.randn(V, embed, generator=g)
+W1 = torch.randn(context * embed, hidden, generator=g) / (context * embed) ** 0.5
+b1 = torch.zeros(hidden)
+W2 = torch.randn(hidden, V, generator=g) * 0.01      # small: start near uniform
+b2 = torch.zeros(V)
+parameters = [C, W1, b1, W2, b2]
+for p in parameters:
+    p.requires_grad_()
+
+batch = torch.randint(0, X.shape[0], (32,), generator=g)
+h = torch.tanh(C[X[batch]].view(32, -1) @ W1 + b1)
+loss = F.cross_entropy(h @ W2 + b2, Y[batch])
+
+for p in parameters:
+    p.grad = None                                    # never skip this
+loss.backward()
+for p in parameters:
+    p.data -= 0.1 * p.grad
+print(loss.item())
+```
+
 ## Checks that must pass
 
 1. **Shapes.** Assert the shape of every intermediate tensor against a written expectation. Shape bugs that broadcast silently are the most expensive bugs in this lecture.

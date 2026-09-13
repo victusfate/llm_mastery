@@ -28,6 +28,12 @@ Two things the series deliberately does not cover, and the course does: data cur
 
 Lectures 1 to 8 and their notebooks are listed in [karpathy/nn-zero-to-hero](https://github.com/karpathy/nn-zero-to-hero); lecture 9 has its own repository, [karpathy/build-nanogpt](https://github.com/karpathy/build-nanogpt). Video identifiers and repository links on these pages were taken from those two repositories on September 12, 2026. Playlists change; if a link moves, prefer the repository list over ours and open an issue.
 
+## Two languages, on purpose
+
+Each guide carries both. Blocks fenced as ```run` are **JavaScript** and become editable cells you can run in the page, because a browser executes them with nothing installed — they exist so you can check a claim in ten seconds without leaving the paragraph that made it. Blocks fenced as `python` are **PyTorch starting points** for the same idea, to paste into [Colab](https://colab.research.google.com/) or a local notebook, because that is the language and the ecosystem the exercises and the job actually use.
+
+The browser cells are a cross-check, never a substitute. Nothing in the course is assessed on them; the labs assess the implementation you write yourself.
+
 ## How to work a lecture
 
 Watching is the cheapest part and teaches the least. Use this loop for each lecture:
