@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zero to Hero companion · LLM Training Lab</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to the lecture guide</a>
+    <header>
+      <a class="brand" href="./"
+        ><span class="logo">∇</span> TRAINING LAB
+        <span class="tag">ZERO TO HERO COMPANION</span></a
+      >
+      <div class="header-actions">
+        <button id="concept-open">Explain a term</button
+        ><a href="read.html?doc=docs%2F18-zero-to-hero.md">Track overview</a
+        ><a href="./">← Modules</a>
+      </div>
+    </header>
+    <div class="layout">
+      <aside>
+        <p class="eyebrow">WATCH · BUILD · VERIFY</p>
+        <h2>Nine lectures.<br />Your own code.</h2>
+        <p class="muted">
+          Andrej Karpathy's public lecture series, paired with our exercises,
+          interactive panels, and assessed labs.
+        </p>
+        <nav id="lecture-navigation" aria-label="Lectures in the series"></nav>
+        <p class="small">
+          The videos are his work, linked and credited. His code repositories
+          are MIT licensed, so you may reuse them with the notice kept.
+          Everything on this page — text, panels, and code — is written for
+          this course.
+        </p>
+        <a href="read.html?doc=docs%2Fzero-to-hero%2Flicensing.md"
+          >How we handle licensing →</a
+        >
+      </aside>
+      <main id="main">
+        <p id="lecture-label" class="eyebrow"></p>
+        <h1 id="lecture-title">Loading the lecture…</h1>
+        <p id="lecture-focus" class="lead"></p>
+        <section class="card">
+          <p class="eyebrow">WATCH WITH A PURPOSE</p>
+          <h2>What you should be able to do afterwards</h2>
+          <p id="lecture-outcome"></p>
+          <div id="lecture-open" class="row"></div>
+          <div id="lecture-video"></div>
+          <h3>Source material</h3>
+          <ul id="lecture-links"></ul>
+        </section>
+        <article id="guide-body" class="card full-module">
+          Loading the study guide…
+        </article>
+        <section class="card">
+          <p class="eyebrow">INTERACTIVE PANEL</p>
+          <h2>Predict the change, then move one control.</h2>
+          <p class="small">
+            Every number here is computed in your browser by the same routines
+            you are about to write in Python. Nothing is pre-recorded.
+          </p>
+          <div id="lecture-panel"></div>
+        </section>
+        <section class="card">
+          <p class="eyebrow">RUNNABLE SAMPLE</p>
+          <h2>Edit the code and run it</h2>
+          <p id="sample-description"></p>
+          <p class="small">
+            Every runnable block on this page — here and beside the
+            explanations above — is JavaScript with <code>z2h</code> (the
+            numerics), <code>data</code> (the sample datasets) and
+            <code>print(...)</code> available.
+          </p>
+          <div id="lecture-sample"></div>
+        </section>
+        <section id="lecture-mapping" class="card"></section>
+        <section class="card">
+          <h2>Your explanation</h2>
+          <label for="lecture-notes"
+            >Predict, implement, compare with the lecture, and name the gap that
+            is left</label
+          ><textarea
+            id="lecture-notes"
+            disabled
+            rows="8"
+            maxlength="30000"
+            placeholder="What I predicted before watching:
+What I implemented myself:
+Where my version disagreed with the lecture, and why:
+The check that proves my version is right:
+Assistance used:
+The next thing I cannot yet explain:"
+          ></textarea>
+          <div class="row">
+            <button id="lecture-save" class="primary">Save note</button
+            ><button id="lecture-export">Export note</button
+            ><button id="lecture-tutor">Copy tutor handoff</button>
+          </div>
+          <p id="track-status" class="small" role="status"></p>
+        </section>
+        <nav class="row between" aria-label="Lecture sequence">
+          <a id="lecture-previous" href="./">← Previous</a
+          ><a id="lecture-next" href="./">Next →</a>
+        </nav>
+        <footer>
+          Watching a lecture is not evidence of ability. The labs, the
+          finite-difference checks, and an independent transfer task are.
+        </footer>
+        <footer class="license-notice">
+          <p>
+            © 2026 LLM Training Mastery contributors ·
+            <a href="read.html?doc=LICENSE.md" rel="license">MIT license</a> ·
+            Our text, panels, and code are open for reuse. Linked videos,
+            notebooks, and papers remain under their own licenses and are never
+            reproduced here.
+          </p>
+        </footer>
+      </main>
+    </div>
+    <button id="selection-explain" class="selection-explain" hidden>
+      Explain selection ↗
+    </button>
+    <dialog id="concept-dialog" aria-labelledby="concept-title">
+      <div class="concept-toolbar">
+        <button id="concept-back" disabled>← Back</button
+        ><span class="eyebrow">CONCEPT EXPLORER</span
+        ><button id="concept-close" aria-label="Close concept explorer">
+          Close ×
+        </button>
+      </div>
+      <form id="concept-search-form" class="row">
+        <label class="sr-only" for="concept-search"
+          >Word or phrase to explain</label
+        ><input
+          id="concept-search"
+          type="search"
+          maxlength="120"
+          placeholder="Search a word or phrase…"
+        /><button type="submit">Explore</button>
+      </form>
+      <div id="concept-scroll">
+        <h2 id="concept-title">Explore a concept</h2>
+        <p id="concept-context" class="small"></p>
+        <article id="concept-body"></article>
+        <div id="concept-media" class="row"></div>
+        <div id="concept-video"></div>
+        <h3>Drill further</h3>
+        <div id="concept-related" class="row"></div>
+      </div>
+      <div class="concept-footer">
+        <button id="concept-copy">Copy contextual tutor prompt</button>
+        <p id="concept-status" class="small" role="status"></p>
+      </div>
+    </dialog>
+    <script type="module" src="zero-to-hero-page.mjs"></script>
+  </body>
+</html>

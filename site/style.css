@@ -7,6 +7,8 @@
   --muted: #aebcae;
   --accent: #c4ed9a;
   --gold: #e3c889;
+  --nav-current-bg: #2b3d2c;
+  --nav-current-border: #789064;
 }
 * {
   box-sizing: border-box;
@@ -172,8 +174,8 @@ nav button {
   padding: 10px;
 }
 nav button.active {
-  background: #2b3d2c;
-  border-color: #789064;
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
 }
 nav button span {
   color: var(--muted);
@@ -527,8 +529,8 @@ footer {
   text-decoration: none;
 }
 #lab-navigation a[aria-current="page"] {
-  background: #2b3d2c;
-  border-color: #789064;
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
 }
 audio {
   width: 100%;
@@ -694,8 +696,8 @@ audio {
   text-decoration: none;
 }
 #unit-navigation a[aria-current="page"] {
-  background: #2b3d2c;
-  border-color: #789064;
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
 }
 .complete-reference {
   margin-top: 30px;
@@ -821,8 +823,70 @@ html {
 .diagram-description { font-size: 16px; color: var(--text); line-height: 1.6; }
 .concept-figure { margin-inline: 0; }
 .heatmap-scroll { max-width: 100%; overflow-x: auto; padding: 3px; }
-.heatmap-scroll:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.heatmap-scroll:focus-visible, .live-output:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 @media (forced-colors: active) {
   .mechanism-graphic { forced-color-adjust: none; }
-  .diagram-scroll:focus-visible, .heatmap-scroll:focus-visible { outline-color: Highlight; }
+  .diagram-scroll:focus-visible, .heatmap-scroll:focus-visible, .live-output:focus-visible { outline-color: Highlight; }
+}
+
+/* Zero to Hero companion track */
+#lecture-navigation a {
+  padding: 11px 12px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  text-decoration: none;
+}
+#lecture-navigation a[aria-current="page"] {
+  background: var(--nav-current-bg);
+  border-color: var(--nav-current-border);
+}
+#lecture-links {
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.panel-controls {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  align-items: end;
+  margin: 18px 0 24px;
+}
+.panel-controls textarea {
+  margin: 6px 0 0;
+}
+.panel-controls output {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.code-editor {
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #0c170f;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+.live-cell {
+  margin: 22px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #101a13;
+}
+.live-cell > label {
+  color: var(--muted);
+}
+.live-cell .code-editor {
+  margin: 8px 0 12px;
+}
+.live-output {
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 46px;
+  max-height: 340px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 1px solid var(--border);
+  margin-top: 14px;
 }
