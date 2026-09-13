@@ -20,6 +20,18 @@ Start with the simplest useful thing: to predict position `t`, average the repre
 
 The mask is not a detail; it is what makes next-token training legitimate. Remove it and every position sees the answer it is being trained to predict. The loss drops, the model looks excellent, and it has learned nothing that survives generation. **Assert the invariance instead of trusting the curve:** changing the final token must leave every earlier output bit-for-bit identical.
 
+```run
+const tokens = ["the", "cat", "sat", "on", "the", "mat"];
+for (const causal of [true, false]) {
+  const head = z2h.selfAttention({ tokens, causal });
+  print(causal ? "causal " : "no mask",
+        "| row sums", head.rowSums.map(s => s.toFixed(6)).join(" "),
+        "| drift in earlier outputs", head.earlierPositionDrift);
+}
+// Zero is the assertion. Any other number is the future leaking backwards.
+```
+
+
 The rest of the architecture exists to make depth trainable:
 
 - **Multiple heads** run the same mechanism in parallel with smaller dimensions and concatenate; different heads can specialise. The total compute is comparable to one wide head.
@@ -84,6 +96,15 @@ Open the [panel](../../site/zero-to-hero.html?lecture=l7), which computes a real
 - Untick **Apply the causal mask**. The drift becomes non-zero: editing the last token changed earlier outputs. That number is the leak, quantified.
 - Lower the temperature toward 0.3 — equivalent to larger dot products. The weights collapse toward selecting one position. That is what happens if you forget the `1/√head_dim` scaling at a large head dimension.
 - Raise it to 3 and the weights flatten toward a uniform average — attention degenerating into the simple mean you started from.
+
+The returned matrix is drawn as a heatmap under the cell. Change the temperature and watch the rows sharpen or flatten:
+
+```run
+const head = z2h.selfAttention({ tokens: ["the", "cat", "sat", "on"], temperature: 0.4 });
+head.weights.forEach((row, i) => print("query", i, row.map(w => w.toFixed(3)).join("  ")));
+return head.weights;
+```
+
 
 ## Common failures and what they look like
 

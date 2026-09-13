@@ -17,6 +17,18 @@ Two failure modes follow immediately:
 - **Too large.** Pre-activations are big, `tanh` outputs sit at ±1, and the local derivative `1 - tanh(x)²` is near zero. The forward pass looks lively and the backward pass carries almost nothing. Units that are saturated for *every* example in the batch are dead: no gradient reaches their weights at all.
 - **Too small.** Activations shrink toward zero with depth. Later layers see almost no variation, gradients are tiny, and training is slow in a way that looks like a bad learning rate.
 
+```run
+for (const gain of [0.4, 1, 1.8, 3]) {
+  const report = z2h.initialisationDiagnostics({ gain, depth: 6 });
+  const last = report.layers[5];
+  print("gain", String(gain).padEnd(4),
+        "| activation std", last.activationStd.toFixed(3),
+        "| saturated", (100 * last.saturatedFraction).toFixed(1) + "%",
+        "| first-layer gradient std", report.layers[0].gradientStd.toExponential(2));
+}
+```
+
+
 The last layer deserves special attention. At the start of training you want the output distribution to be roughly uniform, which means logits near zero, which means scaling the final weights down. Otherwise the first steps are spent undoing a confidently wrong initialisation, which shows up as a sharp initial drop in loss that teaches you nothing.
 
 **Normalisation** attacks the problem differently: instead of choosing the scale so activations stay well behaved, standardise them explicitly. Batch normalisation subtracts the batch mean and divides by the batch standard deviation per unit, then applies a learned scale and shift. The consequences are real and worth stating plainly:
@@ -25,6 +37,17 @@ The last layer deserves special attention. At the start of training you want the
 - It couples examples within a batch: a prediction now depends on the other examples it was batched with. That is a strange property for a model to have, and it forces a separate inference path using running statistics.
 - Its interaction with the preceding layer's bias is redundant (the mean subtraction removes it), and with weight decay it is subtle.
 - The alternatives you will meet later — layer normalisation and RMS normalisation — avoid the batch coupling, which is why transformers use them instead.
+
+Saturation per layer, at a gain that would otherwise wreck the network:
+
+```run
+for (const normalised of [false, true]) {
+  const report = z2h.initialisationDiagnostics({ gain: 3, depth: 6, normalised });
+  print(normalised ? "normalised" : "raw       ",
+        report.layers.map(l => (100 * l.saturatedFraction).toFixed(0) + "%").join("  "));
+}
+```
+
 
 The diagnostic habit is the real deliverable: before training, look at per-layer activation histograms, the saturated fraction, and gradient magnitudes. These three plots find in one minute what a loss curve hides for an hour.
 

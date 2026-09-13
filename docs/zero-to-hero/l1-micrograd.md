@@ -16,6 +16,24 @@ Two details do all the damage when they are missing:
 - **Order.** A node can compute its inputs' gradients only after every consumer has contributed to its own. That requires a reverse topological order, not the order in which nodes were created.
 - **Accumulation.** A value used in two places receives gradient from both paths, and those contributions add. `+=`, not `=`. This single character is the most common bug in a hand-written engine, and it is invisible in the loss.
 
+Both claims are checkable right here. Predict each number before you run it:
+
+```run
+// A value used twice collects gradient from both paths.
+const a = z2h.value(3, "a");
+a.mul(a).backward();
+print("d(a*a)/da at a = 3 →", a.grad, "· overwriting would give 3");
+
+// tanh saturates: the output barely moves while the gradient collapses.
+for (const x of [0.5, 1, 2, 4]) {
+  const v = z2h.value(x, "x");
+  const out = v.tanh();
+  out.backward();
+  print("x", x, "| tanh(x)", out.data.toFixed(4), "| gradient", v.grad.toFixed(6));
+}
+```
+
+
 ## Before you watch: predict in writing
 
 1. For `L = a * b` with `a = 3`, `b = -2`: what are `dL/da` and `dL/db`?
@@ -74,6 +92,19 @@ These are the deliverables, not the loss curve.
 4. **Library agreement.** Rebuild the same expression with `torch.tensor([...], requires_grad=True)`, call `.backward()`, and assert your gradients match to `1e-6`.
 5. **Overfit.** Train your MLP on four examples until the loss is below `1e-4`. A model that cannot memorise four examples has a bug, not a learning-rate problem.
 
+The finite-difference check is the one to internalise. Edit the function and see whether your intuition about its derivative survives:
+
+```run
+const check = z2h.checkValueGradients(
+  ([a, b]) => a.mul(b).add(a.tanh()).relu(),   // change this function
+  [0.7, -1.3],
+);
+print("analytic", check.analytic);
+print("numeric ", check.numeric);
+print("largest gap", check.maxError, check.maxError < 1e-6 ? "— agrees" : "— disagrees");
+```
+
+
 ## Use the panel
 
 Open the [interactive panel](../../site/zero-to-hero.html?lecture=l1) and:
@@ -93,6 +124,22 @@ JavaScript has no operator overloading (`a.mul(b).add(c)` for `a * b + c`),
 for you, and `z2h.fitNetwork` trains a small network on four examples so you can
 see what a working loop reaches. Use it as a second opinion when your Python
 disagrees with your expectation — never as a substitute for writing your own.
+
+Clearing gradients is the step everyone skips once. Run both and keep the two numbers:
+
+```run
+const examples = [
+  { inputs: [2, 3], target: 1 }, { inputs: [3, -1], target: -1 },
+  { inputs: [0.5, 1], target: -1 }, { inputs: [1, 1], target: 1 },
+];
+for (const clearGradients of [true, false]) {
+  const fit = z2h.fitNetwork(new z2h.Network([2, 4, 4, 1], 3), examples,
+                             { steps: 150, learningRate: 0.06, clearGradients });
+  print(clearGradients ? "cleared each step " : "left in place    ",
+        "→ final loss", fit.finalLoss.toFixed(6));
+}
+```
+
 
 ## Common failures and what they look like
 

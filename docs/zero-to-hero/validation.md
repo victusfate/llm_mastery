@@ -7,10 +7,10 @@ Recorded September 12, 2026, on Node v22.22.2 in a Linux container. The reposito
 | Command | Result |
 | --- | --- |
 | `npx tsc --noEmit` | Passed with no output. One real defect was caught and fixed: the track page reused the element id `lecture-status`, which already belonged to the module lecture player |
-| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 32 tests passed, 0 failed (15 pre-existing, 17 new) |
+| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 34 tests passed, 0 failed (15 pre-existing, 19 new) |
 | `node scripts/check-docs.ts` | Checked every public Markdown document; all local links resolve |
 | `npm run build` | Static course built into `dist/`, including `site/zero-to-hero.html` and the bundled `z2h-*.mjs` modules and worker |
-| `node tests/zero-to-hero.browser.ts` | Passed: 9 lecture pages, slider extremes, worker samples, timeout recovery, notes, mobile layout |
+| `node tests/zero-to-hero.browser.ts` | Passed: 9 lecture pages, slider extremes, inline and sample cells, cell isolation, timeout recovery, edit persistence, notes, mobile layout |
 | `node tests/browser-smoke.ts`, `reader-browser.ts`, `learning-loop.browser.ts`, `persistence.browser.ts`, `visuals.browser.ts` | All passed, unchanged by this work |
 | `node tests/visual-design.browser.ts` | Passed with the new figures included: 71 concepts plus extremes and the Zero to Hero figures at 1280, 390, and 320 pixels; minimum text contrast 8.64:1, minimum graphic contrast 3.70:1; the missing-stylesheet fallback still renders |
 
@@ -32,6 +32,7 @@ These are the checks that would fail if a lesson's claims stopped being true:
 - **GPT-2 accounting**: the 12-layer, 768-wide, 50,257-vocabulary, 1,024-context configuration totals **124,439,808 parameters**, matching the published 124M figure; training compute equals `6 · N · D`; the schedule warms up to the peak, decays monotonically, and stops at a floor rather than zero.
 - **Figures**: every figure carries `role="img"`, a title, and a description; contains no `NaN`, `Infinity`, or `undefined`; and keeps every label inside the 600 × 280 viewBox.
 - **Track data**: each lecture's guide file exists, its video identifier is well formed, its labs exist in `labs.ts`, its links are HTTPS, and its sample runs in the sandbox without error.
+- **Inline examples**: all 19 runnable blocks across the nine guides execute in the sandbox, print output, and contain no `NaN` or `undefined` in what they print. The whole suite still runs in about 1.5 seconds.
 - **Guides**: each guide links its own video, credits the author, carries the six required sections, and has balanced code fences; `licensing.md` names every referenced repository and flags the unlicensed one.
 
 ## Defects found and fixed during validation

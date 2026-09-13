@@ -29,6 +29,16 @@ Three ideas to get exactly right:
 
 The gap between training loss and dev loss is the quantity that tells you what to do next. Both high: the model or the training budget is too small. Training low and dev much higher: you are memorising, and more data, smaller models, or regularisation are the remedies.
 
+```run
+for (const learningRate of [0.05, 0.4, 1.2]) {
+  const run = z2h.trainCharMLP({ words: data.NAMES, steps: 400, learningRate, seed: 4 });
+  print("lr", String(learningRate).padEnd(5),
+        "| train", run.trainLoss.toFixed(3), "| held-out", run.heldOutLoss.toFixed(3));
+}
+// Does the learning rate that wins on training loss also win on held-out loss?
+```
+
+
 ## Before you watch: predict in writing
 
 1. With `V = 27`, `d = 10`, context 3, and 200 hidden units, how many parameters does the model have? Write the arithmetic, not just the total.
@@ -88,6 +98,17 @@ Open the [panel](../../site/zero-to-hero.html?lecture=l3), which trains a small 
 - Drop the learning rate to 0.05 and retrain. Distinguish "not converged yet" from "converged to a worse place".
 - Look at the embedding scatter after a long run. Do the vowels end up near each other? Say what you can and cannot conclude from two dimensions.
 - Set the context to 1 and compare against your bigram loss. This is the same model family as lecture 2 plus a hidden layer.
+
+More context is more parameters and a wider gap between the two losses:
+
+```run
+for (const context of [1, 2, 3, 4]) {
+  const run = z2h.trainCharMLP({ words: data.NAMES, steps: 400, context, seed: 4 });
+  print("context", context, "| params", String(run.parameters).padStart(4),
+        "| train", run.trainLoss.toFixed(3), "| held-out", run.heldOutLoss.toFixed(3));
+}
+```
+
 
 ## Common failures and what they look like
 

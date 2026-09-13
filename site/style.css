@@ -861,19 +861,33 @@ html {
 .code-editor {
   font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
   background: #0c170f;
-  white-space: pre;
-  overflow-wrap: normal;
-  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
 }
-#sample-output {
+.live-cell {
+  margin: 22px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #101a13;
+}
+.live-cell > label {
+  color: var(--muted);
+}
+.live-cell .code-editor {
+  margin: 8px 0 12px;
+}
+.live-output {
   font-size: 13px;
   line-height: 1.7;
-  min-height: 60px;
+  min-height: 46px;
   max-height: 340px;
   white-space: pre-wrap;
   border: 1px solid var(--border);
+  margin-top: 14px;
 }
-#sample-output:focus-visible {
+.live-output:focus-visible {
   outline: 3px solid var(--gold);
   outline-offset: 2px;
 }

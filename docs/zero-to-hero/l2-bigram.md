@@ -14,9 +14,29 @@ Its quality is one number. For every adjacent pair in your data, take the probab
 - A model that knows nothing assigns `1/V` to everything and scores `log V`. With 27 symbols that is about 3.30 nats.
 - A model that assigned probability 1 to every observed symbol would score 0, which is only achievable by memorising.
 
+```run
+const model = z2h.trainBigram(data.NAMES);
+print("bigram loss", model.loss.toFixed(4),
+      "· uniform baseline", z2h.uniformLoss(model.characters.length).toFixed(4));
+const random = z2h.rng(11);
+const words = Array.from({ length: 6 }, () => z2h.sampleBigram(model, random));
+print("samples:", words.join(" "));
+```
+
+
 The second half of the lecture reaches the same model a different way: one linear layer over a one-hot input, trained by gradient descent on cross-entropy. It converges to almost exactly the counting solution, because that is what the objective's optimum is. This equivalence is worth internalising — the counting model is the closed-form answer, and gradient descent is a general method that finds it without knowing the closed form. Adding weight decay to the trained version behaves like adding a constant to every count: both pull the distribution toward uniform.
 
 Zero counts are the first real modelling decision. An unseen pair gets probability zero, one such pair in the evaluation data makes the whole likelihood zero, and the loss becomes infinite. Adding a constant `k` to every count ("add-k" smoothing) fixes the infinity and costs accuracy on the pairs you did observe.
+
+```run
+for (const k of [0, 0.5, 1, 2, 5]) {
+  const loss = z2h.trainBigram(data.NAMES, k).loss;
+  print("smoothing", k, "| training loss", loss.toFixed(4));
+}
+// Training loss rises with k. Explain why that is the price of a finite loss
+// on a held-out word containing a pair the training data never showed.
+```
+
 
 ## Before you watch: predict in writing
 

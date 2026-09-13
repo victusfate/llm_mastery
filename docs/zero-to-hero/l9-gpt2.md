@@ -12,7 +12,32 @@ Reproducing a published model is not a research problem. It is an accounting pro
 
 **Architecture exactly right.** GPT-2's published 124M configuration is 12 layers, width 768, 12 heads, a 1,024-token context, and a 50,257-token vocabulary with the input and output embeddings tied. Count the parameters yourself and confirm you reach the published figure. If your count is off by a few hundred thousand you have the wrong bias, norm, or tying convention, and every later comparison inherits the error. The panel does this count and lands on 124,439,808 parameters for that configuration — reproduce it by hand before trusting any code.
 
+```run
+const counts = z2h.parameterCount(
+  { layers: 12, width: 768, vocabulary: 50257, context: 1024 });
+print("total", counts.total,
+      counts.total === 124439808 ? "— matches the published 124M" : "— check your shapes");
+for (const [part, n] of Object.entries(counts))
+  if (part !== "total")
+    print("  ", part.padEnd(12), String(n).padStart(9),
+          (100 * n / counts.total).toFixed(1) + "%");
+```
+
+
 **Compute arithmetic.** A single forward-and-backward pass costs roughly `6 · N · D` floating-point operations for `N` parameters and `D` tokens: two per parameter for the forward multiply-accumulate, roughly twice that for the backward pass. Divide by what your hardware actually achieves — its peak rate multiplied by **model FLOPs utilisation**, which is measured, not assumed — and you have an estimate of wall-clock time. A rented device at 40% utilisation is doing well; treating peak as achievable overestimates progress by more than a factor of two.
+
+```run
+const parameters = z2h.parameterCount({}).total;
+for (const utilisation of [0.15, 0.3, 0.45]) {
+  const budget = z2h.trainingBudget({ parameters, tokens: 10e9,
+    deviceTflops: 400 * 8, utilisation, dollarsPerHour: 2 * 8 });
+  print("utilisation", (100 * utilisation).toFixed(0) + "%",
+        "| hours", budget.hours.toFixed(2), "| dollars", budget.dollars.toFixed(0));
+}
+// The difference between the first and last row is what the speed work in this
+// lecture is worth, in money.
+```
+
 
 **Token budget.** The compute-optimal analysis suggests roughly 20 tokens per parameter for a fixed compute budget. That guideline answers "given this much compute, how big a model" and does not answer "how good will my model be", nor does it account for inference cost, which is why production models are often trained well past it. Use it as a starting point and state which question you are asking.
 

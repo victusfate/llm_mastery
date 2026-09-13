@@ -6,6 +6,7 @@ import { NAMES, TOKENIZER_SAMPLE } from '../src/site/z2h-data.ts';
 import { lectures, findLecture } from '../src/site/z2h-track.ts';
 import { traceGraphic, matrixGraphic, scatterGraphic, histogramGraphic, seriesGraphic, treeGraphic, tokenRibbonGraphic } from '../src/site/z2h-visuals.ts';
 import { runSample, preview, findMatrix } from '../src/site/z2h-worker.ts';
+import { liveBlocksOf } from '../src/site/z2h-live-code.ts';
 import { isLearningDataKey } from '../src/site/progress-backup.ts';
 
 test('reverse-mode autograd matches finite differences, including reused variables',()=>{
@@ -298,6 +299,32 @@ test('every lecture sample runs in the sandbox and produces output',()=>{
   assert.ok(result.lines.length>0||result.returned!==undefined,lecture.id);
   assert.ok(!result.lines.join(' ').includes('NaN'),`${lecture.id} printed NaN`);
  }
+});
+
+test('every runnable block in the guides executes and prints something',()=>{
+ // Inline examples are part of the lesson text, so a broken one is a broken
+ // lesson. Each is run exactly as the page runs it.
+ let executed=0;
+ for(const lecture of lectures){
+  const text=readFileSync(new URL(lecture.doc.replace('../docs/zero-to-hero/',''),new URL('../docs/zero-to-hero/',import.meta.url)),'utf8');
+  const blocks=liveBlocksOf(text);
+  assert.ok(blocks.length>=2,`${lecture.id} carries no inline examples`);
+  blocks.forEach((code,index)=>{
+   const result=runSample(code);
+   assert.equal(result.ok,true,`${lecture.id} block ${index+1}: ${result.error}`);
+   assert.ok(result.lines.length>0||result.returned!==undefined,`${lecture.id} block ${index+1} printed nothing`);
+   assert.ok(!result.lines.join(' ').includes('NaN'),`${lecture.id} block ${index+1} printed NaN`);
+   assert.ok(!result.lines.join(' ').includes('undefined'),`${lecture.id} block ${index+1} printed undefined`);
+   executed++;
+  });
+ }
+ assert.ok(executed>=18,`only ${executed} inline examples found`);
+});
+
+test('runnable blocks are recognised only when fenced as run',()=>{
+ assert.deepEqual(liveBlocksOf('```run\nprint(1)\n```'),['print(1)']);
+ assert.deepEqual(liveBlocksOf('```js\nprint(1)\n```'),[]);
+ assert.deepEqual(liveBlocksOf('text\n\n```run\na\n```\n\nmore\n\n```run\nb\n```\n'),['a','b']);
 });
 
 test('track notes are included in progress backups',()=>{

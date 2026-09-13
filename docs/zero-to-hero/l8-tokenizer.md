@@ -29,6 +29,20 @@ Consequences that explain a great deal of language-model behaviour:
 - **Case and indentation are separate tokens,** so a vocabulary trained without code handles code badly. Deliberately including indentation patterns is why code models tokenise whitespace runs efficiently.
 - **The vocabulary is a budget line.** Vocabulary size multiplies the embedding and output projection; shrinking sequences by 10% while doubling the vocabulary is a trade, not a win.
 
+```run
+const model = z2h.trainBPE(data.TOKENIZER_SAMPLE, 32);
+print("vocabulary", model.vocabularySize,
+      "| compression", model.compression.toFixed(2) + "x");
+const probes = ["tokenizer", " tokenizer", "TOKENIZER", "1234", "café", "  indented"];
+for (const probe of probes) {
+  const ids = z2h.encodeBPE(model, probe);
+  print(JSON.stringify(probe).padEnd(14), String(ids.length).padStart(2), "tokens",
+        JSON.stringify(z2h.tokenPieces(model, ids)),
+        z2h.decodeBPE(model, ids) === probe ? "" : "ROUND TRIP BROKEN");
+}
+```
+
+
 Real tokenizers add two refinements worth knowing. A **regex pre-split** prevents merges from crossing category boundaries (letters with punctuation, words with numbers) so tokens stay linguistically sensible. **Special tokens** for document boundaries and chat roles are added outside the merge process, and must be impossible to produce from user text — otherwise input can impersonate a role marker, which is a security problem, not a style preference.
 
 ## Before you watch: predict in writing
@@ -78,6 +92,18 @@ Real tokenizers add two refinements worth knowing. A **regex pre-split** prevent
 Open the [panel](../../site/zero-to-hero.html?lecture=l8), which trains merges on text you supply:
 
 - Start at 0 merges: the token count equals the byte count. Raise the merges to 32 and watch compression climb while the merge frequencies fall — the classic diminishing return.
+
+```run
+for (const merges of [0, 8, 16, 32, 64]) {
+  const model = z2h.trainBPE(data.TOKENIZER_SAMPLE, merges);
+  print("merges", String(merges).padStart(2),
+        "| vocabulary", model.vocabularySize,
+        "| compression", model.compression.toFixed(2) + "x");
+}
+// Paste your own text into the panel above and run this again. The returns
+// flatten at a different place for prose, code, and non-English text.
+```
+
 - Read the merge table in order. The first merges are the most frequent short pairs; later ones build whole words from earlier merges.
 - In the probe field, compare `the tokenizer`, ` tokenizer`, and `TOKENIZER`. The token list shows why capitalisation and a leading space change the input the model receives.
 - Try `1234` and `1235`, then `café`, then a line of indented code. Each is a different way to see the vocabulary's inherited habits.

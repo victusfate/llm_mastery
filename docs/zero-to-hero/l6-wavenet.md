@@ -14,6 +14,17 @@ A hierarchy does it differently. Combine adjacent pairs of positions into one re
 
 The honest accounting matters, and it is the part most summaries get wrong. A hierarchy is **not** automatically smaller. One wide layer costs `context × embedding × hidden` parameters, growing linearly with context. A hierarchy costs one input level plus `k - 1` hidden-to-hidden levels, growing with the *logarithm* of the context. At short contexts the hierarchy costs more because each level carries a full `hidden × hidden` matrix; at long contexts it wins, and where the crossover sits depends on the hidden width. Find the crossover for your configuration before claiming an efficiency gain — the panel computes it for you.
 
+```run
+const plan = z2h.contextPlan({ fanIn: 2, depth: 4, hidden: 64, embedding: 16 });
+for (const point of plan.scaling) {
+  print("context", String(point.contextLength).padStart(3),
+        "| one wide layer", String(point.flat).padStart(8),
+        "| hierarchy", String(point.hierarchical).padStart(8),
+        point.hierarchical < point.flat ? "← hierarchy cheaper" : "");
+}
+```
+
+
 The second half of this lecture is not about architecture at all. It is about the working habits that keep a growing model correct:
 
 - **Shapes are the specification.** Write the expected shape of every tensor in a comment, and assert the important ones. Most bugs in a restructured model are shape bugs that broadcast into something plausible rather than crashing.
@@ -75,6 +86,18 @@ Open the [panel](../../site/zero-to-hero.html?lecture=l6):
 - Watch the crossover readout as you raise the hidden width from 16 to 256. A wider hidden layer pushes the crossover to longer contexts, because the hierarchy's cost is dominated by `hidden × hidden` matrices.
 - Change fan-in to 4 with 3 levels: 64 positions in three levels. Fewer levels, wider groups — state one advantage and one disadvantage.
 - Read the scaling table: one column grows linearly, the other logarithmically. Identify the row where they cross and explain what changes if the embedding is 64 instead of 16.
+
+The crossover is not a fixed fact about hierarchies; it moves with the hidden width:
+
+```run
+for (const hidden of [16, 64, 256]) {
+  const plan = z2h.contextPlan({ fanIn: 2, depth: 8, hidden, embedding: 16 });
+  const crossover = plan.scaling.find(point => point.hierarchical < point.flat);
+  print("hidden", String(hidden).padStart(3), "→ hierarchy becomes cheaper at context",
+        crossover ? crossover.contextLength : "beyond this range");
+}
+```
+
 
 ## Common failures and what they look like
 

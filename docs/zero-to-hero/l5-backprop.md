@@ -28,6 +28,15 @@ The transposes are not arbitrary. They are forced: there is exactly one way to c
 
 Why do this at all, when autograd exists? Because you cannot debug what you cannot predict. Fused kernels, mixed precision, gradient clipping, checkpointing, and custom operators all require knowing what the backward pass should produce. In [module 4](../../modules/04-systems.md) you will write a kernel and supply its gradient, and a finite-difference check will be the only thing standing between you and a silently wrong training run.
 
+```run
+for (const rule of ["correct", "no-batch-mean", "no-onehot", "transposed-hidden"]) {
+  const check = z2h.gradientCheck(rule);
+  print(rule.padEnd(18), check.passed ? "passes" : "FAILS ",
+        check.entries.map(e => `${e.name}:${e.maxError.toExponential(1)}`).join("  "));
+}
+```
+
+
 ## Before you watch: predict in writing
 
 1. `X` is `32 × 100`, `W` is `100 × 50`. What are the shapes of `dX`, `dW`, and `db`? Which one involves a sum over the batch?
@@ -80,6 +89,16 @@ Open the [panel](../../site/zero-to-hero.html?lecture=l5). It runs the check on 
 - **Wrong orientation on the way back** — the last layer still checks out perfectly while the earlier layer is wrong. Look at the bars: a check that only covers the output layer would pass this.
 
 The lesson to write in your notes: partial checks give false confidence, so check every tensor.
+
+```run
+const check = z2h.gradientCheck("transposed-hidden");
+print(check.explanation);
+print("tensors that still look correct:",
+      check.entries.filter(e => e.passed).map(e => e.name).join(", "));
+// A check covering only the output layer would have passed this. Yours should
+// cover every tensor, every time.
+```
+
 
 ## Common failures and what they look like
 

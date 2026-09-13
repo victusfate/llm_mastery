@@ -14,6 +14,18 @@ page.on('console', message => {
 page.on('response', response => {
  if (response.url().startsWith(base) && response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
 });
+// Every runnable block on a page becomes a .live-cell: the ones beside the
+// explanations, then the lecture's full sample at the end.
+async function runCell(index: number): Promise<string> {
+ const cell = page.locator('.live-cell').nth(index);
+ await cell.locator('button.primary').click();
+ await page.waitForFunction(
+  (n) => document.querySelectorAll('.live-cell')[n]?.querySelector('.live-output')?.textContent.length > 0,
+  index, { timeout: 20000 });
+ assert.match(await cell.locator('[role="status"]').textContent(), /Finished in \d+ ms/, `cell ${index}`);
+ return cell.locator('.live-output').textContent();
+}
+
 try {
  for (const lecture of lectures) {
   await page.goto(`${base}/site/zero-to-hero.html?lecture=${lecture.id}`);
@@ -40,28 +52,44 @@ try {
   }
   // Labs named by the track must resolve to real lab pages.
   assert.equal(await page.locator('#lecture-mapping .lab-link').count(), lecture.labs.length, lecture.id);
-  // The sample runs in a worker and reports something back.
-  await page.locator('#sample-run').click();
-  await page.waitForFunction(() => document.querySelector('#sample-output').textContent.length > 0);
-  const output = await page.locator('#sample-output').textContent();
-  assert.ok(output.length > 5, `${lecture.id}: empty sample output`);
-  assert.ok(!/^(?:\w*Error|SyntaxError)/.test(output.trim()), `${lecture.id}: ${output.slice(0, 200)}`);
-  assert.match(await page.locator('#sample-status').textContent(), /Finished in \d+ ms/, lecture.id);
+  // Inline examples from the guide plus the lecture's full sample.
+  const cells = await page.locator('.live-cell').count();
+  assert.ok(cells >= 3, `${lecture.id}: expected inline cells plus a sample, found ${cells}`);
+  for (const index of [0, cells - 1]) {
+   const output = await runCell(index);
+   assert.ok(output.length > 5, `${lecture.id} cell ${index}: empty output`);
+   assert.ok(!/^(?:\w*Error|SyntaxError)/.test(output.trim()), `${lecture.id} cell ${index}: ${output.slice(0, 200)}`);
+   assert.ok(!output.includes('NaN'), `${lecture.id} cell ${index} printed NaN`);
+  }
+  // Editing one cell must not disturb another on the same page.
+  await page.locator('.live-cell textarea').first().fill('print("edited");');
+  assert.ok(!(await page.locator('.live-cell textarea').nth(cells - 1).inputValue()).includes('edited'), lecture.id);
  }
 
  // A runaway snippet must cost a terminated worker, not a frozen page.
  await page.goto(`${base}/site/zero-to-hero.html?lecture=l1`);
- await page.locator('#sample-code').fill('while (true) {}');
- await page.locator('#sample-run').click();
- await page.waitForFunction(() => /Stopped after/.test(document.querySelector('#sample-output').textContent), null, { timeout: 15000 });
- assert.ok(await page.locator('#sample-run').isEnabled(), 'the run button must recover after a timeout');
- await page.locator('#sample-reset').click();
- assert.equal(await page.locator('#sample-code').inputValue(), lectures[0].sample.code);
+ await page.locator('#guide-body h2').first().waitFor();
+ const sample = page.locator('.live-cell').last();
+ await sample.locator('textarea').fill('while (true) {}');
+ await sample.locator('button.primary').click();
+ await page.waitForFunction(() => /Stopped after/.test(document.querySelector('.live-cell:last-of-type .live-output')?.textContent ?? ''), null, { timeout: 20000 });
+ assert.ok(await sample.locator('button.primary').isEnabled(), 'the run button must recover after a timeout');
+ await sample.locator('button').nth(1).click();
+ assert.equal(await sample.locator('textarea').inputValue(), lectures[0].sample.code);
 
  // A returned matrix is drawn, so editing code changes a picture.
- await page.locator('#sample-code').fill('return [[1,2],[3,4]];');
- await page.locator('#sample-run').click();
- await page.locator('#sample-figure svg').waitFor();
+ await sample.locator('textarea').fill('return [[1,2],[3,4]];');
+ await sample.locator('button.primary').click();
+ await sample.locator('svg').waitFor();
+
+ // An inline cell keeps an edit across a reload within the session.
+ const inline = page.locator('.live-cell').first();
+ await inline.locator('textarea').fill('print("my own experiment", 6 * 7);');
+ await inline.locator('button.primary').click();
+ await page.waitForFunction(() => /42/.test(document.querySelector('.live-cell .live-output')?.textContent ?? ''));
+ await page.reload();
+ await page.locator('#guide-body h2').first().waitFor();
+ assert.match(await page.locator('.live-cell textarea').first().inputValue(), /my own experiment/);
 
  // Notes persist like every other course note.
  await page.locator('#lecture-notes').fill('My prediction was wrong about saturation.');
@@ -91,5 +119,5 @@ try {
  await page.locator('#lecture-widget').screenshot({ path: '/tmp/llm-zero-to-hero-panel.png' });
 
  assert.deepEqual(errors, []);
- console.log(`Zero to Hero browser checks passed: ${lectures.length} lecture pages, slider extremes, worker samples, timeout recovery, notes, mobile layout.`);
+ console.log(`Zero to Hero browser checks passed: ${lectures.length} lecture pages, slider extremes, inline and sample cells, timeout recovery, notes, mobile layout.`);
 } finally { await browser.close(); }

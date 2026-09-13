@@ -6,12 +6,10 @@ import { modules } from "./content.ts";
 import { labs } from "./labs.ts";
 import { lectures, findLecture, type Lecture } from "./z2h-track.ts";
 import { mountWidget } from "./z2h-widgets.ts";
-import { matrixGraphic } from "./z2h-visuals.ts";
-import type { SandboxResponse } from "./z2h-worker.ts";
+import { mountLiveCell, upgradeLiveBlocks } from "./z2h-live-code.ts";
 import { startExplorer } from "./explorer.ts";
 import { element as $ } from "./dom.ts";
 
-const SANDBOX_TIMEOUT = 5000;
 const requested = new URL(location.href).searchParams.get("lecture");
 const lecture = findLecture(requested) ?? lectures[0];
 startExplorer();
@@ -83,89 +81,19 @@ async function renderGuide(current: Lecture): Promise<void> {
     const response = await fetch(current.doc);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     $("guide-body").innerHTML = markdown(await response.text(), new URL(current.doc, location.href));
+    upgradeLiveBlocks($("guide-body"), `llm-training-zero-to-hero-inline-${current.id}`);
   } catch (error) {
     $("guide-body").textContent = `The study guide could not load: ${(error as Error).message}. Open ${current.doc} directly.`;
   }
 }
 
-/** One worker per run keeps a runaway snippet from blocking later attempts. */
-function runInWorker(code: string): Promise<SandboxResponse> {
-  return new Promise((resolve) => {
-    let worker: Worker;
-    try {
-      worker = new Worker(new URL("z2h-worker.mjs", import.meta.url), { type: "module" });
-    } catch (error) {
-      resolve({ ok: false, lines: [], error: `This browser refused to start the sandbox worker: ${String(error)}` });
-      return;
-    }
-    const timer = setTimeout(() => {
-      worker.terminate();
-      resolve({ ok: false, lines: [], error: `Stopped after ${SANDBOX_TIMEOUT / 1000} seconds. Reduce the work, or check for a loop that never ends.` });
-    }, SANDBOX_TIMEOUT);
-    worker.onmessage = (event: MessageEvent<SandboxResponse>) => {
-      clearTimeout(timer);
-      worker.terminate();
-      resolve(event.data);
-    };
-    worker.onerror = (event) => {
-      clearTimeout(timer);
-      worker.terminate();
-      resolve({ ok: false, lines: [], error: event.message || "The sandbox worker failed to load." });
-    };
-    worker.postMessage({ code });
-  });
-}
-
 function renderSandbox(current: Lecture): void {
-  const editor = $("sample-code");
-  const storageKey = `llm-training-zero-to-hero-code-${current.id}`;
-  let saved: string | null = null;
-  try {
-    saved = sessionStorage.getItem(storageKey);
-  } catch {}
-  editor.value = saved ?? current.sample.code;
-  editor.disabled = false;
   $("sample-description").textContent = current.sample.description;
-  const output = $("sample-output");
-  const figure = $("sample-figure");
-
-  async function run() {
-    $("sample-run").disabled = true;
-    $("sample-status").textContent = "Running in a background worker…";
-    try {
-      sessionStorage.setItem(storageKey, editor.value);
-    } catch {}
-    const started = performance.now();
-    const result = await runInWorker(editor.value);
-    const elapsed = Math.round(performance.now() - started);
-    const body = [...result.lines];
-    if (result.returned !== undefined) body.push(`→ ${result.returned}`);
-    if (result.error) body.push(result.error);
-    output.textContent = body.join("\n") || "The sample produced no output. Add a print(...) call or return a value.";
-    output.classList.toggle("failure", !result.ok);
-    figure.innerHTML = result.matrix
-      ? matrixGraphic(result.matrix, {
-          caption: "Matrix returned by your code",
-          description: `A ${result.matrix.length} by ${result.matrix[0].length} matrix returned by the sample; brighter cells are larger values.`,
-        })
-      : "";
-    $("sample-status").textContent = `${result.ok ? "Finished" : "Stopped"} in ${elapsed} ms. Nothing left this page: the sandbox has no network or storage access.`;
-    $("sample-run").disabled = false;
-  }
-
-  $("sample-run").onclick = run;
-  $("sample-reset").onclick = () => {
-    editor.value = current.sample.code;
-    output.textContent = "";
-    figure.innerHTML = "";
-    $("sample-status").textContent = "Restored the original sample.";
-  };
-  editor.onkeydown = (event) => {
-    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-      event.preventDefault();
-      run();
-    }
-  };
+  mountLiveCell($("lecture-sample"), {
+    code: current.sample.code,
+    storageKey: `llm-training-zero-to-hero-code-${current.id}`,
+    label: "The lecture's full example — Ctrl/Cmd + Enter runs it",
+  });
 }
 
 function renderNotes(current: Lecture): void {

@@ -112,12 +112,7 @@ interface PageElements {
   'lecture-previous': HTMLElementTagNameMap['a'];
   'lecture-next': HTMLElementTagNameMap['a'];
   'sample-description': HTMLElementTagNameMap['p'];
-  'sample-code': HTMLElementTagNameMap['textarea'];
-  'sample-run': HTMLElementTagNameMap['button'];
-  'sample-reset': HTMLElementTagNameMap['button'];
-  'sample-output': HTMLElementTagNameMap['pre'];
-  'sample-figure': HTMLElementTagNameMap['div'];
-  'sample-status': HTMLElementTagNameMap['p'];
+  'lecture-sample': HTMLElementTagNameMap['div'];
 }
 export function element<K extends keyof PageElements>(id:K):PageElements[K];
 export function element(id:string):HTMLElement;
