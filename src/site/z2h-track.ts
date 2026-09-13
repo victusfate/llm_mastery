@@ -10,7 +10,7 @@
 // (lecture 9), checked 2026-09-12. See docs/zero-to-hero/licensing.md for the
 // license status of each referenced work.
 
-import type { WidgetKind } from "./z2h-widgets.ts";
+import type { PanelKind } from "./z2h-panels.ts";
 
 export interface TrackLink {
   label: string;
@@ -28,8 +28,9 @@ export interface Lecture {
   focus: string;
   /** What you should be able to do afterwards, independently. */
   outcome: string;
-  widget: WidgetKind;
-  doc: string;
+  panel: PanelKind;
+  /** Guide filename inside docs/zero-to-hero/. */
+  guide: string;
   /** Course modules this lecture feeds, by index into content.ts modules. */
   courseModules: { module: number; why: string }[];
   labs: string[];
@@ -53,8 +54,8 @@ export const lectures: Lecture[] = [
       "A derivative is a local rule, and reverse mode applies those rules once per node in the opposite order to the forward pass.",
     outcome:
       "Write a scalar autograd engine from nothing, and prove its gradients against finite differences instead of trusting a falling loss.",
-    widget: "autograd",
-    doc: "../docs/zero-to-hero/l1-micrograd.md",
+    panel: "autograd",
+    guide: "l1-micrograd.md",
     courseModules: [{ module: 0, why: "Autograd, loss, and the verified training loop are module 1's entire subject." }],
     labs: ["01-01", "01-02"],
     links: [
@@ -98,8 +99,8 @@ return z2h.valueTrace(loss).nodes.map(n => [n.label || n.op, n.value, n.grad]);`
       "Language modelling is next-symbol prediction; counting pairs already gives a model, and its negative log likelihood is the number every later model must beat.",
     outcome:
       "Build a bigram model two ways — counts and a trained single layer — and explain why they reach nearly the same loss.",
-    widget: "bigram",
-    doc: "../docs/zero-to-hero/l2-bigram.md",
+    panel: "bigram",
+    guide: "l2-bigram.md",
     courseModules: [
       { module: 0, why: "Cross-entropy, sampling, and a baseline you can beat are the foundations module's tools." },
       { module: 1, why: "The same objective scales up to the decoder you build in module 2." },
@@ -130,8 +131,8 @@ return z2h.trainBigram(data.NAMES, 5).loss - model.loss;`,
       "An embedding table plus one hidden layer generalises across contexts that counting cannot reach, and introduces every practical training control at once.",
     outcome:
       "Train a context-window MLP, split train/dev/test honestly, tune a learning rate by evidence, and report the train–held-out gap.",
-    widget: "mlp",
-    doc: "../docs/zero-to-hero/l3-mlp.md",
+    panel: "mlp",
+    guide: "l3-mlp.md",
     courseModules: [
       { module: 0, why: "Learning-rate search, over- and underfitting, and split discipline belong to module 1." },
       { module: 4, why: "Honest held-out reporting is the habit module 5 formalises." },
@@ -163,8 +164,8 @@ return "compare the two columns, not the loss curve";`,
       "Initialisation scale decides whether activations saturate and whether gradients survive the trip back; normalisation removes much of that dependence.",
     outcome:
       "Diagnose a network from its activation and gradient statistics before training it, and explain what batch normalisation fixes and what it costs.",
-    widget: "activations",
-    doc: "../docs/zero-to-hero/l4-activations.md",
+    panel: "activations",
+    guide: "l4-activations.md",
     courseModules: [
       { module: 0, why: "Diagnosing a failing training run is module 1's failure-diagnosis lab." },
       { module: 1, why: "Norm placement in a decoder block is a module 2 decision." },
@@ -199,8 +200,8 @@ return normalised.layers.map(l => l.activationStd);`,
       "Differentiating a whole layer stack by hand, at tensor level, turns backpropagation from a library call into something you can audit.",
     outcome:
       "Derive the backward pass of cross-entropy, a linear layer, tanh, normalisation, and an embedding lookup, and check each against autograd.",
-    widget: "gradcheck",
-    doc: "../docs/zero-to-hero/l5-backprop.md",
+    panel: "gradcheck",
+    guide: "l5-backprop.md",
     courseModules: [
       { module: 0, why: "Gradient verification is the first foundations lab and the habit everything later depends on." },
       { module: 3, why: "Custom kernels in module 4 need a hand-derived backward pass and a check for it." },
@@ -232,8 +233,8 @@ return z2h.gradientCheck("transposed-hidden").entries;`,
       "Context can be combined hierarchically instead of concatenated into one wide layer, and building that requires reading shapes carefully at every level.",
     outcome:
       "Restructure a flat context model into levels, keep the tensor shapes straight, and justify the parameter cost you chose.",
-    widget: "hierarchy",
-    doc: "../docs/zero-to-hero/l6-wavenet.md",
+    panel: "hierarchy",
+    guide: "l6-wavenet.md",
     courseModules: [
       { module: 0, why: "Convolution and shape discipline are covered by the foundations convolution lab." },
       { module: 1, why: "Module 2 asks you to keep every shape in a decoder explicit." },
@@ -266,8 +267,8 @@ return crossover;`,
       "Attention is a weighted average whose weights are computed from the data, and a causal mask is what makes next-token training honest.",
     outcome:
       "Implement a small decoder — attention, multiple heads, residual connections, normalisation — and test that no position can see the future.",
-    widget: "attention",
-    doc: "../docs/zero-to-hero/l7-gpt.md",
+    panel: "attention",
+    guide: "l7-gpt.md",
     courseModules: [
       { module: 1, why: "This is module 2's build: a causal decoder with an attention-parity test." },
       { module: 2, why: "Module 3 pretrains the architecture you build here." },
@@ -302,8 +303,8 @@ return z2h.selfAttention({ tokens, causal: true }).weights;`,
       "The tokenizer is a separate model with its own training data, and many odd language-model behaviours are inherited from it.",
     outcome:
       "Train byte-pair merges, encode and decode losslessly, and predict which inputs your vocabulary will handle badly.",
-    widget: "tokenizer",
-    doc: "../docs/zero-to-hero/l8-tokenizer.md",
+    panel: "tokenizer",
+    guide: "l8-tokenizer.md",
     courseModules: [
       { module: 1, why: "Module 2's first lab is a reversible tokenizer with a small BPE vocabulary." },
       { module: 2, why: "Tokenisation decisions change the token budget you account for in module 3." },
@@ -337,8 +338,8 @@ return model.merges.slice(0, 8);`,
       "Reproducing a published model is a systems and bookkeeping exercise: exact parameter counts, data throughput, schedules, and measured utilisation.",
     outcome:
       "Plan a run from parameter count and token budget, state the compute and cost before starting, then compare your measurement with the plan.",
-    widget: "budget",
-    doc: "../docs/zero-to-hero/l9-gpt2.md",
+    panel: "budget",
+    guide: "l9-gpt2.md",
     courseModules: [
       { module: 2, why: "Module 3 runs a matched-budget pretraining study with checkpointing." },
       { module: 3, why: "Module 4 measures throughput, memory, and distributed behaviour." },
@@ -370,7 +371,3 @@ return budget;`,
     },
   },
 ];
-
-export function findLecture(id: string | null): Lecture | undefined {
-  return lectures.find((lecture) => lecture.id === id);
-}

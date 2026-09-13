@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { conceptVisual, visualSteps } from '../src/site/concept-visuals.ts';
 import { networkGraphic, workersGraphic, maskGraphic, attentionGraphic, descentGraphic } from '../src/site/graphics.ts';
+import { traceGraphic, matrixGraphic, scatterGraphic, histogramGraphic, seriesGraphic, treeGraphic, tokenRibbonGraphic } from '../src/site/z2h-visuals.ts';
+import * as z from '../src/site/z2h-numerics.ts';
+import { NAMES, TOKENIZER_SAMPLE } from '../src/site/z2h-data.ts';
 const { chromium }=await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const browser=await chromium.launch();
 const page=await browser.newPage();
@@ -9,10 +12,10 @@ const css=await readFile('site/style.css','utf8');
 const examples=Object.keys(visualSteps).map(title=>({title,html:conceptVisual(title)}));
 examples.push({title:'Control extremes',html:networkGraphic(32)+workersGraphic(8,16)+maskGraphic(20,20)+attentionGraphic(8,7,false)+descentGraphic(2.5)});
 // Zero to Hero figures meet the same bar as the concept visuals.
-const { traceGraphic, matrixGraphic, scatterGraphic, histogramGraphic, seriesGraphic, treeGraphic, tokenRibbonGraphic }=await import('../src/site/z2h-visuals.ts');
-const z=await import('../src/site/z2h-numerics.ts');
 const trace=z.backpropagate(z.parseExpression('(a*b + c) * tanh(a) + exp(b)'),{a:1.5,b:-2,c:0.5});
-const bigram=z.trainBigram((await import('../src/site/z2h-data.ts')).NAMES);
+const bigram=z.trainBigram(NAMES);
+const tokenizer=z.trainBPE(TOKENIZER_SAMPLE,32);
+const probe=z.encodeBPE(tokenizer,'the tokenizer sees 1234 and    indentation');
 const attention=z.selfAttention({tokens:['the','cat','sat','on','the','mat']});
 const diagnostics=z.initialisationDiagnostics({gain:3,depth:8});
 examples.push({title:'Zero to Hero figures',html:
@@ -25,7 +28,7 @@ examples.push({title:'Zero to Hero figures',html:
  seriesGraphic([{label:'activation std',values:diagnostics.layers.map(l=>l.activationStd)},{label:'gradient std',values:diagnostics.layers.map(l=>l.gradientStd),comparison:true}],'Per-layer statistics',{logScale:true,xLabel:'Layer index'})+
  seriesGraphic([{label:'learning rate',values:z.learningRateSchedule({steps:120,warmup:15})}],'Warmup then cosine decay',{xLabel:'Optimizer step'})+
  treeGraphic(2,6)+
- tokenRibbonGraphic(z.tokenPieces(z.trainBPE((await import('../src/site/z2h-data.ts')).TOKENIZER_SAMPLE,32),z.encodeBPE(z.trainBPE((await import('../src/site/z2h-data.ts')).TOKENIZER_SAMPLE,32),'the tokenizer sees 1234 and    indentation')),'Token boundaries')});
+ tokenRibbonGraphic(z.tokenPieces(tokenizer,probe),'Token boundaries')});
 const artifact='/tmp/llm-visual-design';await mkdir(artifact,{recursive:true});
 function contrast(a:number[],b:number[]) {
  const luminance=(rgb:number[])=>rgb.slice(0,3).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);

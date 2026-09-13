@@ -37,5 +37,5 @@ def step(loss):
     optimizer.zero_grad()
 `;
 
-/** Short sequence for the attention widget: five words, one clear dependency. */
+/** Short sequence for the attention panel: one repeated word, one clear dependency. */
 export const ATTENTION_SENTENCE = ["the", "cat", "sat", "on", "the", "mat"];

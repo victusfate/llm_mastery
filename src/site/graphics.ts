@@ -3,7 +3,7 @@ import { escapeHTML as esc } from './engine.ts';
 // SVG primitives keep diagrams local, sharp at any zoom, and available offline.
 export const text = (x:number,y:number,label:string) => `<text x="${x}" y="${y}">${esc(label)}</text>`;
 export const line = (x:number,y:number,a:number,b:number,extra='') => `<path d="M${x} ${y} L${a} ${b}" class="wire" ${extra}/>`;
-export const node = (x:number,y:number,label='') => `<circle cx="${x}" cy="${y}" r="15" class="neuron"/>${label?text(x,y+5,label):''}`;
+const node = (x:number,y:number,label='') => `<circle cx="${x}" cy="${y}" r="15" class="neuron"/>${label?text(x,y+5,label):''}`;
 export const box = (x:number,y:number,w:number,h:number,label:string) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" class="block"/>${text(x+w/2,y+h/2+5,label)}`;
 // Essential presentation travels with the SVG: stale or missing page CSS must
 // never turn labels black or remove the network edges.

@@ -821,10 +821,10 @@ html {
 .diagram-description { font-size: 16px; color: var(--text); line-height: 1.6; }
 .concept-figure { margin-inline: 0; }
 .heatmap-scroll { max-width: 100%; overflow-x: auto; padding: 3px; }
-.heatmap-scroll:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.heatmap-scroll:focus-visible, .live-output:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 @media (forced-colors: active) {
   .mechanism-graphic { forced-color-adjust: none; }
-  .diagram-scroll:focus-visible, .heatmap-scroll:focus-visible { outline-color: Highlight; }
+  .diagram-scroll:focus-visible, .heatmap-scroll:focus-visible, .live-output:focus-visible { outline-color: Highlight; }
 }
 
 /* Zero to Hero companion track */
@@ -844,17 +844,17 @@ html {
   font-size: 14px;
   line-height: 1.9;
 }
-.widget-controls {
+.panel-controls {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   align-items: end;
   margin: 18px 0 24px;
 }
-.widget-controls textarea {
+.panel-controls textarea {
   margin: 6px 0 0;
 }
-.widget-controls output {
+.panel-controls output {
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
@@ -886,8 +886,4 @@ html {
   white-space: pre-wrap;
   border: 1px solid var(--border);
   margin-top: 14px;
-}
-.live-output:focus-visible {
-  outline: 3px solid var(--gold);
-  outline-offset: 2px;
 }

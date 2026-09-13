@@ -4,14 +4,14 @@
 import { markdown, escapeHTML as esc } from "./engine.ts";
 import { modules } from "./content.ts";
 import { labs } from "./labs.ts";
-import { lectures, findLecture, type Lecture } from "./z2h-track.ts";
-import { mountWidget } from "./z2h-widgets.ts";
+import { lectures, type Lecture } from "./z2h-track.ts";
+import { mountPanel } from "./z2h-panel-mount.ts";
 import { mountLiveCell, upgradeLiveBlocks } from "./z2h-live-code.ts";
 import { startExplorer } from "./explorer.ts";
 import { element as $ } from "./dom.ts";
 
 const requested = new URL(location.href).searchParams.get("lecture");
-const lecture = findLecture(requested) ?? lectures[0];
+const lecture = lectures.find((entry) => entry.id === requested) ?? lectures[0];
 startExplorer();
 
 function link(item: { label: string; url: string; note?: string }): string {
@@ -76,18 +76,20 @@ function renderMapping(current: Lecture): void {
       .join("");
 }
 
+const guideURL = (current: Lecture) => `../docs/zero-to-hero/${current.guide}`;
+
 async function renderGuide(current: Lecture): Promise<void> {
   try {
-    const response = await fetch(current.doc);
+    const response = await fetch(guideURL(current));
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    $("guide-body").innerHTML = markdown(await response.text(), new URL(current.doc, location.href));
+    $("guide-body").innerHTML = markdown(await response.text(), new URL(guideURL(current), location.href));
     upgradeLiveBlocks($("guide-body"), `llm-training-zero-to-hero-inline-${current.id}`);
   } catch (error) {
-    $("guide-body").textContent = `The study guide could not load: ${(error as Error).message}. Open ${current.doc} directly.`;
+    $("guide-body").textContent = `The study guide could not load: ${(error as Error).message}. Open ${guideURL(current)} directly.`;
   }
 }
 
-function renderSandbox(current: Lecture): void {
+function renderSampleCell(current: Lecture): void {
   $("sample-description").textContent = current.sample.description;
   mountLiveCell($("lecture-sample"), {
     code: current.sample.code,
@@ -115,6 +117,12 @@ function renderNotes(current: Lecture): void {
   };
   notes.oninput = save;
   $("lecture-save").onclick = save;
+  wireNoteExport(current, notes);
+  wireTutorHandoff(current, notes);
+}
+
+/** Download the note as Markdown, so evidence can leave the browser. */
+function wireNoteExport(current: Lecture, notes: HTMLTextAreaElement): void {
   $("lecture-export").onclick = () => {
     const text = `# Zero to Hero lecture ${current.number}: ${current.title}\n\nStatus: unreviewed\nExported: ${new Date().toISOString()}\n\n${notes.value}`;
     const url = URL.createObjectURL(new Blob([text], { type: "text/markdown" }));
@@ -124,8 +132,12 @@ function renderNotes(current: Lecture): void {
     anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
+}
+
+/** Copy a prompt that asks a tutor to test understanding, not accept the note. */
+function wireTutorHandoff(current: Lecture, notes: HTMLTextAreaElement): void {
   $("lecture-tutor").onclick = async () => {
-    const prompt = `I am working through lecture ${current.number} of the Zero to Hero series ("${current.title}") alongside docs/zero-to-hero/${current.doc.split("/").pop()}. Ask me to explain the mechanism from memory, then give me one fresh transfer task I have not seen. Do not accept my note as evidence of understanding.\n\nMy note:\n${notes.value}`;
+    const prompt = `I am working through lecture ${current.number} of the Zero to Hero series ("${current.title}") alongside docs/zero-to-hero/${current.guide}. Ask me to explain the mechanism from memory, then give me one fresh transfer task I have not seen. Do not accept my note as evidence of understanding.\n\nMy note:\n${notes.value}`;
     try {
       await navigator.clipboard.writeText(prompt);
       $("track-status").textContent = "Tutor handoff copied to the clipboard.";
@@ -138,7 +150,7 @@ function renderNotes(current: Lecture): void {
 renderNavigation(lecture);
 renderHeader(lecture);
 renderMapping(lecture);
-renderSandbox(lecture);
+renderSampleCell(lecture);
 renderNotes(lecture);
-mountWidget($("lecture-widget"), lecture.widget);
+mountPanel($("lecture-panel"), lecture.panel);
 await renderGuide(lecture);

@@ -1,4 +1,4 @@
-// Interactive panels for the Zero to Hero track.
+// The Zero to Hero panels: one declarative entry per lecture.
 //
 // One panel per lecture. Each declares its controls and a pure render function,
 // so the numbers on screen come from the same routines the learner is asked to
@@ -7,11 +7,12 @@
 
 import { escapeHTML as esc } from "./engine.ts";
 import { barsGraphic } from "./graphics.ts";
+import { metrics, table, fixed, compact } from "./z2h-readout.ts";
 import * as z from "./z2h-numerics.ts";
 import { NAMES, TOKENIZER_SAMPLE, ATTENTION_SENTENCE } from "./z2h-data.ts";
 import { traceGraphic, matrixGraphic, scatterGraphic, histogramGraphic, seriesGraphic, treeGraphic, tokenRibbonGraphic } from "./z2h-visuals.ts";
 
-export type WidgetKind =
+export type PanelKind =
   | "autograd"
   | "bigram"
   | "mlp"
@@ -22,16 +23,16 @@ export type WidgetKind =
   | "tokenizer"
   | "budget";
 
-type ControlSpec =
+export type ControlSpec =
   | { name: string; kind: "slider"; label: string; min: number; max: number; step: number; value: number }
   | { name: string; kind: "text"; label: string; value: string }
   | { name: string; kind: "textarea"; label: string; value: string }
   | { name: string; kind: "checkbox"; label: string; value: boolean }
   | { name: string; kind: "select"; label: string; value: string; options: { value: string; label: string }[] };
 
-type Values = Record<string, number | string | boolean>;
+export type Values = Record<string, number | string | boolean>;
 
-interface Widget {
+export interface Panel {
   title: string;
   controls: ControlSpec[];
   /** Expensive panels redraw on an explicit run instead of on every keystroke. */
@@ -41,19 +42,7 @@ interface Widget {
 }
 
 const number = (values: Values, name: string) => Number(values[name]);
-const metrics = (entries: [string, string][]) =>
-  '<div class="metrics">' + entries.map(([value, label]) => `<div class="metric"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join("") + "</div>";
-const table = (headers: string[], rows: string[][]) =>
-  '<div class="table-scroll"><table><thead><tr>' +
-  headers.map((h) => `<th scope="col">${esc(h)}</th>`).join("") +
-  "</tr></thead><tbody>" +
-  rows.map((row) => "<tr>" + row.map((cell) => `<td>${esc(cell)}</td>`).join("") + "</tr>").join("") +
-  "</tbody></table></div>";
-const fixed = (value: number, digits = 3) => (Number.isFinite(value) ? value.toFixed(digits) : "—");
-const compact = (value: number) =>
-  Math.abs(value) >= 1e9 ? `${(value / 1e9).toFixed(2)}B` : Math.abs(value) >= 1e6 ? `${(value / 1e6).toFixed(2)}M` : Math.abs(value) >= 1e3 ? `${(value / 1e3).toFixed(1)}K` : value.toFixed(0);
-
-const widgets: Record<WidgetKind, Widget> = {
+export const panels: Record<PanelKind, Panel> = {
   autograd: {
     title: "Differentiate an expression you choose",
     controls: [
@@ -225,7 +214,7 @@ const widgets: Record<WidgetKind, Widget> = {
             [fixed(last.activationStd), "last-layer activation std"],
             [`${(100 * last.saturatedFraction).toFixed(1)}%`, "saturated activations"],
             [last.gradientStd.toExponential(2), "first-layer gradient std"],
-            [`${(100 * report.deadOutputFraction).toFixed(0)}%`, "always-saturated units"],
+            [`${(100 * report.alwaysSaturatedFraction).toFixed(0)}%`, "always-saturated units"],
           ]) +
           table(
             ["layer", "activation std", "saturated", "gradient std"],
@@ -459,116 +448,3 @@ const widgets: Record<WidgetKind, Widget> = {
     },
   },
 };
-
-export function widgetTitle(kind: WidgetKind): string {
-  return widgets[kind].title;
-}
-
-/** Build the controls, draw once, and redraw on input or on an explicit run. */
-export function mountWidget(root: HTMLElement, kind: WidgetKind): void {
-  const widget = widgets[kind];
-  const controls = document.createElement("div");
-  controls.className = "widget-controls";
-  const figures = document.createElement("div");
-  const readout = document.createElement("div");
-  const note = document.createElement("p");
-  note.className = "muted";
-  readout.setAttribute("aria-live", "polite");
-  const values: Values = {};
-  const inputs: HTMLElement[] = [];
-
-  for (const spec of widget.controls) {
-    const wrapper = document.createElement("label");
-    wrapper.htmlFor = `z2h-${kind}-${spec.name}`;
-    wrapper.append(document.createTextNode(spec.label));
-    let input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-    if (spec.kind === "select") {
-      input = document.createElement("select");
-      for (const option of spec.options) {
-        const element = document.createElement("option");
-        element.value = option.value;
-        element.textContent = option.label;
-        input.append(element);
-      }
-      input.value = spec.value;
-      values[spec.name] = spec.value;
-    } else if (spec.kind === "textarea") {
-      input = document.createElement("textarea");
-      input.rows = 6;
-      input.value = spec.value;
-      values[spec.name] = spec.value;
-    } else {
-      input = document.createElement("input");
-      if (spec.kind === "slider") {
-        Object.assign(input, { type: "range", min: spec.min, max: spec.max, step: spec.step, value: spec.value });
-        values[spec.name] = spec.value;
-        const output = document.createElement("output");
-        output.textContent = String(spec.value);
-        wrapper.append(document.createTextNode(": "), output);
-        input.addEventListener("input", () => {
-          output.textContent = (input as HTMLInputElement).value;
-        });
-      } else if (spec.kind === "checkbox") {
-        input.type = "checkbox";
-        (input as HTMLInputElement).checked = spec.value;
-        values[spec.name] = spec.value;
-        wrapper.classList.add("check");
-      } else {
-        input.type = "text";
-        input.value = spec.value;
-        values[spec.name] = spec.value;
-      }
-    }
-    input.id = wrapper.htmlFor;
-    const read = () =>
-      spec.kind === "checkbox" ? (input as HTMLInputElement).checked : spec.kind === "slider" ? Number(input.value) : input.value;
-    input.addEventListener("input", () => {
-      values[spec.name] = read();
-      if (!widget.manual) draw();
-    });
-    input.addEventListener("change", () => {
-      values[spec.name] = read();
-      if (!widget.manual) draw();
-    });
-    if (spec.kind === "checkbox") wrapper.prepend(input);
-    else wrapper.append(document.createElement("br"), input);
-    controls.append(wrapper);
-    inputs.push(input);
-  }
-
-  const status = document.createElement("p");
-  status.className = "small";
-  status.setAttribute("role", "status");
-  if (widget.manual) {
-    const run = document.createElement("button");
-    run.type = "button";
-    run.className = "primary";
-    run.textContent = widget.runLabel ?? "Run";
-    run.onclick = () => {
-      status.textContent = "Working…";
-      // Yield once so the status text paints before a long synchronous run.
-      setTimeout(() => {
-        const started = performance.now();
-        draw();
-        status.textContent = `Finished in ${Math.round(performance.now() - started)} ms in this browser tab.`;
-      }, 0);
-    };
-    controls.append(run);
-  }
-
-  function draw() {
-    try {
-      const result = widget.render(values);
-      figures.innerHTML = result.figures;
-      readout.innerHTML = result.readout;
-      note.textContent = result.note;
-    } catch (error) {
-      figures.innerHTML = "";
-      readout.innerHTML = `<p class="failure">This panel could not be computed: ${esc((error as Error).message)}</p>`;
-      note.textContent = "Change a control to recover.";
-    }
-  }
-
-  root.replaceChildren(controls, figures, readout, note, status);
-  draw();
-}

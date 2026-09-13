@@ -22,14 +22,17 @@ export interface SandboxResponse {
 }
 
 const MAX_ITEMS = 24;
+const MAX_DEPTH = 2;
+/** Widest matrix worth drawing as a heatmap in a cell. */
+const MAX_MATRIX_SIDE = 64;
 
 /** Readable preview of any value, with arrays and depth truncated. */
-export function preview(value: unknown, depth = 0): string {
+function preview(value: unknown, depth = 0): string {
   if (typeof value === "number") return Number.isInteger(value) ? String(value) : String(Number(value.toPrecision(6)));
   if (typeof value === "string") return depth === 0 ? value : JSON.stringify(value);
   if (typeof value === "boolean" || value === null || value === undefined) return String(value);
   if (typeof value === "function") return "[function]";
-  if (depth > 2) return Array.isArray(value) ? "[…]" : "{…}";
+  if (depth > MAX_DEPTH) return Array.isArray(value) ? "[…]" : "{…}";
   if (Array.isArray(value)) {
     const items = value.slice(0, MAX_ITEMS).map((item) => preview(item, depth + 1));
     if (value.length > MAX_ITEMS) items.push(`…${value.length - MAX_ITEMS} more`);
@@ -46,10 +49,10 @@ const isNumberRow = (row: unknown): row is number[] =>
   Array.isArray(row) && row.length > 0 && row.every((value) => typeof value === "number" && Number.isFinite(value));
 
 /** Find a matrix to draw: the value itself, or the first matrix-valued field. */
-export function findMatrix(value: unknown): number[][] | undefined {
-  if (Array.isArray(value) && value.length > 0 && value.length <= 64 && value.every(isNumberRow)) {
+function findMatrix(value: unknown): number[][] | undefined {
+  if (Array.isArray(value) && value.length > 0 && value.length <= MAX_MATRIX_SIDE && value.every(isNumberRow)) {
     const width = (value[0] as number[]).length;
-    if (width <= 64 && value.every((row) => (row as number[]).length === width)) return value as number[][];
+    if (width <= MAX_MATRIX_SIDE && value.every((row) => (row as number[]).length === width)) return value as number[][];
   }
   if (value && typeof value === "object" && !Array.isArray(value))
     for (const item of Object.values(value as Record<string, unknown>)) {

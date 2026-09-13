@@ -103,7 +103,7 @@ interface PageElements {
   'lecture-open': HTMLElementTagNameMap['div'];
   'lecture-video': HTMLElementTagNameMap['div'];
   'lecture-mapping': HTMLElementTagNameMap['section'];
-  'lecture-widget': HTMLElementTagNameMap['div'];
+  'lecture-panel': HTMLElementTagNameMap['div'];
   'lecture-notes': HTMLElementTagNameMap['textarea'];
   'lecture-save': HTMLElementTagNameMap['button'];
   'lecture-export': HTMLElementTagNameMap['button'];

@@ -8,7 +8,7 @@
 
 import { escapeHTML as esc } from "./engine.ts";
 import { matrixGraphic } from "./z2h-visuals.ts";
-import type { SandboxResponse } from "./z2h-worker.ts";
+import type { SandboxRequest, SandboxResponse } from "./z2h-worker.ts";
 
 const TIMEOUT = 5000;
 
@@ -16,7 +16,7 @@ const TIMEOUT = 5000;
  * One worker per run, terminated on completion or timeout, so a snippet that
  * never returns costs a worker rather than the page.
  */
-export function runInWorker(code: string, timeout = TIMEOUT): Promise<SandboxResponse> {
+function runInWorker(code: string, timeout = TIMEOUT): Promise<SandboxResponse> {
   return new Promise((resolve) => {
     let worker: Worker;
     try {
@@ -36,7 +36,7 @@ export function runInWorker(code: string, timeout = TIMEOUT): Promise<SandboxRes
     );
     worker.onmessage = (event: MessageEvent<SandboxResponse>) => finish(event.data);
     worker.onerror = (event) => finish({ ok: false, lines: [], error: event.message || "The sandbox worker failed to load." });
-    worker.postMessage({ code });
+    worker.postMessage({ code } satisfies SandboxRequest);
   });
 }
 
@@ -45,8 +45,6 @@ export interface LiveCellOptions {
   /** Stable key for remembering edits within this browser session. */
   storageKey?: string;
   label?: string;
-  /** Run once on mount, for a cell whose output is the point of the paragraph. */
-  autorun?: boolean;
 }
 
 /** Replace `host` with an editable, runnable cell seeded from `options.code`. */
@@ -131,7 +129,6 @@ export function mountLiveCell(host: HTMLElement, options: LiveCellOptions): void
 
   cell.append(label, editor, controls, output, figure, status);
   host.replaceWith(cell);
-  if (options.autorun) execute();
 }
 
 /**
@@ -154,7 +151,3 @@ export function upgradeLiveBlocks(container: HTMLElement, keyPrefix: string): nu
 export function liveBlocksOf(markdown: string): string[] {
   return [...markdown.matchAll(/^```run\n([\s\S]*?)^```/gm)].map((match) => match[1].replace(/\n+$/, ""));
 }
-
-// The escaping helper is re-exported so a caller rendering its own cell labels
-// does not need a second import for the same utility.
-export { esc };

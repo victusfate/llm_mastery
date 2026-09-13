@@ -18,6 +18,7 @@ import {
   makeQuestion,
 } from "./engine.ts";
 import { element as $ } from "./dom.ts";
+import { metrics } from "./z2h-readout.ts";
 const KEY = "llm-training-lab-v1";
 const lecture = setupLecture();
 let state = freshState(),
@@ -437,7 +438,11 @@ function drawVisual() {
     const reward = 1 + 2 * v,
       grad = 2 * v * (1 - v);
     $("visual").innerHTML =
-      `<div class="metrics"><div class="metric"><strong>${reward.toFixed(3)}</strong><span>expected reward</span></div><div class="metric"><strong>${grad.toFixed(3)}</strong><span>d expected reward / d logit</span></div><div class="metric"><strong>${(v * 100).toFixed(0)}%</strong><span>probability of A</span></div></div>`;
+      metrics([
+        [reward.toFixed(3), "expected reward"],
+        [grad.toFixed(3), "d expected reward / d logit"],
+        [`${(v * 100).toFixed(0)}%`, "probability of A"],
+      ]);
     $("visual-explanation").textContent =
       "A earns 3; B earns 1. J=3p+1(1−p). With p=sigmoid(z), dJ/dz=2p(1−p). Higher expected reward does not always mean a larger gradient. Compare this exact value with a sampled estimator in the lab.";
   }

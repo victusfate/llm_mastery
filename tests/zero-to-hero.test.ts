@@ -4,11 +4,15 @@ import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import * as z from '../src/site/z2h-numerics.ts';
 import { NAMES, TOKENIZER_SAMPLE } from '../src/site/z2h-data.ts';
-import { lectures, findLecture } from '../src/site/z2h-track.ts';
+import { lectures } from '../src/site/z2h-track.ts';
 import { traceGraphic, matrixGraphic, scatterGraphic, histogramGraphic, seriesGraphic, treeGraphic, tokenRibbonGraphic } from '../src/site/z2h-visuals.ts';
-import { runSample, preview, findMatrix } from '../src/site/z2h-worker.ts';
+import { runSample } from '../src/site/z2h-worker.ts';
 import { liveBlocksOf } from '../src/site/z2h-live-code.ts';
 import { isLearningDataKey } from '../src/site/progress-backup.ts';
+
+const guideText=(lecture:{guide:string})=>readFileSync(new URL(lecture.guide,new URL('../docs/zero-to-hero/',import.meta.url)),'utf8');
+const pythonBlocks=(text:string)=>[...text.matchAll(/^```python\n([\s\S]*?)^```/gm)].map(match=>match[1]);
+const python3Available=(()=>{try{execFileSync('python3',['-c','pass'],{stdio:'ignore'});return true}catch{return false}})();
 
 test('reverse-mode autograd matches finite differences, including reused variables',()=>{
  const variables={a:1.5,b:-2,c:0.5};
@@ -265,20 +269,21 @@ test('the sandbox runs a sample, reports failures, and truncates large values',(
  const syntax=runSample('const = ;');
  assert.equal(syntax.ok,false);
  assert.match(syntax.error,/SyntaxError/);
- assert.equal(preview(Array.from({length:100},(_,i)=>i)).includes('76 more'),true);
- assert.equal(preview({a:{b:{c:{d:1}}}}),'{ a: { b: { c: {…} } } }');
- assert.equal(findMatrix({weights:[[1,2],[3,4]]})?.[1][0],3);
- assert.equal(findMatrix([[1,2],[3]]),undefined);
- assert.equal(findMatrix('text'),undefined);
+ // Long or deep values are truncated so one return cannot lock the page.
+ assert.match(runSample('return Array.from({length:100},(_,i)=>i);').returned,/76 more/);
+ assert.equal(runSample('return {a:{b:{c:{d:1}}}};').returned,'{ a: { b: { c: {…} } } }');
+ // A matrix anywhere in the returned value is offered to the figure.
+ assert.deepEqual(runSample('return {weights:[[1,2],[3,4]]};').matrix,[[1,2],[3,4]]);
+ assert.equal(runSample('return [[1,2],[3]];').matrix,undefined);
+ assert.equal(runSample('return "text";').matrix,undefined);
 });
 
 test('every lecture links to real files, real videos, and real course labs',()=>{
  assert.equal(lectures.length,9);
  const labIds=new Set(readFileSync(new URL('../src/site/labs.ts',import.meta.url),'utf8').match(/id: "\d{2}-\d{2}"/g).map(entry=>entry.slice(5,10)));
- const widgets=new Set<string>();
+ const panels=new Set<string>();
  for(const lecture of lectures){
-  assert.equal(findLecture(lecture.id),lecture);
-  assert.ok(existsSync(new URL(lecture.doc,new URL('../site/',import.meta.url))),lecture.doc);
+  assert.ok(existsSync(new URL(lecture.guide,new URL('../docs/zero-to-hero/',import.meta.url))),lecture.guide);
   assert.match(lecture.video,/^[\w-]{11}$/,lecture.id);
   assert.ok(lecture.focus.length>60&&lecture.outcome.length>60,lecture.id);
   assert.ok(lecture.courseModules.length>0&&lecture.courseModules.every(entry=>entry.module>=0&&entry.module<=9));
@@ -286,10 +291,10 @@ test('every lecture links to real files, real videos, and real course labs',()=>
   for(const lab of lecture.labs)assert.ok(labIds.has(lab),`${lecture.id} references unknown lab ${lab}`);
   assert.ok(lecture.links.every(item=>item.url.startsWith('https://')),lecture.id);
   assert.ok(lecture.sample.code.includes('print(')||lecture.sample.code.includes('return '),lecture.id);
-  widgets.add(lecture.widget);
+  panels.add(lecture.panel);
  }
  // Each lecture gets its own panel: nine mechanisms, nine interactive figures.
- assert.equal(widgets.size,9);
+ assert.equal(panels.size,9);
  assert.deepEqual(lectures.map(lecture=>lecture.number),[1,2,3,4,5,6,7,8,9]);
 });
 
@@ -307,7 +312,7 @@ test('every runnable block in the guides executes and prints something',()=>{
  // lesson. Each is run exactly as the page runs it.
  let executed=0;
  for(const lecture of lectures){
-  const text=readFileSync(new URL(lecture.doc.replace('../docs/zero-to-hero/',''),new URL('../docs/zero-to-hero/',import.meta.url)),'utf8');
+  const text=guideText(lecture);
   const blocks=liveBlocksOf(text);
   assert.ok(blocks.length>=2,`${lecture.id} carries no inline examples`);
   blocks.forEach((code,index)=>{
@@ -327,10 +332,6 @@ test('runnable blocks are recognised only when fenced as run',()=>{
  assert.deepEqual(liveBlocksOf('```js\nprint(1)\n```'),[]);
  assert.deepEqual(liveBlocksOf('text\n\n```run\na\n```\n\nmore\n\n```run\nb\n```\n'),['a','b']);
 });
-
-const guideText=(lecture:{doc:string})=>readFileSync(new URL(lecture.doc.replace('../docs/zero-to-hero/',''),new URL('../docs/zero-to-hero/',import.meta.url)),'utf8');
-const pythonBlocks=(text:string)=>[...text.matchAll(/^```python\n([\s\S]*?)^```/gm)].map(match=>match[1]);
-const python3Available=(()=>{try{execFileSync('python3',['-c','pass'],{stdio:'ignore'});return true}catch{return false}})();
 
 test('each guide pairs its JavaScript cells with a PyTorch starting point',()=>{
  for(const lecture of lectures){
@@ -373,7 +374,7 @@ test('track notes are included in progress backups',()=>{
 test('the guides teach without reproducing the lectures and point at our own checks',()=>{
  const base=new URL('../docs/zero-to-hero/',import.meta.url);
  for(const lecture of lectures){
-  const text=readFileSync(new URL(lecture.doc.replace('../docs/zero-to-hero/',''),base),'utf8');
+  const text=guideText(lecture);
   assert.ok(text.includes(`youtube.com/watch?v=${lecture.video}`),`${lecture.id} must link its video`);
   for(const heading of ['## The mechanism in plain terms','## Implement it yourself','## Checks that must pass','## Use the panel','## Exercises','## Transfer task'])
    assert.ok(text.includes(heading),`${lecture.id} is missing ${heading}`);

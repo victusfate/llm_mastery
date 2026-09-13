@@ -6,7 +6,7 @@
 // title and description for screen readers.
 
 import { frame, line, box, text } from "./graphics.ts";
-import type { Trace } from "./z2h-numerics.ts";
+import { SATURATION_THRESHOLD, type Trace } from "./z2h-numerics.ts";
 
 /** Placeholder for an empty figure: an outlined plate rather than bare text. */
 const emptyPlate = (message: string) =>
@@ -41,7 +41,7 @@ export function traceGraphic(trace: Trace, limit = 15): string {
   for (const node of shown) {
     const [x, y] = position.get(node.id);
     const width = Math.min(76, 480 / Math.max(1, depths));
-    body += box(x - width / 2, y - 17, width, 34, node.label);
+    body += box(x - width / 2, y - 17, width, 34, node.label || round(node.value, 2));
     if (rows <= 4) body += text(x, y + 34, round(node.value, 2));
   }
   return frame(
@@ -132,10 +132,11 @@ export function scatterGraphic(points: number[][], labels: string[], caption: st
 
 /** Activation histogram with the saturated tails marked. */
 export function histogramGraphic(bins: number[], caption: string, saturated: number): string {
+  const threshold = SATURATION_THRESHOLD;
   const peak = Math.max(...bins, 1e-12);
   const width = 460 / bins.length;
   let body = text(300, 25, caption);
-  const edge = 70 + 460 * ((0.97 + 1) / 2);
+  const edge = 70 + 460 * ((threshold + 1) / 2);
   body += `<rect x="${edge}" y="60" width="${540 - edge}" height="160" class="blocked" opacity="0.85"/>`;
   body += `<rect x="70" y="60" width="${540 - edge}" height="160" class="blocked" opacity="0.85"/>`;
   bins.forEach((share, i) => {
@@ -143,11 +144,11 @@ export function histogramGraphic(bins: number[], caption: string, saturated: num
     body += `<rect x="${(70 + i * width).toFixed(1)}" y="${(220 - height).toFixed(1)}" width="${Math.max(1, width - 2).toFixed(1)}" height="${height.toFixed(1)}" class="signal"/>`;
   });
   body += line(70, 220, 540, 220) + text(75, 245, "−1") + text(305, 245, "0") + text(535, 245, "+1");
-  body += text(300, 270, `Dark bands: |activation| > 0.97 · ${(100 * saturated).toFixed(1)}% saturated`);
+  body += text(300, 270, `Dark bands: |activation| > ${threshold} · ${(100 * saturated).toFixed(1)}% saturated`);
   return frame(
     caption,
     body,
-    `Distribution of activations between −1 and +1. ${(100 * saturated).toFixed(1)} percent of units sit in the flat tails of tanh, where gradients are near zero.`,
+    `Distribution of activations between −1 and +1. ${(100 * saturated).toFixed(1)} percent of units are beyond ${threshold}, in the flat tails of tanh where gradients are near zero.`,
   );
 }
 

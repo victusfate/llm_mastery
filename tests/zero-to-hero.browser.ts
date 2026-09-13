@@ -35,18 +35,18 @@ try {
   assert.equal(await page.locator('#lecture-navigation a[aria-current="page"]').count(), 1, lecture.id);
   assert.ok((await page.locator('#lecture-links a').count()) >= 2, lecture.id);
   // The panel computes its own figures; every figure must be labelled.
-  const figure = page.locator('#lecture-widget svg').first();
+  const figure = page.locator('#lecture-panel svg').first();
   await figure.waitFor({ state: 'attached' });
   assert.ok(await figure.getAttribute('aria-label'), lecture.id);
-  const sliders = page.locator('#lecture-widget input[type="range"]');
+  const sliders = page.locator('#lecture-panel input[type="range"]');
   for (const extreme of ['min', 'max']) {
    for (const slider of await sliders.all()) {
     await slider.fill(await slider.getAttribute(extreme));
     await slider.dispatchEvent('input');
    }
-   const run = page.locator('#lecture-widget button.primary');
+   const run = page.locator('#lecture-panel button.primary');
    if (await run.count()) await run.click();
-   const panel = await page.locator('#lecture-widget').innerHTML();
+   const panel = await page.locator('#lecture-panel').innerHTML();
    assert.ok(!panel.includes('NaN'), `${lecture.id} produced NaN at ${extreme}`);
    assert.ok(!panel.includes('could not be computed'), `${lecture.id} failed at ${extreme}`);
   }
@@ -112,11 +112,11 @@ try {
 
  await page.setViewportSize({ width: 390, height: 844 });
  await page.goto(`${base}/site/zero-to-hero.html?lecture=l7`);
- await page.locator('#lecture-widget svg').first().waitFor({ state: 'attached' });
+ await page.locator('#lecture-panel svg').first().waitFor({ state: 'attached' });
  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'mobile overflow');
  await page.screenshot({ path: '/tmp/llm-zero-to-hero-mobile.png', fullPage: true });
  await page.setViewportSize({ width: 1280, height: 900 });
- await page.locator('#lecture-widget').screenshot({ path: '/tmp/llm-zero-to-hero-panel.png' });
+ await page.locator('#lecture-panel').screenshot({ path: '/tmp/llm-zero-to-hero-panel.png' });
 
  assert.deepEqual(errors, []);
  console.log(`Zero to Hero browser checks passed: ${lectures.length} lecture pages, slider extremes, inline and sample cells, timeout recovery, notes, mobile layout.`);

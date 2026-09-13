@@ -1,5 +1,6 @@
 import { descentGraphic, networkGraphic, barsGraphic, attentionGraphic, corpusGraphic, workersGraphic, maskGraphic, computationGraphic, policyGraphic } from './graphics.ts';
 import { softmax } from "./engine.ts";
+import { metric } from "./z2h-readout.ts";
 export function mountSandbox(root, kind) {
   const controls = document.createElement("div"),
     view = document.createElement("div"),
@@ -21,8 +22,6 @@ export function mountSandbox(root, kind) {
     input.oninput = draw;
     return () => Number(input.value);
   }
-  const metric = (value, label) =>
-    `<div class="metric"><strong>${value}</strong><span>${label}</span></div>`;
   let a, b;
   if (kind === "softmax") {
     a = slider("Temperature", 0.2, 3, 0.1, 1);
