@@ -7,7 +7,8 @@ Recorded September 12, 2026, on Node v22.22.2 in a Linux container. The reposito
 | Command | Result |
 | --- | --- |
 | `npx tsc --noEmit` | Passed with no output. One real defect was caught and fixed: the track page reused the element id `lecture-status`, which already belonged to the module lecture player |
-| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 36 tests passed, 0 failed (15 pre-existing, 21 new) |
+| `node --test tests/engine.test.ts tests/content.test.ts tests/zero-to-hero.test.ts` | 37 tests passed, 1 skipped (the opt-in PyTorch run), 0 failed |
+| `RUN_PYTHON_STARTERS=1 node --test tests/zero-to-hero.test.ts` with torch 2.14.0 installed | 22 passed, 0 skipped: all nine PyTorch starters execute standalone |
 | `node scripts/check-docs.ts` | Checked every public Markdown document; all local links resolve |
 | `npm run build` | Static course built into `dist/`, including `site/zero-to-hero.html` and the bundled `z2h-*.mjs` modules and worker |
 | `node tests/zero-to-hero.browser.ts` | Passed: 9 lecture pages, slider extremes, inline and sample cells, cell isolation, timeout recovery, edit persistence, notes, mobile layout |
@@ -33,8 +34,35 @@ These are the checks that would fail if a lesson's claims stopped being true:
 - **Figures**: every figure carries `role="img"`, a title, and a description; contains no `NaN`, `Infinity`, or `undefined`; and keeps every label inside the 600 × 280 viewBox.
 - **Track data**: each lecture's guide file exists, its video identifier is well formed, its labs exist in `labs.ts`, its links are HTTPS, and its sample runs in the sandbox without error.
 - **Inline examples**: all 19 runnable blocks across the nine guides execute in the sandbox, print output, and contain no `NaN` or `undefined` in what they print. The whole suite still runs in about 1.5 seconds.
-- **Python starters**: each guide carries exactly one PyTorch starting point of at least ten lines, points at Colab, and is never marked runnable (the sandbox executes JavaScript, so a Run button on a Python block would only produce an error). Every starter is compiled by `python3` in the test, which skips itself where `python3` is absent.
+- **Python starters**: each guide carries exactly one PyTorch starting point of at least ten lines, points at Colab, and is never marked runnable (the sandbox executes JavaScript, so a Run button on a Python block would only produce an error). Every starter is compiled by `python3` in the default suite, and executed in its own process under the opt-in check.
 - **Guides**: each guide links its own video, credits the author, carries the six required sections, and has balanced code fences; `licensing.md` names every referenced repository and flags the unlicensed one.
+
+## The PyTorch starters, executed
+
+`torch 2.14.0` (CPU) was installed in the validation container and every starter was run in its own process, as a learner would paste it into a fresh notebook. All nine pass:
+
+| Guide | What it printed |
+| --- | --- |
+| l1 micrograd | `value -2.2628707885742188` and the three gradients |
+| l2 bigram | `loss 1.7484067678451538 uniform baseline 2.3025851249694824` on the three-word sample list |
+| l3 MLP | one training step, loss `2.3067328929901123` — close to `log 6` for that tiny vocabulary, which is the expected start |
+| l4 activations | per-layer statistics, `layer 1 std 0.617 saturated 3.2%` at gain 1 |
+| l5 backprop | the comparison harness defines cleanly |
+| l6 WaveNet | `input (2, 8, 4)` and the grouping assertion holds |
+| l7 GPT | `drift in earlier outputs 0.0`, and its `assert drift == 0.0` passes |
+| l8 tokenizer | the merge functions define cleanly |
+| l9 GPT-2 | `124,439,808 parameters · 1.62 hours · $26 at $2 per device-hour`, and its assertion on the published count passes |
+
+**Cross-language agreement.** Lecture 1's starter and the browser engine compute the same expression, and they agree to float32 precision:
+
+| | value | ∂/∂a | ∂/∂b | ∂/∂c |
+| --- | --- | --- | --- | --- |
+| PyTorch | −2.2628708 | −2.2620630 | 1.3577224 | 0.9051483 |
+| Our engine | −2.2628706 | −2.2620631 | 1.3577224 | 0.9051483 |
+
+The remaining difference is float32 against float64, which is the expected size.
+
+PyTorch is **not** a repository dependency: the default suite only compiles the starters, and CI stays Node-only. The execution check is opt-in, and the installed torch lives in the validation container rather than in the project.
 
 ## Defects found and fixed during validation
 
@@ -46,6 +74,7 @@ These are the checks that would fail if a lesson's claims stopped being true:
 6. **Light text on bright fills** — scatter markers and token plates failed the site's 4.5:1 text-contrast gate; both are now outlined blocks with light text.
 7. **Legend overlapped the axis label** in multi-series plots; the legend is now one line.
 8. **The context tree's top level collided with its caption**; the level spacing was reduced.
+9. **The lecture 3 starter did not stand alone** — it used `words`, `chars` and `index` from lecture 2's block, so pasting it into a fresh notebook raised `NameError`. Found by a static check for undefined names and confirmed by running each block in its own process; the starter now builds its own vocabulary.
 
 Items 4 to 8 were found only because the new figures were added to `tests/visual-design.browser.ts`, which measures contrast and label placement at three widths.
 
@@ -54,5 +83,4 @@ Items 4 to 8 were found only because the new figures were added to `tests/visual
 - **Node 24.** The repository's engine requirement was not exercised; this run used Node 22.
 - **Lecture runtimes and playlist membership.** YouTube is unreachable from this environment. Video identifiers and repository links were read from `karpathy/nn-zero-to-hero` and `karpathy/build-nanogpt`, and no runtimes are stated anywhere in the track.
 - **The video embed.** External media cannot load here; the browser test asserts the iframe is created with the right source and that a direct link is offered, not that playback works.
-- **The PyTorch starters were compiled, not executed.** This container has no `torch`, so the nine Python starting points are checked for syntax only. Their arithmetic was verified where it does not need a framework: the parameter function reproduces 124,439,808 exactly, and the bigram pairing was run by hand. Run them in Colab before relying on the tensor code.
 - **Learning outcomes.** Nothing in this work measures whether the track teaches anyone anything. It is an instructional design plus correctness checks, not an evaluated intervention.

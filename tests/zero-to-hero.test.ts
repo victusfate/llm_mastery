@@ -352,6 +352,17 @@ test('every Python starter compiles',{skip:python3Available?false:'python3 is no
    execFileSync('python3',['-c','import sys; compile(sys.stdin.read(), "<starter>", "exec")'],{input:code});
 });
 
+// Executing the starters needs PyTorch, which this repository deliberately does
+// not depend on, so the check is opt-in: RUN_PYTHON_STARTERS=1 npm test, on a
+// machine with torch installed. Each block runs in its own process, because a
+// learner pastes one block into a fresh notebook.
+test('every Python starter runs standalone under PyTorch',
+ {skip:process.env.RUN_PYTHON_STARTERS==='1'?false:'set RUN_PYTHON_STARTERS=1 with torch installed'},()=>{
+ for(const lecture of lectures)
+  for(const code of pythonBlocks(guideText(lecture)))
+   execFileSync('python3',['-c',code],{stdio:'pipe',timeout:300000});
+});
+
 test('track notes are included in progress backups',()=>{
  assert.ok(isLearningDataKey('llm-training-zero-to-hero-l1'));
  assert.ok(isLearningDataKey('llm-training-zero-to-hero-l9'));

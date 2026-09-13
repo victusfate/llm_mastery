@@ -93,6 +93,10 @@ outwards from it — it is a starting point, not a solution.
 import torch
 import torch.nn.functional as F
 
+words = ["ada", "nora", "elias"]             # your own list
+chars = ["."] + sorted({c for word in words for c in word})
+index = {c: i for i, c in enumerate(chars)}
+
 context, embed, hidden, V = 3, 10, 200, len(chars)
 
 X, Y = [], []
