@@ -1,14 +1,14 @@
 :root {
   color-scheme: dark;
-  --bg: #101613;
-  --panel: #19221c;
-  --border: #35443a;
-  --text: #e9eee6;
-  --muted: #aebcae;
-  --accent: #c4ed9a;
-  --gold: #e3c889;
-  --nav-current-bg: #2b3d2c;
-  --nav-current-border: #789064;
+  --bg: #0f1218;
+  --panel: #161b24;
+  --border: #2a3140;
+  --text: #e7ebf3;
+  --muted: #9aa5b8;
+  --accent: #8ab4f8;
+  --accent-2: #c4a7e7;
+  --nav-current-bg: #232c44;
+  --nav-current-border: #51639c;
 }
 * {
   box-sizing: border-box;
@@ -34,7 +34,7 @@ textarea {
 button,
 .button {
   border: 1px solid var(--border);
-  background: #26352b;
+  background: #222a3a;
   color: var(--text);
   padding: 9px 15px;
   border-radius: 7px;
@@ -54,7 +54,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 3px solid var(--accent-2);
   outline-offset: 3px;
 }
 header {
@@ -143,7 +143,7 @@ p {
 .stats strong {
   font-size: 27px;
   display: block;
-  color: var(--gold);
+  color: var(--accent-2);
 }
 .stats span {
   font-size: 11px;
@@ -151,7 +151,7 @@ p {
 }
 .primary {
   background: var(--accent);
-  color: #142014;
+  color: #0d1017;
   border-color: var(--accent);
   font-weight: 700;
 }
@@ -200,8 +200,8 @@ main {
   background: transparent;
 }
 .tabs button[aria-selected="true"] {
-  background: #314332;
-  border-color: #7b956e;
+  background: #26304d;
+  border-color: #51639c;
 }
 .card {
   border: 1px solid var(--border);
@@ -211,16 +211,16 @@ main {
   margin: 20px 0;
 }
 .intro {
-  background: linear-gradient(110deg, #233025, #19221c);
+  background: linear-gradient(110deg, #1d2434, #161b24);
 }
 .prediction {
-  border-left: 3px solid var(--gold);
+  border-left: 3px solid var(--accent-2);
   padding: 9px 18px;
-  background: #202c24;
+  background: #1c2130;
   margin: 22px 0;
 }
 .prediction strong {
-  color: var(--gold);
+  color: var(--accent-2);
   font-size: 13px;
 }
 .prediction p {
@@ -242,9 +242,9 @@ label {
 select,
 input[type="text"],
 textarea {
-  background: #111b15;
+  background: #10141d;
   color: var(--text);
-  border: 1px solid #5d7162;
+  border: 1px solid #3c465e;
   border-radius: 6px;
   padding: 10px;
 }
@@ -281,7 +281,7 @@ textarea {
   gap: 10px;
 }
 .bar-track {
-  background: #0f1912;
+  background: #0c0f16;
   height: 26px;
   border-radius: 5px;
   overflow: hidden;
@@ -304,16 +304,16 @@ textarea {
   align-items: center;
   font-size: 14px;
   border-radius: 4px;
-  background: #0c150f;
+  background: #0c0f16;
   color: #d6e2d7;
-  border: 1px solid #8ba99c;
+  border: 1px solid #46516e;
 }
 .cell.on {
-  background: #365630;
+  background: #32406b;
   color: white;
 }
 .cell.selected {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--accent-2);
   outline-offset: -2px;
 }
 .metrics {
@@ -334,14 +334,14 @@ svg {
   width: 100%;
   max-height: 230px;
   display: block;
-  background: #101a13;
+  background: #0c0f16;
   border-radius: 8px;
 }
 .question {
   font-size: 22px;
   line-height: 1.5;
   padding: 18px 0;
-  color: var(--gold);
+  color: var(--accent-2);
 }
 #feedback {
   padding: 12px 0;
@@ -368,14 +368,14 @@ article h2 {
   margin-top: 30px;
 }
 code {
-  background: #0c170f;
+  background: #0c0f16;
   padding: 2px 5px;
   border-radius: 4px;
   font-size: 13px;
 }
 pre {
   overflow: auto;
-  background: #0c170f;
+  background: #0c0f16;
   padding: 14px;
   border-radius: 6px;
 }
@@ -546,13 +546,13 @@ audio {
 }
 #lecture-chapters button[aria-current="step"] {
   border-color: var(--accent);
-  background: #314332;
+  background: #26304d;
 }
 .concept-term {
   display: inline;
   padding: 0;
   border: 0;
-  border-bottom: 1px dotted #b7d991;
+  border-bottom: 1px dotted #8ab4f8;
   border-radius: 0;
   background: transparent;
   color: inherit;
@@ -562,21 +562,21 @@ audio {
   text-align: inherit;
 }
 .concept-term:hover {
-  background: #3a5135;
+  background: #2a3450;
   color: var(--accent);
 }
 .selection-explain {
   position: fixed;
   z-index: 100;
   background: var(--accent);
-  color: #142014;
+  color: #0d1017;
   font-size: 13px;
   box-shadow: 0 5px 30px #0008;
 }
 #concept-dialog {
   color: var(--text);
   background: var(--panel);
-  border: 1px solid #71816c;
+  border: 1px solid #3c465e;
   border-radius: 18px;
   width: min(800px, calc(100vw - 32px));
   max-height: 90dvh;
@@ -585,7 +585,7 @@ audio {
   box-shadow: 0 20px 100px #0009;
 }
 #concept-dialog::backdrop {
-  background: #020704b8;
+  background: #05070db8;
   backdrop-filter: blur(3px);
 }
 .concept-toolbar {
@@ -602,9 +602,9 @@ audio {
 #concept-search {
   flex: 1;
   min-width: 100px;
-  background: #101a13;
+  background: #0c0f16;
   color: var(--text);
-  border: 1px solid #5d7162;
+  border: 1px solid #3c465e;
   border-radius: 6px;
   padding: 10px;
 }
@@ -620,7 +620,7 @@ audio {
 }
 #concept-body h3 {
   font-size: 15px;
-  color: var(--gold);
+  color: var(--accent-2);
   margin-top: 25px;
 }
 #concept-context {
@@ -733,14 +733,14 @@ audio {
   text-align: left;
   padding: 12px;
   border: 1px solid var(--border);
-  background: #293b2d;
+  background: #232c44;
   color: var(--accent);
 }
 blockquote {
   margin: 18px 0;
   padding: 12px 20px;
-  border-left: 3px solid var(--gold);
-  background: #202c24;
+  border-left: 3px solid var(--accent-2);
+  background: #1c2130;
 }
 #reader-links a,
 #reader-toc a {
@@ -758,8 +758,93 @@ html {
   scroll-margin-top: 20px;
 }
 
+/* Incremental module steps */
+.progress-track {
+  height: 8px;
+  border-radius: 5px;
+  background: #0c0f16;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin: 14px 0 6px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+.steps-count {
+  margin: 6px 0 10px;
+}
+.step-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.step-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+.step-list li:hover {
+  background: #1c2130;
+}
+.step-list input {
+  accent-color: var(--accent);
+  margin: 3px 0 0;
+  flex: none;
+}
+.step-list label {
+  display: inline;
+  font-size: 13px;
+  color: var(--text);
+}
+.step-list a {
+  color: inherit;
+  text-decoration: none;
+}
+.step-list a:hover .text {
+  text-decoration: underline;
+}
+.step-list input:checked ~ label .text {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.steps-complete {
+  border-left: 3px solid var(--accent);
+  background: #1c2130;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.steps-complete strong {
+  color: var(--accent);
+}
+.mini-progress {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--muted);
+  min-width: 30px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.mini-progress.complete {
+  color: var(--accent);
+}
+a.step-continue {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  margin: 10px 0;
+}
+
 .concept-flow {display:flex;gap:1.5rem;list-style:none;padding:0;align-items:stretch;flex-wrap:wrap;}
-.concept-flow li {position:relative;flex:1;min-width:130px;border:1px solid var(--line,#bbc7ca);border-radius:8px;padding:1rem;background:rgba(40,130,110,.08);}
+.concept-flow li {position:relative;flex:1;min-width:130px;border:1px solid var(--line,#bbc7ca);border-radius:8px;padding:1rem;background:rgba(138,180,248,.08);}
 .concept-flow li:not(:last-child)::after {content:'→';position:absolute;right:-1.3rem;top:40%;}
 .concept-figure {margin:1.25rem 0;}
 .concept-figure figcaption {font-weight:600;}
@@ -771,23 +856,23 @@ html {
 
 /* Diagram colors are checked against their actual SVG backgrounds. */
 :root {
-  --diagram-bg: #0d1915;
-  --diagram-text: #f3f7ee;
-  --diagram-edge: #a5c9bd;
-  --diagram-accent: #c4ed9a;
-  --diagram-secondary: #ffe0a0;
+  --diagram-bg: #10131c;
+  --diagram-text: #eef1f8;
+  --diagram-edge: #8fa3c8;
+  --diagram-accent: #8ab4f8;
+  --diagram-secondary: #c4a7e7;
 }
 .diagram-scroll {
   max-width: 100%;
   overflow-x: auto;
   margin: 16px 0 8px;
-  border: 1px solid #829d90;
+  border: 1px solid #3c465e;
   border-radius: 8px;
   background: var(--diagram-bg);
   scrollbar-color: var(--diagram-edge) var(--diagram-bg);
 }
 .diagram-scroll:focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 3px solid var(--accent-2);
   outline-offset: 3px;
 }
 .diagram-scroll::after {
@@ -798,7 +883,7 @@ html {
   padding: 8px 12px;
   font-size: 14px;
   color: var(--diagram-text);
-  border-top: 1px solid #829d90;
+  border-top: 1px solid #3c465e;
 }
 .mechanism-graphic {
   min-width: 600px;
@@ -814,8 +899,8 @@ html {
   font-variant-numeric: tabular-nums;
 }
 .mechanism-graphic .wire { fill: none; stroke: var(--diagram-edge); stroke-width: 2; }
-.mechanism-graphic .neuron { fill: #214e45; stroke: var(--diagram-accent); stroke-width: 2; }
-.mechanism-graphic .block { fill: #203c33; stroke: var(--diagram-edge); stroke-width: 1.5; }
+.mechanism-graphic .neuron { fill: #25335a; stroke: var(--diagram-accent); stroke-width: 2; }
+.mechanism-graphic .block { fill: #202a44; stroke: var(--diagram-edge); stroke-width: 1.5; }
 .mechanism-graphic .signal { fill: var(--diagram-accent); }
 .mechanism-graphic .blocked { fill: var(--diagram-bg); stroke: var(--diagram-edge); stroke-width: 1.5; }
 .mechanism-graphic .curve { fill: none; stroke: var(--diagram-accent); stroke-width: 3; }
@@ -823,7 +908,7 @@ html {
 .diagram-description { font-size: 16px; color: var(--text); line-height: 1.6; }
 .concept-figure { margin-inline: 0; }
 .heatmap-scroll { max-width: 100%; overflow-x: auto; padding: 3px; }
-.heatmap-scroll:focus-visible, .live-output:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.heatmap-scroll:focus-visible, .live-output:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
 @media (forced-colors: active) {
   .mechanism-graphic { forced-color-adjust: none; }
   .diagram-scroll:focus-visible, .heatmap-scroll:focus-visible, .live-output:focus-visible { outline-color: Highlight; }
@@ -862,7 +947,7 @@ html {
 }
 .code-editor {
   font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: #0c170f;
+  background: #0c0f16;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   tab-size: 2;
@@ -872,7 +957,7 @@ html {
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: #101a13;
+  background: #0c0f16;
 }
 .live-cell > label {
   color: var(--muted);

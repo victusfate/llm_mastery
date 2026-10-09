@@ -47,6 +47,12 @@ Correct unaided answers move a concept through 1-, 3-, 7-, and 14-day review int
 
 The sidebar counts attempted concepts and due reviews. It deliberately does not award “mastery” from quiz scores. Use [the practical rubric](../assessments/01-mastery.md) for implementation, debugging, experimental judgment, and explanation. The numeric questions cover selected concepts, not the complete theoretical depth of each module.
 
+## Small tracked chunks
+
+Each module is broken into completable chunks in the sidebar: read the overview, read each submodule page, run each lab, and pass one check unaided. Checking a chunk banks visible progress; a completed module shows a completion banner and the next module's counter can tick toward ✓. Lesson and lab pages carry their own “Mark complete” button. An unaided correct quiz answer banks the module's “prove” chunk automatically.
+
+Chunk completion is a pacing and momentum aid stored in this browser (and included in progress backups). It is not a grade: practical gates still require the evidence and review described in the rubric. Design decisions and validation for this feature are recorded in [docs/incremental-progress/](incremental-progress/README.md).
+
 ## Agent-assisted expertise
 
 The learner already uses agents to generate implementations and outcomes. Practice that workflow with stricter inspection: write the specification and invariants, predict results, ask an agent to implement, review the critical code, inject a failure, and demonstrate a fresh small task independently. This develops both effective direction of agents and personal ability to recognize wrong results.

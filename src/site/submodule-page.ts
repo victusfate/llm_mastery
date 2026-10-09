@@ -3,6 +3,7 @@ import { modules } from "./content.ts";
 import { submodules } from "./submodules.ts";
 import { labs } from "./labs.ts";
 import { markdown, escapeHTML as esc } from "./engine.ts";
+import { loadSteps, saveSteps, toggleStep, isDone } from "./steps.ts";
 import { mountSandbox } from "./sandbox.ts";
 import { startExplorer } from "./explorer.ts";
 import { element as $ } from "./dom.ts";
@@ -13,6 +14,7 @@ if (!unit) {
   $("unit-title").textContent = "Submodule not found";
   $("guide-body").textContent = "Choose a lesson from the module overview.";
   $("unit-audio").hidden = true;
+  $("unit-complete").hidden = true;
 } else {
   $("unit-title").textContent = unit.title;
   mountPrimer($("concept-primer"), modules[unit.module].file);
@@ -94,6 +96,25 @@ if (!unit) {
   $("unit-save").onclick = save;
   $("unit-notes").oninput = save;
   $("unit-notes").disabled = false;
+  let stepRecord = loadSteps();
+  const completeButton = $("unit-complete");
+  const renderComplete = () => {
+    const done = isDone(stepRecord, unit.module, `read-${unit.id}`);
+    completeButton.textContent = done ? "✓ Completed" : "Mark complete";
+    completeButton.classList.toggle("primary", !done);
+    completeButton.setAttribute("aria-pressed", String(done));
+  };
+  completeButton.onclick = () => {
+    const done = !isDone(stepRecord, unit.module, `read-${unit.id}`);
+    stepRecord = toggleStep(stepRecord, unit.module, `read-${unit.id}`, done);
+    $("unit-status").textContent = saveSteps(stepRecord)
+      ? done
+        ? "Lesson marked complete. Next chunk is waiting."
+        : "Lesson unmarked."
+      : "Storage unavailable; progress not saved.";
+    renderComplete();
+  };
+  renderComplete();
   $("unit-export").onclick = () => {
     const text = `# Submodule ${unit.id}: ${unit.title}\n\nStatus: unreviewed\n\n${$("unit-notes").value}`;
     const url = URL.createObjectURL(
