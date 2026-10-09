@@ -3,6 +3,17 @@ import { createProgressBackup, validateProgressBackup, restoreProgressBackup } f
 import { renderCoach, confidenceFeedback } from "./study-coach.ts";
 import { mountPrimer } from "./concept-primer.ts";
 import { submodules } from "./submodules.ts";
+import {
+  loadSteps,
+  saveSteps,
+  toggleStep,
+  isDone,
+  stepProgress,
+  totalProgress,
+  nextStep,
+  moduleSteps,
+  type StepRecord,
+} from "./steps.ts";
 import { startExplorer } from "./explorer.ts";
 import { setupLecture } from "./lecture.ts";
 import { labs } from "./labs.ts";
@@ -21,6 +32,7 @@ import { element as $ } from "./dom.ts";
 const KEY = "llm-training-lab-v1";
 const lecture = setupLecture();
 let state = freshState(),
+  stepRecord = loadSteps(),
   question,
   checked = false,
   revealed = false,
@@ -44,9 +56,75 @@ function save() {
 function stats() {
   renderCoach($("study-coach"), state);
   const records = Object.values(state.reviews),
-    due = records.filter((r) => r.due <= Date.now()).length;
+    due = records.filter((r) => r.due <= Date.now()).length,
+    chunks = totalProgress(stepRecord);
   $("stats").innerHTML =
-    `<div><strong>${records.length}/20</strong><span>concepts attempted</span></div><div><strong>${due}</strong><span>due for review</span></div>`;
+    `<div><strong>${records.length}/20</strong><span>concepts attempted</span></div><div><strong>${due}</strong><span>due for review</span></div><div><strong>${chunks.done}/${chunks.total}</strong><span>chunks done</span></div>`;
+}
+
+function renderSteps() {
+  const root = $("module-steps");
+  const index = state.selected;
+  const { done, total } = stepProgress(stepRecord, index);
+  const pending = nextStep(stepRecord, index);
+  const percent = total ? Math.round((done / total) * 100) : 0;
+  const rows = [
+    `<p class="eyebrow">MODULE STEPS</p>`,
+    `<div class="progress-track" role="progressbar" aria-valuenow="${done}" aria-valuemin="0" aria-valuemax="${total}" aria-label="Module steps complete"><div class="progress-fill" style="width:${percent}%"></div></div>`,
+    `<p class="small steps-count">${done} of ${total} chunks complete</p>`,
+  ];
+  if (done === total && total > 0) {
+    rows.push(
+      `<p class="steps-complete"><strong>Module complete.</strong> Every chunk is banked. Carry the explanation into the next module or defend it in a review.</p>`,
+    );
+  } else if (pending) {
+    rows.push(
+      pending.href
+        ? `<a class="button primary wide step-continue" href="${pending.href}">Continue: ${esc(pending.label)} →</a>`
+        : `<button class="primary wide step-continue" data-step="${pending.id}">Continue: ${esc(pending.label)} →</button>`,
+    );
+  }
+  rows.push(
+    `<ul class="step-list">` +
+      moduleSteps(index)
+        .map((s) => {
+          const text = `<span class="text">${esc(s.label)}</span>`;
+          const body = s.href
+            ? `<a href="${s.href}">${text}</a>`
+            : text;
+          return `<li><input type="checkbox" id="step-${s.id}" data-step="${s.id}" ${isDone(stepRecord, index, s.id) ? "checked" : ""} /><label for="step-${s.id}">${body}</label></li>`;
+        })
+        .join("") +
+      `</ul>`,
+  );
+  root.innerHTML = rows.join("");
+  for (const box of root.querySelectorAll<HTMLInputElement>("input[data-step]"))
+    box.onchange = () => {
+      stepRecord = toggleStep(stepRecord, index, box.dataset.step!, box.checked);
+      if (!saveSteps(stepRecord))
+        $("storage-status").textContent =
+          "Browser storage unavailable. Export a backup before closing.";
+      renderSteps();
+      stats();
+    };
+  const continueButton = root.querySelector<HTMLButtonElement>(
+    ".step-continue[data-step]",
+  );
+  if (continueButton && continueButton.dataset.step === "overview")
+    continueButton.onclick = () => {
+      $("learn").scrollIntoView({ behavior: "smooth" });
+    };
+  document.querySelectorAll<HTMLElement>("#modules button").forEach((b, i) => {
+    const mini = b.querySelector<HTMLElement>(".mini-progress");
+    if (mini) {
+      const progress = stepProgress(stepRecord, i);
+      mini.textContent =
+        progress.done === progress.total
+          ? "✓"
+          : `${progress.done}/${progress.total}`;
+      mini.classList.toggle("complete", progress.done === progress.total);
+    }
+  });
 }
 function selectModule(index) {
   if ("speechSynthesis" in window) speechSynthesis.cancel();
@@ -91,6 +169,7 @@ function selectModule(index) {
   loadGuide(index);
   lecture.select(index, m);
   renderLabs(index);
+  renderSteps();
   const url = new URL(location.href);
   url.searchParams.set("module", String(index + 1));
   history.replaceState(null, "", url);
@@ -102,7 +181,7 @@ function selectModule(index) {
 }
 modules.forEach((m, i) => {
   const b = document.createElement("button");
-  b.innerHTML = `<span>${String(i + 1).padStart(2, "0")}</span>${esc(m.title)}`;
+  b.innerHTML = `<span>${String(i + 1).padStart(2, "0")}</span>${esc(m.title)}<span class="mini-progress" aria-hidden="true"></span>`;
   b.onclick = () => selectModule(i);
   $("modules").append(b);
 });
@@ -207,6 +286,12 @@ $("answer-form").onsubmit = (e) => {
     correct,
     assisted,
   );
+  if (correct && !assisted && !isDone(stepRecord, state.selected, "prove")) {
+    stepRecord = toggleStep(stepRecord, state.selected, "prove", true);
+    $("storage-status").textContent =
+      "Unaided check banked as a completed module step.";
+    renderSteps();
+  }
   state.history.push({
     time: Date.now(),
     module: state.selected,

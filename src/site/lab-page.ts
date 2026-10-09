@@ -1,5 +1,6 @@
 import { labs } from "./labs.ts";
 import { markdown } from "./engine.ts";
+import { loadSteps, saveSteps, toggleStep, isDone } from "./steps.ts";
 import { startExplorer } from "./explorer.ts";
 import { element as $ } from "./dom.ts";
 const id = new URL(location.href).searchParams.get("lab");
@@ -53,6 +54,25 @@ if (!lab) {
   $("lab-notes").oninput = save;
   $("lab-notes").disabled = false;
   $("lab-save").onclick = save;
+  let stepRecord = loadSteps();
+  const completeButton = $("lab-complete");
+  const renderComplete = () => {
+    const done = isDone(stepRecord, lab.module, `lab-${lab.id}`);
+    completeButton.textContent = done ? "✓ Completed" : "Mark complete";
+    completeButton.classList.toggle("primary", !done);
+    completeButton.setAttribute("aria-pressed", String(done));
+  };
+  completeButton.onclick = () => {
+    const done = !isDone(stepRecord, lab.module, `lab-${lab.id}`);
+    stepRecord = toggleStep(stepRecord, lab.module, `lab-${lab.id}`, done);
+    $("lab-status").textContent = saveSteps(stepRecord)
+      ? done
+        ? "Lab marked complete. Evidence notes stay unreviewed."
+        : "Lab unmarked."
+      : "Storage unavailable; progress not saved.";
+    renderComplete();
+  };
+  renderComplete();
   $("lab-export").onclick = () => {
     const text = `# Lab ${lab.id}: ${lab.title}\n\nExported: ${new Date().toISOString()}\nStatus: unreviewed evidence\n\n${$("lab-notes").value}`;
     const url = URL.createObjectURL(

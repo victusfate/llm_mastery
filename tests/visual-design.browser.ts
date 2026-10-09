@@ -56,7 +56,7 @@ try {
  }
  // Missing page styles reproduce the failure mode in the reported screenshot.
  await page.setContent(examples.map(e=>e.html).join(''));
- const fallback=await page.locator('svg').evaluateAll(svgs=>svgs.every(svg=>[...svg.querySelectorAll('text')].every(t=>getComputedStyle(t).fill==='rgb(243, 247, 238)')&&[...svg.querySelectorAll('.wire')].every(e=>getComputedStyle(e).stroke!=='none')));
+ const fallback=await page.locator('svg').evaluateAll(svgs=>svgs.every(svg=>[...svg.querySelectorAll('text')].every(t=>getComputedStyle(t).fill==='rgb(238, 241, 248)')&&[...svg.querySelectorAll('.wire')].every(e=>getComputedStyle(e).stroke!=='none')));
  assert.ok(fallback,'Essential SVG styles survive a missing stylesheet');
  // Review sheets include every distinct mechanism, at its readable native size.
  await page.setViewportSize({width:1280,height:900});

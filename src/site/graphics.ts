@@ -8,19 +8,19 @@ const box = (x:number,y:number,w:number,h:number,label:string) => `<rect x="${x}
 // Essential presentation travels with the SVG: stale or missing page CSS must
 // never turn labels black or remove the network edges.
 const graphicStyles:Record<string,string> = {
- wire: 'fill:none;stroke:#a5c9bd;stroke-width:2',
- neuron: 'fill:#214e45;stroke:#c4ed9a;stroke-width:2',
- block: 'fill:#203c33;stroke:#a5c9bd;stroke-width:1.5',
- signal: 'fill:#c4ed9a',
- blocked: 'fill:#0d1915;stroke:#a5c9bd;stroke-width:1.5',
- curve: 'fill:none;stroke:#c4ed9a;stroke-width:3',
- comparison: 'fill:none;stroke:#ffe0a0;stroke-width:3;stroke-dasharray:6 4',
+ wire: 'fill:none;stroke:#8fa3c8;stroke-width:2',
+ neuron: 'fill:#25335a;stroke:#8ab4f8;stroke-width:2',
+ block: 'fill:#202a44;stroke:#8fa3c8;stroke-width:1.5',
+ signal: 'fill:#8ab4f8',
+ blocked: 'fill:#10131c;stroke:#8fa3c8;stroke-width:1.5',
+ curve: 'fill:none;stroke:#8ab4f8;stroke-width:3',
+ comparison: 'fill:none;stroke:#c4a7e7;stroke-width:3;stroke-dasharray:6 4',
 };
 function frame(label:string,body:string,description:string):string {
  const painted=body.replace(/class="(wire|neuron|block|signal|blocked|curve|comparison)"/g,
   (_,kind)=>`class="${kind}" ${graphicStyles[kind].split(';').map(pair=>{const [key,value]=pair.split(':');return `${key}="${value}"`;}).join(' ')}`)
-  .replace(/<text /g,'<text fill="#f3f7ee" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" ');
- return `<div class="diagram-scroll" role="region" tabindex="0" aria-label="${esc(label)} — scroll horizontally to explore" style="max-width:100%;overflow-x:auto"><svg class="mechanism-graphic" viewBox="0 0 600 280" role="img" aria-label="${esc(label)}" style="min-width:600px;width:100%;height:auto;max-height:none;background:#0d1915;forced-color-adjust:none"><title>${esc(label)}</title><desc>${esc(description)}</desc>${painted}</svg></div><p class="diagram-description">${esc(description)}</p>`;
+  .replace(/<text /g,'<text fill="#eef1f8" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" ');
+ return `<div class="diagram-scroll" role="region" tabindex="0" aria-label="${esc(label)} — scroll horizontally to explore" style="max-width:100%;overflow-x:auto"><svg class="mechanism-graphic" viewBox="0 0 600 280" role="img" aria-label="${esc(label)}" style="min-width:600px;width:100%;height:auto;max-height:none;background:#10131c;forced-color-adjust:none"><title>${esc(label)}</title><desc>${esc(description)}</desc>${painted}</svg></div><p class="diagram-description">${esc(description)}</p>`;
 }
 export function networkGraphic(width=4):string {
  const count=Math.min(width,6), layers=[2,count,2], positions=layers.map((n,i)=>Array.from({length:n},(_,j)=>[90+i*210,50+j*175/Math.max(1,n-1)]));
