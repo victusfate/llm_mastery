@@ -12,6 +12,8 @@ Causal modeling factors a sequence probability as `product_t p(x_t | x_<t)`. Att
 
 Learn byte-level tokenization and BPE, embeddings, residuals, LayerNorm/RMSNorm, positional information including RoPE, gated feed-forward layers, multi-head versus grouped-query attention, tied embeddings, sampling temperature, and KV caching. Build a minimal correct architecture first; add one modern component at a time. The original [Transformer paper](https://arxiv.org/abs/1706.03762) is the attention reference; [CS336](https://cs336.stanford.edu/) provides modern language-model context.
 
+**Zero to Hero pairing.** Lecture 7 of Andrej Karpathy's free series builds a decoder-only transformer end to end, and lecture 8 builds the byte-pair tokenizer. Use the [companion track guides](../docs/18-zero-to-hero.md) for the study plan, the causal-invariance and round-trip checks this module requires, and browser panels that compute a real attention head and real BPE merges. Implement from the specification rather than typing along; the labs below are the assessed work.
+
 ## Labs
 
 1. Start with a byte tokenizer. Implement small-corpus BPE, deterministic tie-breaking, special tokens, and encode/decode round trips including Unicode. Train tokenizer statistics on training documents only.

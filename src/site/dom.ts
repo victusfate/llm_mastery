@@ -94,6 +94,25 @@ interface PageElements {
   'unit-status': HTMLElementTagNameMap['p'];
   'unit-previous': HTMLElementTagNameMap['a'];
   'unit-next': HTMLElementTagNameMap['a'];
+  'lecture-navigation': HTMLElementTagNameMap['nav'];
+  'lecture-label': HTMLElementTagNameMap['p'];
+  'lecture-title': HTMLElementTagNameMap['h1'];
+  'lecture-focus': HTMLElementTagNameMap['p'];
+  'lecture-outcome': HTMLElementTagNameMap['p'];
+  'lecture-links': HTMLElementTagNameMap['ul'];
+  'lecture-open': HTMLElementTagNameMap['div'];
+  'lecture-video': HTMLElementTagNameMap['div'];
+  'lecture-mapping': HTMLElementTagNameMap['section'];
+  'lecture-panel': HTMLElementTagNameMap['div'];
+  'lecture-notes': HTMLElementTagNameMap['textarea'];
+  'lecture-save': HTMLElementTagNameMap['button'];
+  'lecture-export': HTMLElementTagNameMap['button'];
+  'lecture-tutor': HTMLElementTagNameMap['button'];
+  'track-status': HTMLElementTagNameMap['p'];
+  'lecture-previous': HTMLElementTagNameMap['a'];
+  'lecture-next': HTMLElementTagNameMap['a'];
+  'sample-description': HTMLElementTagNameMap['p'];
+  'lecture-sample': HTMLElementTagNameMap['div'];
 }
 export function element<K extends keyof PageElements>(id:K):PageElements[K];
 export function element(id:string):HTMLElement;

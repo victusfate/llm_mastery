@@ -1,5 +1,6 @@
 import { descentGraphic, networkGraphic, barsGraphic, attentionGraphic, corpusGraphic, workersGraphic, maskGraphic, computationGraphic, policyGraphic } from './graphics.ts';
 import { softmax } from "./engine.ts";
+import { metrics } from "./readout.ts";
 export function mountSandbox(root, kind) {
   const controls = document.createElement("div"),
     view = document.createElement("div"),
@@ -21,8 +22,6 @@ export function mountSandbox(root, kind) {
     input.oninput = draw;
     return () => Number(input.value);
   }
-  const metric = (value, label) =>
-    `<div class="metric"><strong>${value}</strong><span>${label}</span></div>`;
   let a, b;
   if (kind === "softmax") {
     a = slider("Temperature", 0.2, 3, 0.1, 1);
@@ -107,27 +106,12 @@ export function mountSandbox(root, kind) {
       explanation.textContent = `There are ${(n * (n + 1)) / 2} allowed query–key pairs including the diagonal, out of ${n * n} score positions. Rows are queries. This shows a mask, not learned attention weights.`;
     } else if (kind === "shapes") {
       view.innerHTML =
-        '<div class="metrics">' +
-        metric(`${a()} × 2`, "inputs") +
-        metric(`${a()} × ${b()}`, "hidden activations") +
-        metric(`${a()} × 2`, "logits") +
-        metric(5 * b() + 2, "parameters including biases") +
-        "</div>";
+        metrics([[`${a()} × 2`, "inputs"], [`${a()} × ${b()}`, "hidden activations"], [`${a()} × 2`, "logits"], [5 * b() + 2, "parameters including biases"]]);
       explanation.textContent =
         "For 2 input features, h hidden features, and 2 classes: parameters = 2h + h + 2h + 2. Increasing batch size changes activations, not parameter count.";
     } else if (kind === "gradient") {
       view.innerHTML =
-        '<div class="metrics">' +
-        metric((-Math.log(a())).toFixed(3), "this example’s loss") +
-        metric(
-          ((a() - 1) / b()).toFixed(3),
-          "correct-logit gradient contribution",
-        ) +
-        metric(
-          ((1 - a()) / b()).toFixed(3),
-          "other-logit gradient contribution",
-        ) +
-        "</div>";
+        metrics([[(-Math.log(a())).toFixed(3), "this example’s loss"], [((a() - 1) / b()).toFixed(3), "correct-logit gradient contribution"], [((1 - a()) / b()).toFixed(3), "other-logit gradient contribution"]]);
       explanation.textContent =
         "This binary example contributes (p−y)/B to a mean-batch gradient. The displayed loss is the single-example loss; other batch examples are unspecified. A negative correct-logit gradient means descent raises that score.";
     } else if (kind === "descent") {
@@ -142,55 +126,29 @@ export function mountSandbox(root, kind) {
       explanation.textContent = `L(x)=x²/2 gives x_next=(1−rate)x. Final x=${x.toFixed(4)}. This quadratic converges for 0<rate<2; its threshold is not a general neural-network recipe.`;
     } else if (kind === "bandit") {
       view.innerHTML =
-        '<div class="metrics">' +
-        metric((1 + 2 * a()).toFixed(3), "expected reward") +
-        metric(
-          (2 * a() * (1 - a())).toFixed(3),
-          "derivative with respect to logit",
-        ) +
-        "</div>";
+        metrics([[(1 + 2 * a()).toFixed(3), "expected reward"], [(2 * a() * (1 - a())).toFixed(3), "derivative with respect to logit"]]);
       explanation.textContent =
         "Action A earns 3 and B earns 1. With p(A)=sigmoid(z), J=1+2p and dJ/dz=2p(1−p). Compare this exact gradient with a Monte Carlo estimator in your lab.";
     } else if (kind === "curation") {
       const filtered = 1000 * (1 - a() / 100),
         kept = filtered * (1 - b() / 100);
       view.innerHTML =
-        '<div class="metrics">' +
-        metric(1000, "input documents") +
-        metric(filtered.toFixed(0), "after quality filter") +
-        metric(kept.toFixed(0), "after deduplication") +
-        "</div>";
+        metrics([[1000, "input documents"], [filtered.toFixed(0), "after quality filter"], [kept.toFixed(0), "after deduplication"]]);
       explanation.textContent =
         "Duplicate percentage applies to the remaining documents. These are count calculations, not a measured quality improvement. A smaller retained corpus also changes repeat exposure under a fixed token budget.";
     } else if (kind === "batch") {
       view.innerHTML =
-        '<div class="metrics">' +
-        metric(a(), "workers") +
-        metric(4, "microbatch per worker") +
-        metric(b(), "accumulation steps") +
-        metric(a() * 4 * b(), "global sequences per update") +
-        "</div>";
+        metrics([[a(), "workers"], [4, "microbatch per worker"], [b(), "accumulation steps"], [a() * 4 * b(), "global sequences per update"]]);
       explanation.textContent =
         "Assumes equal sequence contributions and correct mean-loss scaling. Variable valid-token counts require care; multiplying these counts does not make gradients automatically equivalent.";
     } else if (kind === "mask") {
       view.innerHTML =
-        '<div class="metrics">' +
-        metric(20, "prompt tokens: masked labels") +
-        metric(a(), "response tokens: supervised") +
-        metric(b(), "padding tokens: masked labels") +
-        metric(a(), "loss denominator") +
-        "</div>";
+        metrics([[20, "prompt tokens: masked labels"], [a(), "response tokens: supervised"], [b(), "padding tokens: masked labels"], [a(), "loss denominator"]]);
       explanation.textContent =
         "Assistant-only SFT supervises the selected response positions; EOS is assumed already counted in the response here. Loss masking does not automatically establish a correct attention mask.";
     } else {
       view.innerHTML =
-        '<div class="metrics">' +
-        metric(
-          (a() / 100).toFixed(3),
-          "accuracy, invalids counted as failures",
-        ) +
-        metric((a() / (100 - b())).toFixed(3), "if invalids are excluded") +
-        "</div>";
+        metrics([[(a() / 100).toFixed(3), "accuracy, invalids counted as failures"], [(a() / (100 - b())).toFixed(3), "if invalids are excluded"]]);
       explanation.textContent =
         "There are 100 evaluation prompts; correct plus invalid never exceeds 100 in these controls. Dropping invalid responses changes the denominator and can inflate a headline score without improving any answer.";
     }

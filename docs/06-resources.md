@@ -21,6 +21,8 @@ Primary references checked September 8, 2026. Read only the sections needed for 
 
 Use [Stanford’s recorded CS336 tokenization lecture](https://www.youtube.com/watch?v=SQ3fZ1sAqXI) and [architectures lecture](https://www.youtube.com/watch?v=ptFiH_bHnJw), with the [2025 archive](https://cs336.stanford.edu/spring2025/index.html) for associated materials. The [current course page](https://cs336.stanford.edu/) provides the newer offering. Do not assume old assignment requirements or APIs match current versions.
 
+For building the machinery yourself, use the [Zero to Hero companion track](18-zero-to-hero.md): nine linked lectures by Andrej Karpathy, paired with our study plans, interactive panels, and checks. Videos and notebooks are his and are linked, never reproduced; [licensing notes](zero-to-hero/licensing.md) record the status of each work.
+
 Watch 10–20 minutes at a time. Stop, state the mechanism from memory, predict a concrete result, then implement or calculate it. Playback speed is a preference; shorten the segment if recall fails. The interactive workbench links these lectures and lets you open a video intentionally; external video playback needs network access and may be blocked by the provider.
 
 ## Paper review questions

@@ -155,6 +155,8 @@ Independently derive or numerically verify a loss gradient, debug a fresh broken
 
 The chaptered narration is original course text, spoken with a New Zealand neural voice. Read the accompanying transcript as you listen and pause between chapters to manipulate an example or inspect code. [Lecture transcript](../docs/13-foundations-lecture.md).
 
+**Zero to Hero pairing.** Lectures 1 to 6 of Andrej Karpathy's free series build exactly this module's machinery from nothing: a scalar autograd engine, a character language model, an MLP with real training controls, activation and gradient diagnostics, hand-derived tensor backward passes, and a hierarchical architecture. Work them through the [companion track](../docs/18-zero-to-hero.md), which adds our specifications, correctness checks, and interactive panels. Watching is not assessed; Labs 01-01 to 01-04 are.
+
 Use [Dive into Deep Learning](https://d2l.ai/) as a supporting textbook for tensors, MLPs, convolution, and optimization. Subsequent language-model architecture material is linked in the [reading library](../docs/06-resources.md). Do not treat a tokenization lecture as a replacement for understanding gradients in this module.
 
 ## Dedicated lab pages

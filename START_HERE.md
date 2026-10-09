@@ -8,6 +8,10 @@ Begin with the definitions and visual examples in the first lesson. Explore at y
 
 Install Node 24+, run `npm install`, then `npm run dev` from this directory and open http://127.0.0.1:8765/site/. Use Learn & explore for explanations, Retrieve & test for theory, and Build & defend for evidence to review with the tutor. The app’s quiz scores do not replace the placement implementation tasks.
 
+## Build the mechanics alongside the modules
+
+The [Zero to Hero companion track](docs/18-zero-to-hero.md) pairs Andrej Karpathy's free lecture series with our own study plans, interactive panels, runnable samples, and correctness checks. It is the fastest route to being able to write an autograd engine, a tokenizer, and a transformer yourself, and it runs alongside modules 1 and 2 rather than before them. Watching is not assessed; the labs are.
+
 ## Optional intensive first day: nine coursework hours
 
 | Time budget | Task | Save |
