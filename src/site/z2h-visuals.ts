@@ -58,8 +58,9 @@ export interface MatrixOptions {
 
 /**
  * Heatmap for count matrices and attention weights; opacity encodes magnitude.
- * The opacity floor keeps the faintest cell above the site's contrast gate, so
- * exact values belong in the table beside the figure rather than in the shading.
+ * The opacity floor keeps the faintest cell above the site's contrast gate (the
+ * soft-blue signal over the slate plate needs 0.55 to reach 3:1), so exact
+ * values belong in the table beside the figure rather than in the shading.
  */
 export function matrixGraphic(values: number[][], options: MatrixOptions): string {
   const rows = values.length;
@@ -75,7 +76,7 @@ export function matrixGraphic(values: number[][], options: MatrixOptions): strin
     for (let c = 0; c < columns; c++) {
       const intensity = Math.abs(values[r][c]) / peak;
       const blocked = options.mask && c > r;
-      body += `<rect x="${left + c * size}" y="${top + r * size}" width="${Math.max(1, size - 2)}" height="${Math.max(1, size - 2)}" class="${blocked ? "blocked" : "signal"}"${blocked ? "" : ` opacity="${(0.45 + 0.55 * intensity).toFixed(3)}"`}/>`;
+      body += `<rect x="${left + c * size}" y="${top + r * size}" width="${Math.max(1, size - 2)}" height="${Math.max(1, size - 2)}" class="${blocked ? "blocked" : "signal"}"${blocked ? "" : ` opacity="${(0.55 + 0.45 * intensity).toFixed(3)}"`}/>`;
     }
   const columnLabels = options.columnLabels ?? options.rowLabels ?? [];
   // A word label is wider than a cell, so long column labels become indexes and

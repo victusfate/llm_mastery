@@ -28,7 +28,7 @@ module at once.
   `chunks done` figure in the sidebar stats.
 - Chunk completion is a pacing and momentum aid. The interface copy states it
   is not a grade; practical gates remain governed by
-  [the mastery rubric](../assessments/01-mastery.md).
+  [the mastery rubric](../../assessments/01-mastery.md).
 - The steps record is included in progress backups via
   `isLearningDataKey`, so export/import moves chunks between machines.
 
