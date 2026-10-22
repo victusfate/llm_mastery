@@ -1,6 +1,6 @@
 {
   "name": "llm-mastery",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -20,6 +20,6 @@
     "@types/node": "^24.0.0",
     "esbuild": "^0.25.0",
     "typescript": "^5.9.0",
-    "wrangler": "4.130.0"
+    "wrangler": "4.151.3"
   }
 }
