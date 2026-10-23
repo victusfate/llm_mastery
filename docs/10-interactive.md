@@ -12,6 +12,10 @@ Open **http://127.0.0.1:8765/site/** in a browser. Stop the server with Ctrl+C. 
 
 The workbench uses browser-native HTML, CSS, and JavaScript with no package install, API key, account, or paid service. Python 3.9+ is needed for the small server. Modern browsers are expected. External lectures need internet access; text-to-speech depends on browser/OS voices and may use the platform’s speech service.
 
+## LLM Arcade: five-minute episodes
+
+Open **http://127.0.0.1:8765/site/play.html** (the default landing page). Twenty episodes, two per module. Each starts with a live control and a goal, then gives one short idea, a multiple-choice check, and a calculation with fresh numbers. It ends with stars, XP, levels, a daily streak and badges. **▶ Watch it move** animates the control across its range so you can see cause and effect. Calculations feed the same review schedule as the Retrieve tab. XP is practice, not a module pass. Design and validation: [arcade design](arcade/design.md).
+
 ## Three modes
 
 **Learn and explore:** ten module summaries, prediction prompts, full Markdown module guides, optional spoken summaries, recorded-lecture links/embeds, and four manipulable numerical examples: softmax temperature, causal attention masks, gradient-descent stability, and an exact policy-gradient bandit.

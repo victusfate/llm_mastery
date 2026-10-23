@@ -1,6 +1,6 @@
 # Save your progress and your place
 
-The course automatically saves quiz attempts, confidence, review schedules, module notes, submodule notes, lab evidence notes, and hardware choices in your browser's persistent local storage. Closing a tab or restarting the browser normally preserves them. No account is required, and this information is not uploaded to the course server.
+The course automatically saves quiz attempts, confidence, review schedules, module notes, submodule notes, lab evidence notes, hardware choices, and LLM Arcade stars and XP in your browser's persistent local storage. Closing a tab or restarting the browser normally preserves them. No account is required, and this information is not uploaded to the course server.
 
 ## Bookmark your place
 
@@ -14,7 +14,7 @@ When you reopen the bookmark in the same browser profile on the same domain, the
 2. Open the course on the destination browser or device.
 3. Choose Import backup and select the JSON file. Confirm replacing the destination's learning record.
 
-New full backups include module progress, confidence, module notes, lab notes, submodule notes, and hardware preferences. The Markdown export is a readable tutor record, not the complete restorable backup. Older JSON backups still restore their module progress and leave existing separate lab/hardware records unchanged.
+New full backups include module progress, confidence, module notes, lab notes, submodule notes, hardware preferences, and LLM Arcade progress. The Markdown export is a readable tutor record, not the complete restorable backup. Older JSON backups still restore their module progress and leave existing separate lab/hardware records unchanged.
 
 A full backup replaces the included learning records; it does not merge two people's answers. Other website storage and tutor-interface preferences are not imported. Keep backup files private if your notes contain personal information.
 

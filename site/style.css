@@ -975,3 +975,7 @@ a.step-continue {
   border: 1px solid var(--border);
   margin-top: 14px;
 }
+
+/* Arcade call-to-action on the workbench. */
+.play-callout { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: linear-gradient(110deg, #22304f, #1d2434); }
+.play-callout h2 { margin: 0; }

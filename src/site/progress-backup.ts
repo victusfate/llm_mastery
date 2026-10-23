@@ -1,9 +1,10 @@
-import { validateState, type Progress } from './engine.ts';
+import { validateState, PROGRESS_KEY, type Progress } from './engine.ts';
+import { GAME_KEY } from './game.ts';
 // Track notes are keyed <prefix><lecture id>; the page builds the same key.
 export const ZERO_TO_HERO_NOTE_PREFIX='llm-training-zero-to-hero-';
-const mainKey='llm-training-lab-v1';
+const mainKey=PROGRESS_KEY;
 export function isLearningDataKey(key:string):boolean {
- return key==='llm-mastery-hardware-v1'||key==='llm-training-steps-v1'||/^llm-training-(?:lab-evidence|submodule)-\d{2}-\d{2}$/.test(key)||new RegExp(`^${ZERO_TO_HERO_NOTE_PREFIX}l\\d{1,2}$`).test(key);
+ return key==='llm-mastery-hardware-v1'||key===GAME_KEY||key==='llm-training-steps-v1'||/^llm-training-(?:lab-evidence|submodule)-\d{2}-\d{2}$/.test(key)||new RegExp(`^${ZERO_TO_HERO_NOTE_PREFIX}l\\d{1,2}$`).test(key);
 }
 export function createProgressBackup(state:Progress,storage:Storage) {
  const browserData:Record<string,string>={};
@@ -23,7 +24,7 @@ export function validateProgressBackup(input:unknown):{state:Progress;browserDat
  const browserData:Record<string,string>={};
  for(const [key,value] of entries){
   if(!isLearningDataKey(key)||typeof value!=='string'||value.length>30000)throw Error('Invalid learning record');
-  if(key==='llm-mastery-hardware-v1')JSON.parse(value);
+  if(key==='llm-mastery-hardware-v1'||key===GAME_KEY)JSON.parse(value);
   browserData[key]=value;
  }
  return {state,browserData};

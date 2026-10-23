@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM Arcade</title>
+    <meta name="description" content="Twenty bite-sized LLM training episodes: play with a live control, learn one idea, prove it, earn stars." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="arcade.css" />
+  </head>
+  <body class="arcade-body">
+    <a class="skip" href="#main">Skip to episodes</a>
+    <header>
+      <a class="brand" href="play.html"><span class="logo">∇</span> LLM ARCADE <span class="tag">BITE-SIZED EPISODES</span></a>
+      <nav class="header-actions" aria-label="Site">
+        <a href="./">Full workbench</a>
+        <a href="zero-to-hero.html">Zero to Hero</a>
+      </nav>
+    </header>
+    <main id="main" class="arcade">
+      <section id="hud" class="hud" aria-label="Your progress"></section>
+      <div id="hub">
+        <section class="arcade-hero">
+          <p class="eyebrow">PLAY · LEARN ONE IDEA · PROVE IT</p>
+          <h1>How LLMs train, five minutes at a time.</h1>
+          <p class="lead">Each episode starts with something to play with. Then one short idea, two quick checks, and your stars.</p>
+          <button id="continue" class="primary big-button"></button>
+        </section>
+        <div id="seasons" class="seasons"></div>
+        <section id="badge-shelf" class="badge-shelf" aria-label="Badges"></section>
+        <p class="small honesty">Arcade XP measures practice with small, exact examples. It is not a module pass: practical gates still need labs, evidence, and review. Calculations you answer here also join the workbench's review schedule. Progress stays in this browser; the workbench's <a href="./">Export progress</a> button includes it.</p>
+      </div>
+      <section id="player" class="player" hidden aria-label="Episode">
+        <div class="player-top">
+          <button id="back" class="quiet">← Map</button>
+          <p id="episode-label" class="eyebrow"></p>
+          <span id="combo" class="combo" aria-live="polite"></span>
+        </div>
+        <ol id="dots" class="step-dots" aria-label="Episode steps"></ol>
+        <div id="stage" class="stage card"></div>
+      </section>
+    </main>
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+    <script type="module" src="play-page.mjs"></script>
+  </body>
+</html>
