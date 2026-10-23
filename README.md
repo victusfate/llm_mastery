@@ -17,7 +17,7 @@ npm ci
 npm run dev
 ```
 
-Visit **http://127.0.0.1:8765/site/** for 35 narrated submodules, 52 dedicated lab guides, formatted readings, concept popups, interactive numerical experiments, randomized theory checks, scheduled review, and hands-on tutor handoffs. No API key or cloud spend required. [Workbench guide](docs/10-interactive.md).
+Visit **http://127.0.0.1:8765/site/play.html** for the **LLM Arcade**: twenty five-minute episodes where you play with a live control, learn one idea, prove it with quick checks, and earn stars and XP ([design](docs/arcade/design.md)). The full workbench at **http://127.0.0.1:8765/site/** has 35 narrated submodules, 52 dedicated lab guides, formatted readings, concept popups, interactive numerical experiments, randomized theory checks, scheduled review, and hands-on tutor handoffs. No API key or cloud spend required. [Workbench guide](docs/10-interactive.md).
 
 ## Start here
 

@@ -2,6 +2,8 @@ export interface Review { streak:number; attempts:number; correct:number; due:nu
 export interface Attempt { confidence?:string; question:string; answer:string; correct:boolean; assisted:boolean; time:number; module:number }
 export interface Progress { version:number; selected:number; reviews:Record<string,Review>; notes:Record<string,string>; history:Attempt[] }
 export const DAY = 86400000;
+export const PROGRESS_KEY = "llm-training-lab-v1";
+const MAX_HISTORY = 20000;
 export function softmax(logits, temperature = 1) {
   if (!(temperature > 0) || !logits.length || !logits.every(Number.isFinite))
     throw new Error("Invalid softmax input");
@@ -29,6 +31,13 @@ export function scheduleReview(previous, correct, assisted, now = Date.now()) {
     due: correct && !assisted && !eligible ? old.due : now + delay,
     last: now,
   };
+}
+/** Schedule the concept's next review and append the attempt to history. */
+export function recordAttempt(state: Progress, key: string, attempt: Attempt): Attempt {
+  state.reviews[key] = scheduleReview(state.reviews[key], attempt.correct, attempt.assisted, attempt.time);
+  state.history.push(attempt);
+  state.history = state.history.slice(-MAX_HISTORY);
+  return attempt;
 }
 export const freshState = (): Progress => ({
   version: 1,
@@ -69,7 +78,7 @@ export function validateState(data) {
       throw new Error("Invalid learning note");
     state.notes[key] = note;
   }
-  if (!Array.isArray(data.history) || data.history.length > 20000)
+  if (!Array.isArray(data.history) || data.history.length > MAX_HISTORY)
     throw new Error("Invalid history");
   for (const row of data.history) {
     if (

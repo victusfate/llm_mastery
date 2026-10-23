@@ -21,7 +21,8 @@ import { modules } from "./content.ts";
 import {
   softmax,
   numericCorrect,
-  scheduleReview,
+  recordAttempt,
+  PROGRESS_KEY,
   freshState,
   validateState,
   escapeHTML as esc,
@@ -30,7 +31,7 @@ import {
 } from "./engine.ts";
 import { element as $ } from "./dom.ts";
 import { metrics } from "./readout.ts";
-const KEY = "llm-training-lab-v1";
+const KEY = PROGRESS_KEY;
 const lecture = setupLecture();
 let state = freshState(),
   stepRecord = loadSteps(),
@@ -282,29 +283,23 @@ $("answer-form").onsubmit = (e) => {
   const correct = numericCorrect(answer, question.expected, question.tolerance),
     assisted = revealed || $("assisted").checked;
   checked = true;
-  state.reviews[question.key] = scheduleReview(
-    state.reviews[question.key],
-    correct,
-    assisted,
-  );
   if (correct && !assisted && !isDone(stepRecord, state.selected, "prove")) {
     stepRecord = toggleStep(stepRecord, state.selected, "prove", true);
     $("storage-status").textContent =
       "Unaided check banked as a completed module step.";
     renderSteps();
   }
-  state.history.push({
+  const confidence=document.querySelector<HTMLSelectElement>('#confidence').value;
+  recordAttempt(state, question.key, {
     time: Date.now(),
     module: state.selected,
     question: question.prompt,
     answer,
     correct,
     assisted,
+    confidence,
   });
-  const confidence=document.querySelector<HTMLSelectElement>('#confidence').value;
   document.querySelector('#confidence-feedback').textContent=confidenceFeedback(confidence,correct,assisted);
-  state.history[state.history.length-1].confidence=confidence;
-  state.history = state.history.slice(-20000);
   save();
   stats();
   $("check").disabled = true;
