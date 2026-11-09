@@ -113,3 +113,33 @@
   .big-button, .card-in, .tok.enter, .challenge-status.won, .shake, .big-star.lit, .xp-float, .toast { animation: none; }
   .xp-fill, .sbar-fill, .tok, .episode-tile, .step-dots li { transition: none; }
 }
+
+/* Optional rabbit holes stay beside the episode rather than replacing it. */
+.learning-guide { margin-top: 24px; overflow-wrap: anywhere; }
+.learning-guide h2 { scroll-margin-top: 24px; }
+.learning-guide details { margin: 12px 0; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+.learning-guide summary { cursor: pointer; font-weight: 700; }
+.learning-terms { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.learning-terms details { margin: 0; }
+.flow-explorer, .twist-lab { border-left: 3px solid var(--accent); padding: 4px 16px 12px; margin: 24px 0; }
+.flow-stops { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.flow-stops button { min-width: 0; padding: 12px 6px; }
+.flow-stops button span { display: block; font-size: 22px; }
+.flow-stops button[aria-pressed="true"] { border-color: var(--hi); background: #17352b; }
+.flow-detail { margin: 12px 0; padding: 16px; background: #0c0f16; border-radius: 10px; min-height: 130px; }
+.learning-guide pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; font-size: 14px; }
+.twist-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.twist-comparison[hidden] { display: none; }
+.twist-comparison > div { background: #0c0f16; border-radius: 10px; padding: 16px; }
+.learning-guide textarea, .learning-guide input { max-width: 100%; box-sizing: border-box; }
+@media (max-width: 540px) {
+  .learning-guide { padding: 18px 12px; }
+  .twist-comparison { grid-template-columns: 1fr; }
+  .flow-explorer, .twist-lab { padding-left: 10px; padding-right: 0; }
+}
+.learning-bar { margin: 10px 0; font-size: 13px; }
+.learning-bar > div { height: 12px; background: var(--off); border-radius: 6px; overflow: hidden; }
+.learning-bar i { display: block; height: 100%; }
+.learning-tokens { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 18px)); gap: 3px; margin: 16px 0; }
+/* Long explanations need the full viewport instead of a floating score panel. */
+.arcade:has(#player:not([hidden])) .hud { position: static; }

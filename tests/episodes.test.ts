@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { episodes, initialValues, type Episode, type Values } from "../src/site/episodes.ts";
+import { episodeLearning } from "../src/site/episode-learning.ts";
 import { submodules } from "../src/site/submodules.ts";
 import { makeQuestion } from "../src/site/engine.ts";
 
@@ -64,5 +65,27 @@ test("controls, sweeps and deeper links point at real things", () => {
     assert.ok(units.has(e.deeper), `${e.id} deeper ${e.deeper}`);
     assert.equal(Number(e.deeper.slice(0, 2)) - 1, e.module, `${e.id} deeper module`);
     for (const c of e.controls) assert.ok(c.value >= c.min && c.value <= c.max, `${e.id} ${c.id} default`);
+  }
+});
+
+
+test("every episode has a usable rabbit hole and a valid, distinct experiment", () => {
+  assert.deepEqual(Object.keys(episodeLearning).sort(), episodes.map(e => e.id).sort());
+  for (const e of episodes) {
+    const guide = episodeLearning[e.id];
+    assert.ok(guide.terms.length >= 2, `${e.id} definitions`);
+    for (const [term, meaning] of guide.terms) assert.ok(term && meaning.length > 30);
+    for (const field of ['why', 'transform', 'example', 'hint', 'misconception'] as const)
+      assert.ok(guide[field].length > 40, `${e.id} ${field}`);
+    const values = { ...initialValues(e), ...guide.twist.values };
+    for (const [key, value] of Object.entries(guide.twist.values)) {
+      const control = e.controls.find(c => c.id === key);
+      assert.ok(control, `${e.id} unknown control ${key}`);
+      assert.ok(value >= control.min && value <= control.max, `${e.id} preset range`);
+      const steps = (value - control.min) / control.step;
+      assert.ok(Math.abs(steps - Math.round(steps)) < 1e-6, `${e.id} preset step`);
+    }
+    assert.notEqual(JSON.stringify(e.scene(values)), JSON.stringify(e.scene(initialValues(e))), `${e.id} experiment changes the result`);
+    assert.ok(guide.twist.notice.length > 40, `${e.id} explains what happened`);
   }
 });
