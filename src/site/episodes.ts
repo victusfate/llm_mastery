@@ -438,7 +438,7 @@ export const episodes: Episode[] = [
     },
     solved: ({ q }) => Math.abs(q / 0.2 - 1.2) < 1e-6,
     win: "Ratio 1.2: right at the edge. Any further and the gain is clipped.",
-    idea: "PPO's ratio is new probability ÷ the probability when the sample was collected. Clipping it to 1 ± ε stops one batch moving the policy too far.",
+    idea: "PPO compares new and rollout probabilities. Its clipped surrogate limits incentives for large changes; it is not a hard bound on the policy.",
     choice: { prompt: "The ratio divides by the probability from…", options: ["The rollout policy", "The reference model", "A uniform guess"], answer: 0, why: "Importance ratios compare to the policy that generated the sample." },
     takeaway: "Small, trusted steps.",
     deeper: "08-01",

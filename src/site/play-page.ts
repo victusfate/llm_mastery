@@ -7,7 +7,13 @@ import { GAME_KEY, SCORE, BADGES, MAX_EPISODE_SCORE, MAX_STARS, freshGame, valid
 import { validateState, freshState, recordAttempt, numericCorrect, makeQuestion, PROGRESS_KEY, escapeHTML as esc } from "./engine.ts";
 import { metric } from "./readout.ts";
 import { loadSteps, saveSteps, toggleStep, isDone } from "./steps.ts";
+import { mountEpisodeGuide } from "./episode-guide.ts";
+import { startExplorer } from "./explorer.ts";
 import { modules } from "./content.ts";
+
+startExplorer({ regions: ["stage"], pageTutor: false });
+let learning: ReturnType<typeof mountEpisodeGuide> | undefined;
+let applyExperiment: ((values: Values) => void) | undefined;
 
 const byModule = episodesByModule();
 const episodeById = new Map(episodes.map((e) => [e.id, e]));
@@ -150,6 +156,8 @@ function start(e: Episode) {
   $("#hub").hidden = true;
   $("#player").hidden = false;
   scrollTo({ top: 0 });
+  learning = undefined;
+  learning = mountEpisodeGuide($("#learning-guide"), e, (values) => applyExperiment?.(values));
   showStep();
 }
 
@@ -171,6 +179,8 @@ function showStep() {
   $("#episode-label").textContent = `EP ${e.id.slice(1)} · ${e.title}`;
   $("#dots").innerHTML = STEP_NAMES.map((name, i) => `<li class="${i < r.step ? "done" : i === r.step ? "current" : ""}" ${i === r.step ? 'aria-current="step"' : ""}>${name}</li>`).join("");
   renderCombo();
+  applyExperiment = undefined;
+  $("#learning-guide").querySelector<HTMLElement>(".twist-lab")!.hidden = r.step !== 0;
   const stage = $("#stage");
   cardToken++;
   stage.classList.remove("card-in");
@@ -185,6 +195,7 @@ function playCard(stage: HTMLElement, e: Episode) {
   let sweeping = false;
   stage.innerHTML = `<p class="eyebrow">LIVE CHALLENGE · +${SCORE.challenge} XP</p><h2 tabindex="-1">${esc(e.hook)}</h2>
     <p class="goal"><span>Goal</span>${esc(e.goal)}</p>
+    <p><a href="#learning-title">New to this? Explore definitions, the data flow, or ask your LLM ↓</a></p>
     <div class="controls-grid">${e.controls
       .map((c) =>
         c.toggle
@@ -204,6 +215,16 @@ function playCard(stage: HTMLElement, e: Episode) {
       if (out) out.value = formatValue(c, v[c.id]);
     }
     paintScene($(".scene", stage), e.scene(v));
+    learning?.update(v);
+  };
+  applyExperiment = (v) => {
+    // Cancel the watch animation before applying a guided experiment.
+    cardToken++;
+    sweeping = false;
+    $<HTMLButtonElement>("#watch").disabled = false;
+    Object.assign(values, v);
+    apply(values);
+    if (!run?.cleared) $("#challenge-status").textContent = "Guided experiment. Now try a control yourself to hit the goal.";
   };
   const check = () => {
     if (sweeping || run?.cleared || !e.solved(values)) return;
@@ -225,7 +246,9 @@ function playCard(stage: HTMLElement, e: Episode) {
     sweeping = true;
     $<HTMLButtonElement>("#watch").disabled = true;
     $("#challenge-status").textContent = "Watch how the picture responds…";
+    const watchToken = cardToken;
     await animateSweep(e, values, apply);
+    if (watchToken !== cardToken) return;
     if (!stage.isConnected || !stage.contains($("#watch"))) return;
     apply(values);
     sweeping = false;

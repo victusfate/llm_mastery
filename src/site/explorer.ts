@@ -11,7 +11,7 @@ import {
 } from "./concepts.ts";
 import { markdown, escapeHTML as esc } from "./engine.ts";
 import { element as $ } from "./dom.ts";
-export function startExplorer() {
+export function startExplorer(options: { regions?: string[]; pageTutor?: boolean } = {}) {
   mountBookmark();
   const dialog = $("concept-dialog"),
     history = [];
@@ -20,7 +20,7 @@ export function startExplorer() {
     context = "",
     ticket = 0;
   mountTutor(dialog.querySelector('#concept-scroll'), () => ({title:selected?.title || 'this concept',text:selected?.body || context}));
-  if(document.querySelector('main'))mountTutor(document.querySelector('main'),()=>({title:document.title,text:document.querySelector('#guide-body')?.textContent || ''}));
+  if(options.pageTutor !== false && document.querySelector('main'))mountTutor(document.querySelector('main'),()=>({title:document.title,text:document.querySelector('#guide-body')?.textContent || ''}));
   const source = new URL("../docs/12-concepts.md", location.href);
   const ready = fetch(source)
     .then((r) => {
@@ -36,7 +36,7 @@ export function startExplorer() {
     $("concept-status").textContent =
       "Concept guide unavailable. Reload or check the local server.";
   });
-  const regions = [
+  const regions = options.regions ?? [
     "summary",
     "prediction",
     "lab",
