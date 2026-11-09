@@ -13,6 +13,11 @@
 - Screenshot review found the sticky HUD obscured long explanations. It is now
   static during episodes so definitions and diagrams have the full viewport.
 
+- Keyboard flow selection, reduced motion, interrupting a watch animation with a
+  what-if experiment, and final layouts passed at 1280, 375 and 320px. Screenshot
+  review also caught inherited sidebar CSS hiding the phone heading; the guide now
+  uses a named section and the browser test asserts its heading remains visible.
+
 Local validation used Node 24.22.1; repository CI uses Node 26. Browser checks used
 Playwright with headless Chromium. The sandbox blocked browser/server startup and
 stalled a Python subprocess; the successful checks ran outside that sandbox.

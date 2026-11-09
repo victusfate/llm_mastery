@@ -121,6 +121,7 @@ try {
     const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     assert.ok(overflow <= 0, `${url} overflows by ${overflow}px`);
     if (url.includes('episode=')) {
+      assert.equal(await phone.locator('#learning-title').isVisible(), true, 'learning heading stays visible on phones');
       await phone.locator('[data-twist]').click();
       await phone.locator('[data-episode-tutor] summary').click();
       assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${url} expanded help overflows`);
